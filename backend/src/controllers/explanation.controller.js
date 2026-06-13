@@ -1,10 +1,10 @@
-import OpenAI from "openai";
 import { Groq } from "groq-sdk";
 import { UserExerciseAttempt } from "../models/UserExerciseAttempt.js";
 import { Exercise } from "../models/Exercise.js";
 import { AttemptExplanation } from "../models/AttemptExplanation.js";
 import { checkAndConsumeAiUsage } from "../services/aiUsage.service.js";
 import { User } from "../models/user.js";
+import { createOpenRouterChatCompletion } from "../services/ai.service.js";
 
 const aiServer = process.env.AI_SERVER || 'OpenRouter';
 
@@ -12,11 +12,6 @@ let aiClient;
 if (aiServer === 'Groq') {
     aiClient = new Groq({
         apiKey: process.env.GROQ_API_KEY,
-    });
-} else {
-    aiClient = new OpenAI({
-        apiKey: process.env.OPENROUTER_API_KEY,
-        baseURL: "https://openrouter.ai/api/v1",
     });
 }
 
@@ -156,18 +151,34 @@ Explain clearly why the student answer is wrong and what the correct option is f
             ? "openai/gpt-oss-120b"
             : "tngtech/deepseek-r1t2-chimera:free";
 
-        const completion = await aiClient.chat.completions.create({
-            model: model,
-            messages: [
-                {
-                    role: "user",
-                    content: prompt
-                }
-            ],
-            temperature: 0.4
-        });
+        let explanationText;
+        if (aiServer === 'Groq') {
+            const completion = await aiClient.chat.completions.create({
+                model: model,
+                messages: [
+                    {
+                        role: "user",
+                        content: prompt
+                    }
+                ],
+                temperature: 0.4
+            });
 
-        let explanationText = completion.choices[0].message.content;
+            explanationText = completion.choices[0].message.content;
+        } else {
+            const completion = await createOpenRouterChatCompletion({
+                model,
+                messages: [
+                    {
+                        role: "user",
+                        content: prompt
+                    }
+                ],
+                temperature: 0.4
+            });
+
+            explanationText = completion.choices[0].message.content;
+        }
 
         explanationText = explanationText.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
         explanationText = explanationText.replace(/```json/g, "").replace(/```/g, "").trim();

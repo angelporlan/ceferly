@@ -11,5 +11,6 @@ export const Subcategory = sequelize.define("Subcategory", {
         allowNull: false
     }
 }, {
-    tableName: "subcategories"
+    tableName: "subcategories",
+    timestamps: false
 });

@@ -7,5 +7,6 @@ export const Level = sequelize.define("Level", {
         allowNull: false
     }
 }, {
-    tableName: "levels"
+    tableName: "levels",
+    timestamps: false
 });
