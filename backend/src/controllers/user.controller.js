@@ -347,19 +347,16 @@ export const updateDailyGoal = async (req, res) => {
 export const purchaseAvatar = async (req, res) => {
     try {
         const user = req.user;
-        const { seed } = req.body;
         const AVATAR_COST = 50;
-
-        if (!seed) {
-            return res.status(400).json({ message: "Seed is required" });
-        }
 
         if (user.coins < AVATAR_COST) {
             return res.status(400).json({ message: "Insufficient coins" });
         }
 
+        const { randomUUID } = await import("crypto");
+
         user.coins -= AVATAR_COST;
-        user.avatar_seed = seed;
+        user.avatar_seed = `avatar-${randomUUID()}`;
         await user.save();
 
         res.json({
