@@ -8,6 +8,10 @@ export const AiUsageDaily = sequelize.define(
             type: DataTypes.DATEONLY,
             allowNull: false
         },
+        user_id: {
+            type: DataTypes.INTEGER,
+            allowNull: false
+        },
         used: {
             type: DataTypes.INTEGER,
             allowNull: false,
