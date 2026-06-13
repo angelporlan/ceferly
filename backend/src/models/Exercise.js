@@ -28,5 +28,6 @@ export const Exercise = sequelize.define("Exercise", {
         type: DataTypes.TEXT
     }
 }, {
-    tableName: "exercises"
+    tableName: "exercises",
+    timestamps: false
 });
