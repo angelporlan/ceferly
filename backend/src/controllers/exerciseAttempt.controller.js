@@ -3,6 +3,7 @@ import { Exercise } from "../models/Exercise.js";
 import { Subcategory } from "../models/Subcategory.js";
 import { AttemptExplanation } from "../models/AttemptExplanation.js";
 import { Category } from "../models/Category.js";
+import { updateStreakWhenDailyGoalReached } from "./user.controller.js";
 
 const normalizeAnswer = (value) => {
     if (value === null || value === undefined) {
@@ -155,24 +156,7 @@ export const createExerciseAttempt = async (req, res) => {
             }
         });
 
-        const dailyGoal = user.daily_goal || 5;
-
-        if (numberOfAttemptsToday >= dailyGoal) {
-            const lastCompleted = user.last_completed_date;
-
-            if (lastCompleted !== todayStr) {
-                const yesterday = new Date();
-                yesterday.setDate(yesterday.getDate() - 1);
-                const yesterdayStr = yesterday.toISOString().split('T')[0];
-
-                if (lastCompleted === yesterdayStr) {
-                    user.streak = (user.streak || 0) + 1;
-                } else {
-                    user.streak = 1;
-                }
-                user.last_completed_date = todayStr;
-            }
-        }
+        await updateStreakWhenDailyGoalReached(user, numberOfAttemptsToday);
 
         await user.save();
 
