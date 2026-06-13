@@ -32,6 +32,7 @@ model User {
   createdAt               DateTime              @default(now())
   updatedAt               DateTime              @updatedAt
   userExerciseAttempts    UserExerciseAttempt[]
+  aiUsageDaily            AiUsageDaily[]
 
   @@map("users")
 }
@@ -94,6 +95,29 @@ model UserExerciseAttempt {
   user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   exerciseId     Int      @map("exercise_id")
   exercise       Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  attemptExplanation AttemptExplanation?
 
   @@map("user_exercise_attempts")
+}
+
+model AttemptExplanation {
+  id         Int                @id @default(autoincrement())
+  explanation String             @db.Text
+  model      String
+  attemptId  Int                @unique @map("attempt_id")
+  attempt    UserExerciseAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  createdAt  DateTime           @default(now()) @map("created_at")
+
+  @@map("attempt_explanations")
+}
+
+model AiUsageDaily {
+  id       Int      @id @default(autoincrement())
+  date     DateTime @db.Date
+  used     Int      @default(0)
+  userId   Int      @map("user_id")
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@map("ai_usage_daily")
 }
