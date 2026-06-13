@@ -1,5 +1,7 @@
 import { AttemptExplanation } from "../models/AttemptExplanation.js";
 import { UserExerciseAttempt } from "../models/UserExerciseAttempt.js";
+import { User } from "../models/user.js";
+import { checkAndConsumeAiUsage } from "../services/aiUsage.service.js";
 import { explainAttempt } from "./explanation.controller.js";
 
 export const generateAiExplanation = async (req, res) => {
@@ -27,6 +29,16 @@ export const generateAiExplanation = async (req, res) => {
             return res.json({
                 explanation: cachedExplanation.explanation,
                 cached: true
+            });
+        }
+
+        const user = await User.findByPk(userId);
+        const usageCheck = await checkAndConsumeAiUsage(user, { dryRun: true });
+
+        if (!usageCheck.allowed) {
+            return res.status(403).json({
+                message: "Daily AI explanation limit reached",
+                limit: usageCheck.limit
             });
         }
 
