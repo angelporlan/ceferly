@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: ceferly_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-ceferly_user}
+      POSTGRES_PASSWORD: ${DB_PASS:-ceferly_password}
+      POSTGRES_DB: ${DB_NAME:-ceferly_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ceferly_backend
+    restart: always
+    ports:
+      - "4000:4000"
+    environment:
+      - ENV=TEST
+      - PORT_TEST=4000
+      - URL_TEST=http://localhost
+      - JWT_SECRET=${JWT_SECRET:-ceferly_secret_jwt_key_12345}
+      - DB_HOST=db
+      - DB_NAME=${DB_NAME:-ceferly_db}
+      - DB_USER=${DB_USER:-ceferly_user}
+      - DB_PASS=${DB_PASS:-ceferly_password}
+      - AI_SERVER=${AI_SERVER:-OpenRouter}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - STRIPE_SECRET_KEY_TEST=${STRIPE_SECRET_KEY_TEST:-sk_test_dummy}
+      - URL_FRONT_TEST=http://localhost:4200
+      - RESEND_API_KEY=${RESEND_API_KEY}
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ceferly_frontend
+    restart: always
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
