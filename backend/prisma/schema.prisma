@@ -34,3 +34,29 @@ model User {
 
   @@map("users")
 }
+
+model Level {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  @@map("levels")
+}
+
+model Category {
+  id            Int           @id @default(autoincrement())
+  name          String        @unique
+  subcategories Subcategory[]
+
+  @@map("categories")
+}
+
+model Subcategory {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  categoryId  Int      @map("category_id")
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([name, categoryId])
+  @@map("subcategories")
+}
