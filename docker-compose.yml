@@ -2,19 +2,20 @@ version: '3.8'
 
 services:
   db:
-    image: postgres:15-alpine
+    image: mysql:8.0
     container_name: ceferly_db
     restart: always
     environment:
-      POSTGRES_USER: ${DB_USER:-ceferly_user}
-      POSTGRES_PASSWORD: ${DB_PASS:-ceferly_password}
-      POSTGRES_DB: ${DB_NAME:-ceferly_db}
+      MYSQL_ROOT_PASSWORD: ${DB_PASS:-ceferly_password}
+      MYSQL_DATABASE: ${DB_NAME:-ceferly_db}
+      MYSQL_USER: ${DB_USER:-ceferly_user}
+      MYSQL_PASSWORD: ${DB_PASS:-ceferly_password}
     ports:
-      - "5432:5432"
+      - "3306:3306"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - mysql_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -23,6 +24,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      target: development
     container_name: ceferly_backend
     restart: always
     ports:
@@ -64,4 +66,4 @@ services:
       - backend
 
 volumes:
-  postgres_data:
+  mysql_data:
