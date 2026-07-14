@@ -38,6 +38,7 @@ services:
       - DB_NAME=${DB_NAME:-ceferly_db}
       - DB_USER=${DB_USER:-ceferly_user}
       - DB_PASS=${DB_PASS:-ceferly_password}
+      - DATABASE_URL=mysql://${DB_USER:-ceferly_user}:${DB_PASS:-ceferly_password}@db:3306/${DB_NAME:-ceferly_db}
       - AI_SERVER=${AI_SERVER:-OpenRouter}
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
       - GROQ_API_KEY=${GROQ_API_KEY}
