@@ -4,6 +4,107 @@ import { Subcategory } from "../models/Subcategory.js";
 import { AttemptExplanation } from "../models/AttemptExplanation.js";
 import { Category } from "../models/Category.js";
 
+const normalizeAnswer = (value) => {
+    if (value === null || value === undefined) {
+        return "";
+    }
+
+    if (typeof value === "string") {
+        return value.trim().toLowerCase();
+    }
+
+    if (Array.isArray(value)) {
+        return JSON.stringify(value);
+    }
+
+    if (typeof value === "object") {
+        return JSON.stringify(value);
+    }
+
+    return String(value).trim().toLowerCase();
+};
+
+const getAnswerValue = (answers, key) => {
+    if (!answers || typeof answers !== "object") {
+        return undefined;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(answers, key)) {
+        return answers[key];
+    }
+
+    const numericKey = Number(key);
+    if (!Number.isNaN(numericKey) && Object.prototype.hasOwnProperty.call(answers, numericKey)) {
+        return answers[numericKey];
+    }
+
+    return undefined;
+};
+
+const sortAnswerKeys = (keys) =>
+    [...keys].sort((left, right) => {
+        const leftNumber = Number(left);
+        const rightNumber = Number(right);
+
+        if (!Number.isNaN(leftNumber) && !Number.isNaN(rightNumber)) {
+            return leftNumber - rightNumber;
+        }
+
+        return String(left).localeCompare(String(right), undefined, { numeric: true });
+    });
+
+const buildMarkedAnswers = (userAnswer, correctAnswer) => {
+    const answerMap = correctAnswer && typeof correctAnswer === "object"
+        ? correctAnswer
+        : {};
+
+    const keys = sortAnswerKeys(new Set([
+        ...Object.keys(answerMap),
+        ...Object.keys(userAnswer || {})
+    ]));
+
+    return keys.map((key) => {
+        const userValue = getAnswerValue(userAnswer, key);
+        const correctValue = getAnswerValue(answerMap, key);
+        const isCorrect = normalizeAnswer(userValue) === normalizeAnswer(correctValue);
+
+        return {
+            question_id: Number.isNaN(Number(key)) ? key : Number(key),
+            user_answer: userValue ?? null,
+            correct_answer: correctValue ?? null,
+            is_correct: isCorrect,
+            status: isCorrect ? "correct" : "incorrect"
+        };
+    });
+};
+
+const serializeAttemptSummary = (attempt) => {
+    const attemptJson = attempt.toJSON();
+    const exercise = attemptJson.exercise;
+
+    return {
+        id: attemptJson.id,
+        created_at: attemptJson.created_at,
+        total_gaps: attemptJson.total_gaps,
+        correct_gaps: attemptJson.correct_gaps,
+        score: attemptJson.score,
+        is_fully_correct: attemptJson.is_fully_correct,
+        exercise: exercise ? {
+            id: exercise.id,
+            title: exercise.title,
+            type: exercise.type,
+            subcategory: exercise.Subcategory ? {
+                id: exercise.Subcategory.id,
+                name: exercise.Subcategory.name,
+                category: exercise.Subcategory.Category ? {
+                    id: exercise.Subcategory.Category.id,
+                    name: exercise.Subcategory.Category.name
+                } : null
+            } : null
+        } : null
+    };
+};
+
 export const createExerciseAttempt = async (req, res) => {
     try {
         const userId = req.user.id;
@@ -113,7 +214,21 @@ export const getExerciseAttemptById = async (req, res) => {
             return res.status(404).json({ message: "Attempt not found" });
         }
 
-        res.json(attempt);
+        const attemptJson = attempt.toJSON();
+        const markedAnswers = buildMarkedAnswers(
+            attemptJson.user_answer,
+            attemptJson.exercise?.correct_answer
+        );
+
+        res.json({
+            ...attemptJson,
+            marked_answers: markedAnswers,
+            feedback_summary: {
+                total: markedAnswers.length,
+                correct: markedAnswers.filter((answer) => answer.is_correct).length,
+                incorrect: markedAnswers.filter((answer) => !answer.is_correct).length
+            }
+        });
 
     } catch (error) {
         console.error(error);
@@ -131,14 +246,14 @@ export const getUserAttempts = async (req, res) => {
         const whereClause = { user_id: userId };
         const subcategoryInclude = {
             model: Subcategory,
-            attributes: ['name'],
+            attributes: ['id', 'name'],
             required: category && category !== 'Todos'
         };
 
         if (category && category !== 'Todos') {
             subcategoryInclude.include = [{
                 model: Category,
-                attributes: [],
+                attributes: ['id', 'name'],
                 where: { name: category },
                 required: true
             }];
@@ -148,7 +263,7 @@ export const getUserAttempts = async (req, res) => {
             {
                 model: Exercise,
                 as: 'exercise',
-                attributes: ['title'],
+                attributes: ['id', 'title', 'type'],
                 required: category && category !== 'Todos',
                 include: [subcategoryInclude]
             }
@@ -164,8 +279,10 @@ export const getUserAttempts = async (req, res) => {
                     include: [{
                         model: Subcategory,
                         required: true,
+                        attributes: ['id', 'name'],
                         include: [{
                             model: Category,
+                            attributes: ['id', 'name'],
                             where: { name: category },
                             required: true
                         }]
@@ -177,7 +294,7 @@ export const getUserAttempts = async (req, res) => {
 
         const attempts = await UserExerciseAttempt.findAll({
             where: whereClause,
-            attributes: ['id', 'correct_gaps', 'total_gaps', 'created_at'],
+            attributes: ['id', 'correct_gaps', 'total_gaps', 'created_at', 'score', 'is_fully_correct'],
             include: includeClause,
             order: [['created_at', 'DESC']],
             limit: parseInt(limit),
@@ -187,7 +304,12 @@ export const getUserAttempts = async (req, res) => {
         const totalPages = Math.ceil(total / parseInt(limit));
 
         res.json({
-            attempts,
+            attempts: attempts.map((attempt) => ({
+                ...serializeAttemptSummary(attempt),
+                accuracy: attempt.total_gaps > 0
+                    ? Math.round((attempt.correct_gaps / attempt.total_gaps) * 100)
+                    : 0
+            })),
             pagination: {
                 total,
                 page: parseInt(page),
