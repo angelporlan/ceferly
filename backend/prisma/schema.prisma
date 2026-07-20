@@ -69,11 +69,11 @@ model Exercise {
   id            Int                   @id @default(autoincrement())
   type          String
   title         String
-  questionText  String                @map("question_text")
+  questionText  String                @db.Text @map("question_text")
   options       Json?
   correctAnswer Json                  @map("correct_answer")
   audioUrl      String?               @map("audio_url")
-  readingText   String?               @map("reading_text")
+  readingText   String?               @db.Text @map("reading_text")
   levelId       Int                   @map("level_id")
   level         Level                 @relation(fields: [levelId], references: [id], onDelete: Cascade)
   subcategoryId Int                   @map("subcategory_id")
