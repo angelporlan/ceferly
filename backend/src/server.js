@@ -10,7 +10,7 @@ import exerciseAttemptRoutes from "./routes/exerciseAttempt.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import exerciseRoutes from "./routes/exercise.routes.js";
 import userRoutes from "./routes/user.routes.js";
-import explanationRoutes from "./routes/explanation.routes.js";
+import aiRoutes from "./routes/ai.routes.js";
 import paymentsRoutes from "./routes/payments.routes.js";
 
 import { seedLevels } from "./seeds/seedLevels.js";
@@ -36,7 +36,7 @@ app.use("/api", exerciseAttemptRoutes);
 app.use("/api", authRoutes);
 app.use("/api", exerciseRoutes);
 app.use("/api", userRoutes);
-app.use("/api", explanationRoutes);
+app.use("/api", aiRoutes);
 app.use("/api", paymentsRoutes);
 
 (async () => {
