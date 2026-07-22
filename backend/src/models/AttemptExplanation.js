@@ -4,6 +4,10 @@ import { sequelize } from "../config/db.js";
 export const AttemptExplanation = sequelize.define(
     "AttemptExplanation",
     {
+        attempt_id: {
+            type: DataTypes.INTEGER,
+            allowNull: false
+        },
         explanation: {
             type: DataTypes.TEXT,
             allowNull: false
