@@ -8,6 +8,64 @@ import { Sequelize, Op } from "sequelize";
 import { AiUsageDaily } from "../models/AiUsageDaily.js";
 import { AI_LIMITS } from "../config/aiLimits.js";
 
+const formatDateKey = (date = new Date()) => date.toISOString().split("T")[0];
+
+const getYesterdayKey = (date = new Date()) => {
+    const yesterday = new Date(date);
+    yesterday.setDate(yesterday.getDate() - 1);
+    return formatDateKey(yesterday);
+};
+
+export const resetStreakIfNeeded = async (user, referenceDate = new Date()) => {
+    if (!user.last_completed_date) {
+        return user;
+    }
+
+    const todayKey = formatDateKey(referenceDate);
+    const lastCompletedKey = user.last_completed_date;
+
+    if (lastCompletedKey === todayKey) {
+        return user;
+    }
+
+    const yesterdayKey = getYesterdayKey(referenceDate);
+    const diffDays = Math.ceil(
+        Math.abs(new Date(todayKey) - new Date(lastCompletedKey)) / (1000 * 60 * 60 * 24)
+    );
+
+    if (lastCompletedKey !== yesterdayKey && diffDays > 1) {
+        user.streak = 0;
+        await user.save();
+    }
+
+    return user;
+};
+
+export const updateStreakWhenDailyGoalReached = async (
+    user,
+    attemptsToday,
+    referenceDate = new Date()
+) => {
+    const dailyGoal = user.daily_goal || 5;
+    if (attemptsToday < dailyGoal) {
+        return user;
+    }
+
+    const todayKey = formatDateKey(referenceDate);
+    const lastCompletedKey = user.last_completed_date;
+
+    if (lastCompletedKey === todayKey) {
+        return user;
+    }
+
+    const yesterdayKey = getYesterdayKey(referenceDate);
+    user.streak = lastCompletedKey === yesterdayKey ? (user.streak || 0) + 1 : 1;
+    user.last_completed_date = todayKey;
+    await user.save();
+
+    return user;
+};
+
 export const getUserProgress = async (req, res) => {
     try {
         const userId = req.user.id;
@@ -164,7 +222,7 @@ export const changeRole = async (req, res) => {
 export const userInformation = async (req, res) => {
     try {
         const userData = req.user;
-        await userData.checkStreak();
+        await resetStreakIfNeeded(userData);
 
         const user = userData.toJSON();
         delete user.password_hash;
@@ -252,7 +310,7 @@ export const deleteUser = async (req, res) => {
 export const getNumberOfAttemptsToday = async (req, res) => {
     try {
         const user = req.user;
-        await user.checkStreak();
+        await resetStreakIfNeeded(user);
 
         const today = new Date().toISOString().split("T")[0];
         const numberOfAttempts = await UserExerciseAttempt.count({ where: { user_id: user.id, created_at: { [Op.gte]: today } } });
