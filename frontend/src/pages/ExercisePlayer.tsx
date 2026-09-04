@@ -44,10 +44,22 @@ export const ExercisePlayer: React.FC = () => {
     })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data && data.title) {
+        if (data && (data.title || data.id)) {
+          const resolvedQuestionText = data.questionText || data.question_text || ''
+          const resolvedCorrectAnswer = data.correctAnswer !== undefined ? data.correctAnswer : data.correct_answer
+          const resolvedReadingText = data.readingText || data.reading_text || ''
+          const resolvedOptions = Array.isArray(data.options)
+            ? data.options
+            : (typeof data.options === 'object' && data.options !== null ? Object.values(data.options) : DEMO_EXERCISE.options)
+
           setExercise({
             ...data,
-            options: Array.isArray(data.options) ? data.options : DEMO_EXERCISE.options,
+            title: data.title || DEMO_EXERCISE.title,
+            type: data.type || DEMO_EXERCISE.type,
+            questionText: resolvedQuestionText || DEMO_EXERCISE.questionText,
+            correctAnswer: resolvedCorrectAnswer !== undefined ? resolvedCorrectAnswer : DEMO_EXERCISE.correctAnswer,
+            readingText: resolvedReadingText,
+            options: resolvedOptions,
           })
         }
       })
@@ -56,7 +68,18 @@ export const ExercisePlayer: React.FC = () => {
 
   const handleCheckAnswer = () => {
     const userAnswer = exercise.type === 'multiple_choice' ? selectedOption : gapInput.trim()
-    const isCorrect = String(userAnswer).toLowerCase() === String(exercise.correctAnswer).toLowerCase()
+    let isCorrect = false
+    const expected = exercise.correctAnswer
+
+    if (typeof expected === 'string') {
+      const slashParts = expected.split('/').map((s) => s.trim().toLowerCase())
+      isCorrect = slashParts.includes(String(userAnswer).toLowerCase()) || String(userAnswer).toLowerCase() === expected.toLowerCase()
+    } else if (typeof expected === 'object' && expected !== null) {
+      const values = Object.values(expected).map((v: any) => String(v).toLowerCase())
+      isCorrect = values.includes(String(userAnswer).toLowerCase())
+    } else {
+      isCorrect = String(userAnswer).toLowerCase() === String(expected).toLowerCase()
+    }
 
     if (isCorrect) {
       setStatus('correct')
@@ -66,37 +89,47 @@ export const ExercisePlayer: React.FC = () => {
     }
   }
 
-  const handleContinue = () => {
-    // Send attempt to backend if token exists
+  const handleContinue = async () => {
     const token = localStorage.getItem('token')
     const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000/api'
     const isCorrect = status === 'correct'
+    const userAnswer = exercise.type === 'multiple_choice' ? selectedOption : gapInput
+    let attemptId: number | undefined
 
     if (token) {
-      fetch(`${API_BASE}/exercises/${id}/attempt`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          userAnswer: exercise.type === 'multiple_choice' ? selectedOption : gapInput,
-          totalGaps: 1,
-          correctGaps: isCorrect ? 1 : 0,
-          isFullyCorrect: isCorrect,
-          score: isCorrect ? 100 : 0,
-        }),
-      }).catch(() => {})
+      try {
+        const res = await fetch(`${API_BASE}/exercises/${id}/attempt`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            userAnswer,
+            totalGaps: 1,
+            correctGaps: isCorrect ? 1 : 0,
+            isFullyCorrect: isCorrect,
+            score: isCorrect ? 100 : 0,
+          }),
+        })
+        if (res.ok) {
+          const attemptData = await res.json()
+          attemptId = attemptData?.attempt?.id
+        }
+      } catch {
+        // Continue even if network error
+      }
     }
 
     // Navigate to results page with state
     navigate('/results', {
       state: {
         exerciseId: exercise.id,
+        attemptId,
         exerciseTitle: exercise.title,
         isCorrect,
-        correctAnswer: exercise.correctAnswer,
-        userAnswer: exercise.type === 'multiple_choice' ? selectedOption : gapInput,
+        correctAnswer: typeof exercise.correctAnswer === 'object' ? JSON.stringify(exercise.correctAnswer) : exercise.correctAnswer,
+        userAnswer,
         questionText: exercise.questionText,
       },
     })

@@ -4,7 +4,7 @@ import { Exercise } from "../models/Exercise.js";
 import { AttemptExplanation } from "../models/AttemptExplanation.js";
 import { checkAndConsumeAiUsage } from "../services/aiUsage.service.js";
 import { User } from "../models/user.js";
-import { createOpenRouterChatCompletion } from "../services/ai.service.js";
+import { createOpenRouterChatCompletion, createGeminiCompletion } from "../services/ai.service.js";
 
 const aiServer = process.env.AI_SERVER || 'OpenRouter';
 
@@ -147,12 +147,23 @@ Explain clearly why the student answer is wrong and what the correct option is f
 `;
         }
 
-        const model = aiServer === 'Groq'
+        const isGemini = aiServer?.toLowerCase() === 'gemini';
+        const isGroq = aiServer === 'Groq';
+
+        const model = isGroq
             ? "openai/gpt-oss-120b"
+            : isGemini
+            ? (process.env.GEMINI_MODEL || "gemini-3.5-flash")
             : "tngtech/deepseek-r1t2-chimera:free";
 
         let explanationText;
-        if (aiServer === 'Groq') {
+        if (isGemini) {
+            explanationText = await createGeminiCompletion({
+                prompt,
+                model,
+                temperature: 0.4
+            });
+        } else if (isGroq) {
             const completion = await aiClient.chat.completions.create({
                 model: model,
                 messages: [
@@ -202,3 +213,70 @@ Explain clearly why the student answer is wrong and what the correct option is f
         res.status(500).json({ message: "Error generating explanation" });
     }
 };
+
+export const explainDirect = async (req, res) => {
+    try {
+        const { questionText, userAnswer, correctAnswer, exerciseType = "Grammar" } = req.body;
+
+        const prompt = `
+You are an expert Cambridge English B2/C1 teacher.
+Explain clearly why the student's answer is wrong and the correct grammatical/vocabulary rule in a concise, encouraging way.
+
+Exercise Type: ${exerciseType}
+Question: ${questionText || "N/A"}
+Student Answer: ${JSON.stringify(userAnswer)}
+Correct Answer: ${JSON.stringify(correctAnswer)}
+
+Return strict JSON:
+{
+  "general_feedback": "Motivational summary of the mistake",
+  "explanation": "Clear, concise grammatical rule and why the correct answer fits"
+}
+`;
+
+        const isGemini = aiServer?.toLowerCase() === 'gemini';
+        const model = isGemini ? (process.env.GEMINI_MODEL || "gemini-3.5-flash") : "tngtech/deepseek-r1t2-chimera:free";
+
+        let explanationText;
+        if (isGemini) {
+            explanationText = await createGeminiCompletion({
+                prompt,
+                model,
+                temperature: 0.4
+            });
+        } else if (aiServer === 'Groq') {
+            const completion = await aiClient.chat.completions.create({
+                model: "openai/gpt-oss-120b",
+                messages: [{ role: "user", content: prompt }],
+                temperature: 0.4
+            });
+            explanationText = completion.choices[0].message.content;
+        } else {
+            const completion = await createOpenRouterChatCompletion({
+                model,
+                messages: [{ role: "user", content: prompt }],
+                temperature: 0.4
+            });
+            explanationText = completion.choices[0].message.content;
+        }
+
+        explanationText = explanationText.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
+        explanationText = explanationText.replace(/```json/g, "").replace(/```/g, "").trim();
+
+        let parsed;
+        try {
+            parsed = JSON.parse(explanationText);
+        } catch {
+            parsed = { explanation: explanationText };
+        }
+
+        return res.json({
+            explanation: parsed.explanation || parsed.general_feedback || explanationText,
+            raw: parsed
+        });
+    } catch (err) {
+        console.error("Error in explainDirect:", err);
+        return res.status(500).json({ message: "Error generating explanation" });
+    }
+};
+

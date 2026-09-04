@@ -33,8 +33,9 @@ export const ExercisesList: React.FC = () => {
     })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data && Array.isArray(data) && data.length > 0) {
-          setExercises(data)
+        const list = Array.isArray(data) ? data : (data?.exercises || [])
+        if (Array.isArray(list) && list.length > 0) {
+          setExercises(list)
         }
       })
       .catch(() => {})

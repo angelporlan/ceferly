@@ -35,9 +35,10 @@ export const Leaderboard: React.FC = () => {
     })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data && Array.isArray(data) && data.length > 0) {
+        const list = Array.isArray(data) ? data : (data?.data || [])
+        if (Array.isArray(list) && list.length > 0) {
           setRankings(
-            data.map((item, idx) => ({
+            list.map((item: any, idx: number) => ({
               id: item.id ?? idx + 1,
               rank: idx + 1,
               name: item.name || item.username,

@@ -1,5 +1,5 @@
 import express from "express";
-import { authenticate } from "../middlewares/auth.middleware.js";
+import { authenticate, optionalAuthenticate } from "../middlewares/auth.middleware.js";
 import { getUserProgress } from "../controllers/user.controller.js";
 import { getMyAiUsage } from "../controllers/user.controller.js";
 import { changeRole } from "../controllers/user.controller.js";
@@ -24,6 +24,6 @@ router.delete("/users/me", authenticate, deleteUser);
 router.get("/users/me/numberOfAttemptsToday", authenticate, getNumberOfAttemptsToday);
 router.put("/users/me/daily-goal", authenticate, updateDailyGoal);
 router.post("/users/me/avatar", authenticate, purchaseAvatar);
-router.get("/users/rankings", authenticate, getGlobalRankings);
+router.get("/users/rankings", optionalAuthenticate, getGlobalRankings);
 
 export default router;

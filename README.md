@@ -13,7 +13,7 @@ El proyecto se estructura como una aplicación monorrepositorio dividida en dos 
 ### 1. Backend (`/backend`)
 *   **Servidor**: Node.js con Express (v5.2.1) en formato ESM (ES Modules).
 *   **Base de Datos y ORM**: MySQL gestionado a través de **Sequelize** (v6.37.7) con el driver `mysql2`.
-*   **Inteligencia Artificial**: Integración con **OpenRouter API** (utilizando modelos de DeepSeek de forma gratuita, como `deepseek-r1`) o **Groq SDK** para generar explicaciones gramaticales personalizadas y calificar redacciones.
+*   **Inteligencia Artificial**: Integración con **Google Gemini** (`gemini-3.5-flash` vía `@google/genai`), **OpenRouter API** (modelos como `deepseek-r1`) o **Groq SDK** para generar explicaciones gramaticales personalizadas y calificar redacciones.
 *   **Pasarela de Pago**: **Stripe** (v20.1.0) para la gestión de suscripciones de usuarios (`pro` y `premium`).
 *   **Autenticación**: JSON Web Tokens (**JWT**) y **Google Auth Library** para login con cuentas de Google.
 *   **Correos Electrónicos**: Integración con **Resend** para el envío de correos de recuperación de contraseña.
@@ -186,7 +186,9 @@ Todos los endpoints están protegidos por el middleware `authenticate` (JWT) a e
     DB_HOST=127.0.0.1
     
     # Inteligencia Artificial
-    AI_SERVER=OpenRouter # OpenRouter o Groq
+    AI_SERVER=Gemini # Gemini, OpenRouter o Groq
+    GEMINI_API_KEY=tu_api_key_de_gemini
+    GEMINI_MODEL=gemini-3.5-flash
     OPENROUTER_API_KEY=tu_api_key_de_openrouter
     GROQ_API_KEY=tu_api_key_de_groq
     

@@ -113,11 +113,21 @@ export const createExerciseAttempt = async (req, res) => {
 
         const {
             user_answer,
+            userAnswer,
             total_gaps,
+            totalGaps,
             correct_gaps,
+            correctGaps,
             is_fully_correct,
+            isFullyCorrect,
             score
         } = req.body;
+
+        const resolvedUserAnswer = user_answer !== undefined ? user_answer : userAnswer;
+        const resolvedTotalGaps = total_gaps !== undefined ? total_gaps : (totalGaps !== undefined ? totalGaps : 1);
+        const resolvedCorrectGaps = correct_gaps !== undefined ? correct_gaps : (correctGaps !== undefined ? correctGaps : 0);
+        const resolvedIsFullyCorrect = is_fully_correct !== undefined ? is_fully_correct : (isFullyCorrect !== undefined ? isFullyCorrect : false);
+        const resolvedScore = score !== undefined ? score : (resolvedIsFullyCorrect ? 100 : 0);
 
         const exercise = await Exercise.findByPk(exerciseId);
         if (!exercise) {
@@ -127,11 +137,11 @@ export const createExerciseAttempt = async (req, res) => {
         const attempt = await UserExerciseAttempt.create({
             user_id: userId,
             exercise_id: exerciseId,
-            user_answer,
-            total_gaps,
-            correct_gaps,
-            is_fully_correct,
-            score
+            user_answer: resolvedUserAnswer,
+            total_gaps: resolvedTotalGaps,
+            correct_gaps: resolvedCorrectGaps,
+            is_fully_correct: resolvedIsFullyCorrect,
+            score: resolvedScore
         });
 
         const user = req.user;

@@ -10,6 +10,7 @@ export const ResultsPage: React.FC = () => {
   const navigate = useNavigate()
   const state = location.state as {
     exerciseId?: number
+    attemptId?: number
     exerciseTitle?: string
     isCorrect?: boolean
     correctAnswer?: string
@@ -27,30 +28,49 @@ export const ResultsPage: React.FC = () => {
     const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000/api'
 
     try {
-      const res = await fetch(`${API_BASE}/ai/explain`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({
-          questionText: state?.questionText ?? 'Exercise question',
-          userAnswer: state?.userAnswer ?? '',
-          correctAnswer: state?.correctAnswer ?? '',
-        }),
-      })
+      let res: Response | null = null
+
+      if (state?.attemptId && token) {
+        try {
+          res = await fetch(`${API_BASE}/attempts/${state.attemptId}/explain`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          })
+        } catch {
+          res = null
+        }
+      }
+
+      if (!res || !res.ok) {
+        res = await fetch(`${API_BASE}/ai/explain`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({
+            questionText: state?.questionText ?? 'Exercise question',
+            userAnswer: state?.userAnswer ?? '',
+            correctAnswer: state?.correctAnswer ?? '',
+            exerciseType: state?.exerciseTitle ?? 'Cambridge Grammar',
+          }),
+        })
+      }
 
       if (res.ok) {
         const data = await res.json()
-        setAiExplanation(data.explanation || data.message || 'Explicación generada.')
+        setAiExplanation(data.explanation || data.message || 'Explicación generada con éxito.')
       } else {
         setAiExplanation(
-          `En el examen de Cambridge B2/C1, esta estructura requiere "${state?.correctAnswer}". Recuerda que en este contexto el tiempo verbal o la colocación sigue las reglas de concordancia temporal.`
+          `En el examen de Cambridge B2/C1, esta estructura requiere "${state?.correctAnswer}". Recuerda que en este contexto el tiempo verbal o la colocación sigue las reglas oficiales de concordancia.`
         )
       }
     } catch {
       setAiExplanation(
-        `En el examen de Cambridge B2/C1, esta estructura requiere "${state?.correctAnswer}". Recuerda que en este contexto el tiempo verbal o la colocación sigue las reglas de concordancia temporal.`
+        `En el examen de Cambridge B2/C1, esta estructura requiere "${state?.correctAnswer}". Recuerda que en este contexto el tiempo verbal o la colocación sigue las reglas oficiales de concordancia.`
       )
     } finally {
       setLoadingAi(false)
