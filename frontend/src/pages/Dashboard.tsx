@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
@@ -16,15 +16,78 @@ interface SkillNode {
 }
 
 const DEMO_SKILL_NODES: SkillNode[] = [
-  { id: '1', title: 'Present & Past Perfect', category: 'Grammar', status: 'completed', stars: 3, totalStars: 3 },
-  { id: '2', title: 'Work & Employment Idioms', category: 'Vocabulary', status: 'completed', stars: 3, totalStars: 3 },
-  { id: '3', title: 'Conditionals (Zero, 1st, 2nd, 3rd)', category: 'Grammar', status: 'active', stars: 1, totalStars: 3 },
-  { id: '4', title: 'Multiple Choice Reading', category: 'Reading', status: 'locked', stars: 0, totalStars: 3 },
-  { id: '5', title: 'Key Word Transformation', category: 'Use of English', status: 'locked', stars: 0, totalStars: 3 },
-  { id: '6', title: 'Gapped Text Mastery', category: 'Reading', status: 'locked', stars: 0, totalStars: 3 },
+  { id: '1', title: 'Conditionals (Zero, 1st, 2nd, 3rd)', category: 'Grammar', status: 'active', stars: 2, totalStars: 3 },
+  { id: '2', title: 'Past & Present Perfect', category: 'Grammar', status: 'active', stars: 1, totalStars: 3 },
+  { id: '3', title: 'Passive Voice & Causatives', category: 'Grammar', status: 'active', stars: 0, totalStars: 3 },
+  { id: '4', title: 'Work & Employment Idioms', category: 'Vocabulary', status: 'active', stars: 1, totalStars: 3 },
+  { id: '5', title: 'Word Formation (Prefixes & Suffixes)', category: 'Vocabulary', status: 'active', stars: 0, totalStars: 3 },
+  { id: '6', title: 'Key Word Transformation', category: 'Use of English', status: 'active', stars: 0, totalStars: 3 },
 ]
 
 export const Dashboard: React.FC = () => {
+  const [skillNodes, setSkillNodes] = useState<SkillNode[]>(DEMO_SKILL_NODES)
+  const [streak, setStreak] = useState(1)
+  const [attemptsToday, setAttemptsToday] = useState(0)
+  const [dailyGoal, setDailyGoal] = useState(5)
+
+  useEffect(() => {
+    const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000/api'
+    const token = localStorage.getItem('token')
+
+    // 1. Fetch subcategories to populate dynamic skill tree
+    fetch(`${API_BASE}/categories`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && Array.isArray(data) && data.length > 0) {
+          const allSubs: SkillNode[] = []
+          data.forEach((cat: any) => {
+            const subs = cat.subcategories || cat.Subcategories || []
+            subs.forEach((sub: any, idx: number) => {
+              allSubs.push({
+                id: String(sub.id),
+                title: sub.name,
+                category: cat.name,
+                status: idx === 0 ? 'completed' : 'active',
+                stars: idx === 0 ? 3 : idx === 1 ? 1 : 0,
+                totalStars: 3,
+              })
+            })
+          })
+          if (allSubs.length > 0) {
+            setSkillNodes(allSubs.slice(0, 10))
+          }
+        }
+      })
+      .catch(() => {})
+
+    // 2. Fetch user stats if logged in
+    if (token) {
+      fetch(`${API_BASE}/users/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((userData) => {
+          if (userData) {
+            setStreak(userData.streak ?? 1)
+            setDailyGoal(userData.daily_goal ?? 5)
+          }
+        })
+        .catch(() => {})
+
+      fetch(`${API_BASE}/users/me/numberOfAttemptsToday`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((attemptData) => {
+          if (attemptData && attemptData.attemptsToday !== undefined) {
+            setAttemptsToday(attemptData.attemptsToday)
+          }
+        })
+        .catch(() => {})
+    }
+  }, [])
   return (
     <div className="flex flex-col lg:flex-row gap-8 items-start">
       {/* Main Learning Pathway */}
@@ -53,7 +116,7 @@ export const Dashboard: React.FC = () => {
 
         {/* Skill Tree Path (Duolingo-inspired playful path with Ceferly identity) */}
         <div className="flex flex-col items-center gap-6 my-4 w-full max-w-md">
-          {DEMO_SKILL_NODES.map((node, index) => {
+          {skillNodes.map((node, index) => {
             // Slight horizontal offset to give the playful winding path feel
             const offsets = ['translate-x-0', 'translate-x-10', 'translate-x-0', '-translate-x-10', 'translate-x-0', 'translate-x-8']
             const offset = offsets[index % offsets.length]
@@ -65,7 +128,7 @@ export const Dashboard: React.FC = () => {
             return (
               <div key={node.id} className={`flex flex-col items-center ${offset} transition-transform`}>
                 <Link
-                  to={isLocked ? '#' : `/categories`}
+                  to={isLocked ? '#' : `/categories/${node.id}/exercises`}
                   className={`
                     relative group flex flex-col items-center select-none
                     ${isLocked ? 'cursor-not-allowed opacity-75' : 'cursor-pointer'}
@@ -102,8 +165,8 @@ export const Dashboard: React.FC = () => {
                   </div>
 
                   {/* Stars counter / label */}
-                  <div className="mt-2 text-center">
-                    <span className="text-xs font-black text-slateText-main group-hover:text-mint transition-colors">
+                  <div className="mt-2 text-center max-w-[140px]">
+                    <span className="text-xs font-black text-slateText-main group-hover:text-mint transition-colors truncate block">
                       {node.title}
                     </span>
                     <div className="flex items-center justify-center gap-1 mt-0.5">
@@ -135,12 +198,14 @@ export const Dashboard: React.FC = () => {
               <Sparkles className="w-4 h-4 text-mint" />
               Meta diaria
             </h2>
-            <Badge variant="mint">3 / 5</Badge>
+            <Badge variant="mint">{attemptsToday} / {dailyGoal}</Badge>
           </div>
           <p className="text-xs text-slateText-muted font-bold">
-            Completa 2 ejercicios más hoy para mantener tu racha al máximo.
+            {attemptsToday >= dailyGoal
+              ? '¡Enhorabuena! Has completado tu meta diaria.'
+              : `Completa ${Math.max(0, dailyGoal - attemptsToday)} ejercicios más hoy para mantener tu racha al máximo.`}
           </p>
-          <ProgressBar value={3} max={5} color="mint" showLabel />
+          <ProgressBar value={attemptsToday} max={dailyGoal} color="mint" showLabel />
         </Card>
 
         {/* Streak Challenge Card */}
@@ -150,7 +215,7 @@ export const Dashboard: React.FC = () => {
               <Flame className="w-6 h-6 fill-white" />
             </div>
             <div>
-              <h3 className="text-sm font-black text-slateText-main">Racha activa de 3 días</h3>
+              <h3 className="text-sm font-black text-slateText-main">Racha activa de {streak} {streak === 1 ? 'día' : 'días'}</h3>
               <p className="text-xs text-amber-dark font-bold">¡No pierdas tu progreso!</p>
             </div>
           </div>

@@ -16,7 +16,9 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
   const [loading, setLoading] = useState(false)
   const [gsiActive, setGsiActive] = useState(false)
 
-  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'dummy-google-client-id.apps.googleusercontent.com'
+  const clientId =
+    import.meta.env.VITE_GOOGLE_CLIENT_ID ||
+    '585513092100-7q8qab80q9q1pjpe1vnq6f4uu49snmlk.apps.googleusercontent.com'
 
   const handleCredentialResponse = async (response: any) => {
     setLoading(true)

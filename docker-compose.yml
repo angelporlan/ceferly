@@ -46,6 +46,8 @@ services:
       - URL_FRONT_TEST=http://localhost:4200
       - RESEND_API_KEY=${RESEND_API_KEY}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GEMINI_MODEL=${GEMINI_MODEL:-gemini-3.5-flash}
     depends_on:
       db:
         condition: service_healthy
@@ -62,6 +64,9 @@ services:
     restart: "no"
     ports:
       - "4200:4200"
+    environment:
+      - VITE_GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-585513092100-7q8qab80q9q1pjpe1vnq6f4uu49snmlk.apps.googleusercontent.com}
+      - VITE_API_BASE_URL=http://localhost:4000/api
     volumes:
       - ./frontend:/app
       - /app/node_modules
