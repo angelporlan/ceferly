@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
+import { GoogleLoginButton } from '../components/auth/GoogleLoginButton'
 import { authService } from '../services/auth.service'
 import { User, Lock, Mail } from 'lucide-react'
 
@@ -105,6 +106,17 @@ export const Register: React.FC = () => {
             {loading ? 'Creando cuenta...' : 'Crear Cuenta Gratis'}
           </Button>
         </form>
+
+        <div className="relative my-6 flex items-center justify-center">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t-2 border-ceferlyBorder"></div>
+          </div>
+          <div className="relative bg-white px-3 text-[11px] font-black uppercase tracking-wider text-slateText-muted">
+            O regístrate con
+          </div>
+        </div>
+
+        <GoogleLoginButton />
 
         <div className="text-center mt-6 pt-6 border-t-2 border-slate-100">
           <p className="text-xs font-bold text-slateText-muted">

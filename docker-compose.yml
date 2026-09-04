@@ -45,6 +45,7 @@ services:
       - STRIPE_SECRET_KEY_TEST=${STRIPE_SECRET_KEY_TEST:-sk_test_dummy}
       - URL_FRONT_TEST=http://localhost:4200
       - RESEND_API_KEY=${RESEND_API_KEY}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
     depends_on:
       db:
         condition: service_healthy

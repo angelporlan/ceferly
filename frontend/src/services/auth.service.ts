@@ -47,6 +47,23 @@ export const authService = {
     return data
   },
 
+  googleLogin: async (credential: string, email?: string, name?: string): Promise<{ token: string; user?: any }> => {
+    const res = await fetch(`${API_BASE}/auth/google`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ credential, email, name }),
+    })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      throw new Error(err.message || 'Error al iniciar sesión con Google')
+    }
+    const data = await res.json()
+    if (data.token) {
+      localStorage.setItem('token', data.token)
+    }
+    return data
+  },
+
   register: async (payload: { name: string; username: string; email: string; password: string }): Promise<{ token: string }> => {
     const res = await fetch(`${API_BASE}/register`, {
       method: 'POST',
