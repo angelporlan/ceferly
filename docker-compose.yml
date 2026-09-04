@@ -4,14 +4,14 @@ services:
   db:
     image: mysql:8.0
     container_name: ceferly_db
-    restart: always
+    restart: "no"
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASS:-ceferly_password}
       MYSQL_DATABASE: ${DB_NAME:-ceferly_db}
       MYSQL_USER: ${DB_USER:-ceferly_user}
       MYSQL_PASSWORD: ${DB_PASS:-ceferly_password}
     ports:
-      - "3306:3306"
+      - "3313:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
@@ -26,7 +26,7 @@ services:
       dockerfile: Dockerfile
       target: development
     container_name: ceferly_backend
-    restart: always
+    restart: "no"
     ports:
       - "4000:4000"
     environment:
@@ -56,8 +56,9 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      target: development
     container_name: ceferly_frontend
-    restart: always
+    restart: "no"
     ports:
       - "4200:4200"
     volumes:
