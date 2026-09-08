@@ -49,7 +49,9 @@ export const Dashboard: React.FC = () => {
         if (data && Array.isArray(data) && data.length > 0) {
           const allSubs: SkillNode[] = []
           data.forEach((cat: any) => {
-            const subs = cat.subcategories || cat.Subcategories || []
+            const subs = (cat.subcategories || cat.Subcategories || []).filter(
+              (sub: { totalItems?: number }) => (sub.totalItems ?? 1) > 0
+            )
             subs.forEach((sub: any, idx: number) => {
               allSubs.push({
                 id: String(sub.id),

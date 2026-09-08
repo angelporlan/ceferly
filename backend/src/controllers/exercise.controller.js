@@ -5,6 +5,7 @@ import { Level } from "../models/Level.js";
 import { UserExerciseAttempt } from "../models/UserExerciseAttempt.js";
 
 import { Sequelize } from "sequelize";
+import { attachCountsAndDropEmpty, countMapFromRows } from "../services/catalog.service.js";
 
 export const getExercises = async (req, res) => {
     try {
@@ -214,20 +215,29 @@ export const getCategories = async (req, res) => {
             }]
         });
 
-        const formatted = categories.map(cat => {
-            const catJson = cat.toJSON();
-            const subs = catJson.Subcategories || catJson.subcategories || [];
-            return {
-                id: catJson.id,
-                name: catJson.name,
-                subcategories: subs.map(sub => ({
-                    id: sub.id,
-                    name: sub.name,
-                    description: sub.description || `${sub.name} practice for Cambridge B2/C1`,
-                    categoryId: sub.category_id || catJson.id
-                }))
-            };
+        const countRows = await Exercise.findAll({
+            attributes: [
+                "subcategory_id",
+                [Sequelize.fn("COUNT", Sequelize.col("id")), "totalItems"]
+            ],
+            group: ["subcategory_id"],
+            raw: true
         });
+
+        const formatted = attachCountsAndDropEmpty(
+            categories.map((category) => {
+                const catJson = category.toJSON();
+                return {
+                    id: catJson.id,
+                    name: catJson.name,
+                    subcategories: (catJson.Subcategories || catJson.subcategories || []).map((sub) => ({
+                        ...sub,
+                        description: sub.description || `${sub.name} practice for Cambridge B2/C1`
+                    }))
+                };
+            }),
+            countMapFromRows(countRows)
+        );
 
         res.json(formatted);
     } catch (error) {

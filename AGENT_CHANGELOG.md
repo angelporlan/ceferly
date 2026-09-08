@@ -1,6 +1,19 @@
 # AGENT CHANGELOG
 
-## [Ciclo 2] - Cambridge B1/B2/C1 Use of English, vidas persistidas, tests y CI
+## [Ciclo 3] - Catálogo sin subcategorías vacías (#92)
+
+### Resumen
+`GET /api/categories` omite subcategorías con 0 ejercicios. `/learn` y `/categories` ya no enlazan a listas en blanco (Tenses, Passive Voice, Listening).
+
+### Verificación
+- Tests: `attachCountsAndDropEmpty` + suite completa 16/16.
+- Live `GET /api/categories`: Grammar/Reading/Use of English/Vocabulary/Writing; ningún `totalItems === 0`.
+- Frontend build OK.
+
+### Siguiente prioridad
+Writing con corrección semántica por IA, o Listening con audio.
+
+## [Ciclo 2] - Cambridge B1/B2/C1 Use of English, vidas persistidas y CI
 
 ### Resumen del Ciclo
 Se cubrió la barra del MVP: 108 ejercicios originales de Use of English (Parts 1–4) para B1 Preliminary, B2 First y C1 Advanced con `explanation_rule`; el player ya no se queda en DEMO; los intentos persisten con scoring de servidor; las explicaciones de IA se guardan en `AttemptExplanation` (con cliente LLM inyectable); corazones, racha y monedas viven en el usuario; la tienda gasta precios de servidor; CI ejecuta `npm test` + build frontend.
