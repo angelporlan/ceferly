@@ -61,7 +61,17 @@ export const Categories: React.FC = () => {
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data && Array.isArray(data) && data.length > 0) {
-          setCategories(data)
+          const populated = data
+            .map((cat: Category) => ({
+              ...cat,
+              subcategories: (cat.subcategories || []).filter(
+                (sub: Subcategory & { totalItems?: number }) => (sub.totalItems ?? 1) > 0
+              ),
+            }))
+            .filter((cat: Category) => (cat.subcategories || []).length > 0)
+          if (populated.length > 0) {
+            setCategories(populated)
+          }
         }
       })
       .catch(() => {})
