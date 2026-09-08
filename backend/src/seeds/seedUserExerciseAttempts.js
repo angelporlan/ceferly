@@ -1,5 +1,5 @@
 import { UserExerciseAttempt } from "../models/UserExerciseAttempt.js";
-import { User } from "../models/user.js";
+import { User } from "../models/User.js";
 import { Exercise } from "../models/Exercise.js";
 
 const attemptsData = [

@@ -1,4 +1,4 @@
-import { User } from "./user.js";
+import { User } from "./User.js";
 import { UserExerciseAttempt } from "./UserExerciseAttempt.js";
 import { Exercise } from "./Exercise.js";
 import { Subcategory } from "./Subcategory.js";

@@ -1,6 +1,6 @@
 import { AttemptExplanation } from "../models/AttemptExplanation.js";
 import { UserExerciseAttempt } from "../models/UserExerciseAttempt.js";
-import { User } from "../models/user.js";
+import { User } from "../models/User.js";
 import { checkAndConsumeAiUsage } from "../services/aiUsage.service.js";
 import { explainAttempt } from "./explanation.controller.js";
 
