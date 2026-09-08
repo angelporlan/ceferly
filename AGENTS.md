@@ -1,118 +1,87 @@
 # CEFERLY — Autonomous Goal Runner (Grok Build /goal)
 
 Actúas como un equipo de agentes (planner, implementor, skeptic, reviewer, QA UI) sobre el repo `angelporlan/ceferly`.
-Invocación: `/goal`. No pidas confirmación. No hagas preguntas. No te quedes en recomendaciones. Inspecciona, especifica, planifica, escribe tests primero, implementa, verifica, abre PR y continúa con la siguiente mejora.
+Invocación: `/goal`. No pidas confirmación. No hagas preguntas. No te quedes en recomendaciones.
+
+## GitHub es el sistema de registro (OBLIGATORIO)
+
+El trabajo NO existe si solo está en el disco local. Cada ciclo DEBE dejar rastro en GitHub.
+
+### Commits
+- Nunca trabajes horas sin commitear. Commit tan pronto un incremento compile o un test pase.
+- Rama por ciclo: `agent/feat-<slug>` o `agent/fix-<slug>` desde `main` actualizado.
+- Commits atómicos y semánticos: `feat|fix|test|docs|ci(scope): mensaje`.
+- Prohibido `git add .` a ciegas si hay `.env`, secretos o `node_modules`.
+- `git push -u origin HEAD` después de cada commit listo (no acumules 20 archivos locales).
+- No hagas force-push a `main`. No reescribas historia ajena.
+
+### Issues (el planner los crea ANTES de codear)
+Antes de implementar, abre o reutiliza un issue:
+```
+gh issue list --state open --limit 30
+gh issue create --title "[B2] Vidas y gemas en Header" --label "agent,enhancement" --body "## Por qué\n...\n## Criterios de aceptación\n- [ ] ...\n## Fuera de alcance\n..."
+```
+Reglas:
+- 1 issue = 1 incremento. No un mega-issue de todo el MVP.
+- Si en QA/review descubres un bug o deuda, abre issue nuevo y sigue; no lo dejes solo en el changelog.
+- Cierra el issue desde el PR (`Closes #N`) cuando el criterio esté cumplido.
+- No dupliques: busca títulos parecidos antes de crear.
+
+### Pull Requests
+```
+gh pr create --title "feat(scope): ..." --body "Closes #N\n\n### Qué\n- ...\n### Tests\n- ...\n### QA UI\n- ...\n### Riesgos\n- ..."
+```
+- Un PR por rama. No mezcles gamificación + seeders + CI en el mismo PR si se pueden separar.
+- Espera a que el PR exista en GitHub antes de dar el ciclo por entregado.
+- Si CI falla: commit de fix en la MISMA rama, no un PR nuevo.
+
+### Auto-review de sus propias PRs (el reviewer/skeptic)
+Tras `gh pr create`:
+1. `gh pr diff` y `gh pr checks`.
+2. Publica review en la propia PR:
+```
+gh pr comment --body "## Self-review\n- Auth: ...\n- UI Duolingo intacta: ...\n- Tests: ...\n- Secretos: no\n- Follow-ups: #..."
+```
+3. Si encuentras un defecto real, no lo dejes en el comentario: `fix` + push + otro comentario `addressed`.
+4. Si el defecto es menor y no bloquea, ábrelo como issue `follow-up` y enlázalo.
+5. No hagas merge a `main` sin checks verdes (salvo docs-only). Si no hay permiso de merge, deja la PR lista y pasa al siguiente issue.
+
+### Comprobar que GitHub se enteró
+Antes de pasar de ciclo: `git status` limpio en la rama, `gh pr view` muestra commits recientes, issue enlazado.
 
 ## Producto
 
-Ceferly es un SaaS de aprendizaje de inglés estilo Duolingo, pero centrado en titulaciones Cambridge por nivel CEFR:
+Ceferly es un SaaS de aprendizaje de inglés estilo Duolingo, centrado en titulaciones Cambridge: B1 Preliminary, B2 First, C1 Advanced, C2 cuando B1–C1 esté sólido.
 
-- B1 Preliminary (PET)
-- B2 First (FCE)
-- C1 Advanced (CAE)
-- C2 Proficiency (CPE) cuando el contenido B1–C1 esté sólido
+Stack real:
+- Frontend: React 19 + Vite + TypeScript + Tailwind (`frontend/`, :4200)
+- Backend: Express ESM + Sequelize/MySQL (`backend/`, :4000)
+- Docker Compose. MySQL suele estar en 3313.
+- UI Duolingo: verde `#58CC02`. No romper el look.
 
-Skills del examen: Reading, Use of English, Writing, Listening, Speaking (Speaking/Listening después de UoE + Reading).
+## Pipeline por ciclo
 
-Stack real del repo (el README histórico habla de Angular; ignóralo):
-- Frontend: React 19 + Vite + TypeScript + Tailwind (`frontend/`, puerto 4200)
-- Backend: Node.js Express ESM + Sequelize/MySQL (`backend/`, puerto 4000)
-- Docker Compose en la raíz. MySQL suele exponerse en 3313.
-- UI Duolingo: verde `#58CC02`, botones 3D, no romper el look.
+1. IDEA — changelog + issue GitHub.
+2. SPEC — `docs/specs/<ciclo>-<slug>.md`.
+3. PLAN — checklist; 1 issue / 1 PR.
+4. TDD — tests que fallan primero.
+5. IMPLEMENT — commits frecuentes en `agent/*`.
+6. TESTS — build + tests verdes.
+7. QA UI — rutas tocadas.
+8. REVIEW — self-review en la PR.
+9. PR/CI — push + `gh pr create` + checks.
+10. FIX — misma rama.
+11. DONE — cierra issue, actualiza `AGENT_CHANGELOG.md`, siguiente issue.
 
-## Done condition del goal largo
-
-El goal no termina en un solo PR. Cada ciclo entrega un incremento verificado. El producto se considera listo para un MVP cuando:
-
-1. Hay ≥ 100 ejercicios reales Cambridge en BD (B1 + B2 + C1; Parts 1–4 de Use of English como mínimo).
-2. Flujo E2E: registro/login → elegir nivel → categoría → ejercicio → intento persistido → resultado → explicación IA.
-3. Gamificación viva: vidas, streak, monedas/gemas, shop, leaderboard, meta diaria.
-4. Tests automatizados del dominio crítico + build frontend + API smoke verdes.
-5. QA UI exploratorio de `/`, `/learn` o dashboard, `/categories`, player, `/results`, `/shop`, `/leaderboard` sin errores de consola ni pantallas vacías.
-6. CI en GitHub Actions (lint + test + build) en el PR.
-
-Hasta que eso no se cumpla, elige la siguiente prioridad y sigue. Cuando el MVP esté cubierto, busca mejoras constantes (contenido, UX, rendimiento, accesibilidad, Listening/Writing/Speaking, onboarding, pagos).
-
-## Pipeline obligatorio por ciclo
-
-Ejecuta SIEMPRE este orden. No saltes fases.
-
-### 1. IDEA
-Escribe 5–10 líneas en `AGENT_CHANGELOG.md` (sección del ciclo): qué hueco hay y por qué importa al alumno Cambridge.
-
-### 2. SPEC
-Crea o actualiza `docs/specs/<ciclo>-<slug>.md` con:
-- actor y flujo
-- criterios de aceptación medibles
-- contrato API (ruta, payload, status)
-- formato de `Exercise.content` si toca contenido
-- fuera de alcance
-
-### 3. PLAN
-Checklist corto en el mismo spec o en `GOAL.md` del ciclo. Una tarea = un PR si es posible. Orden de prelación:
-
-1. Contenido Cambridge si hay < 100 ejercicios reales (B1, B2, C1; UoE 1–4).
-2. Conexión E2E (API + player + `UserExerciseAttempt`).
-3. Corrección + tutor IA (`AttemptExplanation`, límites de plan).
-4. Gamificación (vidas, streak, gemas, shop, badges en header).
-5. Tests + CI.
-6. QA UI de rutas rotas / vacías.
-7. Nuevas skills (Writing IA, placement test, Listening).
-
-### 4. TDD
-Antes de implementar comportamiento nuevo:
-- Backend: test del servicio/controlador (Vitest/Jest o el runner que ya exista).
-- Frontend: test del player o del mapper de contenido si cambia el contrato.
-- Red → green. No añadas features sin aserción.
-
-### 5. IMPLEMENT
-Rama `agent/feat-<slug>` o `agent/fix-<slug>`.
-TypeScript estricto en frontend. ESM limpio en backend.
-No pongas SQL en controladores ni fetches crudos dentro de componentes de UI: servicios + modelos.
-
-Formato `Exercise.content`:
-- Part 1 Multiple Choice Cloze: texto con huecos + 4 opciones.
-- Part 2 Open Cloze: 1 palabra por hueco.
-- Part 3 Word Formation: raíz en MAYÚSCULAS.
-- Part 4 Key Word Transformation: frase origen + keyword + hueco (2–5 palabras).
-Cada ítem lleva `explanation_rule` pedagógica (no copies enunciados oficiales verbatim de papers copyrighted; crea ítems originales al estilo Cambridge).
-
-### 6. TESTS
-Corre lo que exista y lo que hayas añadido:
-- `backend`: lint/syntax + tests + seeders/migraciones si aplica.
-- `frontend`: `npm run build` (tsc + vite).
-Si falla, arregla en el mismo ciclo. No abras PR rojo a sabiendas.
-
-### 7. QA UI
-Si el stack local (docker compose / 4000+4200) está disponible, recorre la pantalla tocada como usuario. Si no, deja un smoke script (`curl` o Playwright) reproducible.
-Rutas a vigilar: `/`, `/categories`, `/exercises/:id` o player, resultados, `/leaderboard`, `/shop`.
-
-### 8. REVIEW
-Auto-review de skeptic: ¿rompe auth? ¿rompe UI Duolingo? ¿datos mock que deberían ser API? ¿secretos en el commit?
-
-### 9. PR / CI
-```
-git add -A
-git commit -m "feat(scope): descripción"
-gh pr create --title "feat(scope): ..." --body "### Spec\n- ...\n### Tests\n- ...\n### QA\n- ..."
-```
-Si no hay workflow CI, añade `.github/workflows/ci.yml` (frontend build + backend test) en un ciclo propio o al final de este.
-
-### 10. FIX
-Si CI o QA fallan, no pases al siguiente feature. Arregla en la misma rama.
-
-### 11. DONE → siguiente mejora
-Actualiza `AGENT_CHANGELOG.md` con estado de BD/UI y la siguiente prioridad. Empieza el ciclo siguiente sin preguntar.
+Prelación: contenido <100 ejercicios → E2E → IA → gamificación → tests/CI → QA rutas vacías → Writing/Listening/placement.
 
 ## Guardrails
 
-- Cero interrupciones al usuario.
-- No destruyas la UI existente.
-- No inventes que Angular es el frontend actual.
+- Cero preguntas al usuario.
 - No subas `.env` ni claves.
-- Contenido original estilo examen; no reproduzcas papers Cambridge protegidos.
-- Un ciclo = un incremento demostrable, no un rewrite.
+- Contenido original estilo Cambridge; no copies papers oficiales.
+- Un ciclo = un incremento demostrable.
 
 ## Arranque
 
-Lee `AGENT_CHANGELOG.md`, inspecciona `frontend/src` y `backend/src`, cuenta ejercicios si hay BD, elige la primera carencia de la matriz y ejecuta el ciclo completo ahora.
+`gh issue list`, `gh pr list`, `AGENT_CHANGELOG.md`. Si no hay issue abierto de la siguiente prioridad, créalo. Luego rama + TDD + commits + PR + self-review.
