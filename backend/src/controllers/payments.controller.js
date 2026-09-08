@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import { User } from "../models/user.js";
+import { User } from "../models/User.js";
 import "dotenv/config";
 
 const stripe = new Stripe(process.env.ENV === "PROD" ? process.env.STRIPE_SECRET_KEY_PROD : process.env.STRIPE_SECRET_KEY_TEST);

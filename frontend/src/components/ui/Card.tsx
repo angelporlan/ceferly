@@ -22,7 +22,7 @@ export const Card: React.FC<CardProps> = ({
   }
 
   const selectedStyles = selected
-    ? '!border-mint !bg-mint-50 shadow-[0_4px_0_#10B981]'
+    ? '!border-mint !bg-mint-50 shadow-[0_4px_0_#58CC02]'
     : ''
 
   return (

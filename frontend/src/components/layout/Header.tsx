@@ -13,10 +13,10 @@ interface UserStats {
 
 export const Header: React.FC = () => {
   const [stats, setStats] = useState<UserStats>({
-    streak: 3,
-    coins: 140,
-    hearts: 5,
-    level: 'B2 First',
+    streak: 0,
+    coins: 0,
+    hearts: 0,
+    level: 'Cambridge',
     name: 'Estudiante',
   })
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -34,8 +34,9 @@ export const Header: React.FC = () => {
           if (data) {
             setStats(prev => ({
               ...prev,
-              streak: data.streak ?? prev.streak,
-              coins: data.coins ?? prev.coins,
+              streak: data.streak ?? 0,
+              coins: data.coins ?? 0,
+              hearts: data.hearts ?? 0,
               level: data.level?.name ?? prev.level,
               name: data.name ?? prev.name,
               avatarSeed: data.avatar_seed

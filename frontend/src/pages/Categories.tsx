@@ -85,7 +85,7 @@ export const Categories: React.FC = () => {
             </p>
           </div>
         </div>
-        <Badge variant="sky">Nivel B2 / C1</Badge>
+        <Badge variant="sky">B1 Preliminary · B2 First · C1 Advanced</Badge>
       </div>
 
       {loading && (

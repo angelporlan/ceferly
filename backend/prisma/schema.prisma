@@ -23,6 +23,7 @@ model User {
   subscription_expires_at DateTime?
   daily_goal              Int                   @default(5)
   coins                   Int                   @default(0)
+  hearts                  Int                   @default(5)
   avatar_seed             String?
   google_id               String?               @unique
   streak                  Int                   @default(0)
@@ -72,9 +73,11 @@ model Exercise {
   questionText  String                @db.Text @map("question_text")
   options       Json?
   correctAnswer Json                  @map("correct_answer")
-  audioUrl      String?               @map("audio_url")
-  readingText   String?               @db.Text @map("reading_text")
-  levelId       Int                   @map("level_id")
+  audioUrl          String?               @map("audio_url")
+  readingText       String?               @db.Text @map("reading_text")
+  explanationRule   String?               @db.Text @map("explanation_rule")
+  content           Json?
+  levelId           Int                   @map("level_id")
   level         Level                 @relation(fields: [levelId], references: [id], onDelete: Cascade)
   subcategoryId Int                   @map("subcategory_id")
   subcategory   Subcategory           @relation(fields: [subcategoryId], references: [id], onDelete: Cascade)

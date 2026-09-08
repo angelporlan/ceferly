@@ -19,6 +19,7 @@ import { seedSubcategories } from "./seeds/seedSubcategories.js";
 import { seedExercises } from "./seeds/seedExercises.js";
 import { seedUsers } from "./seeds/seedUsers.js";
 import { seedUserExerciseAttempts } from "./seeds/seedUserExerciseAttempts.js";
+import { seedCambridgeUseOfEnglish } from "./seeds/seedCambridgeUseOfEnglish.js";
 
 const app = express();
 const execFileAsync = promisify(execFile);
@@ -30,6 +31,10 @@ app.use('/public', express.static('public'));
 
 app.get("/", (req, res) => {
     res.send("API funcionando correctamente");
+});
+
+app.get("/api/health", (req, res) => {
+    res.json({ ok: true, service: "ceferly-api" });
 });
 
 app.use("/api", exerciseAttemptRoutes);
@@ -62,6 +67,7 @@ app.use("/api", paymentsRoutes);
             await seedSubcategories();
             await seedUsers();
             await seedExercises();
+            await seedCambridgeUseOfEnglish();
             await seedUserExerciseAttempts();
             console.log("Seeds ejecutadas correctamente");
         }

@@ -7,9 +7,9 @@ export default {
         mint: {
           50: '#ECFDF5',
           light: '#D1FAE5',
-          DEFAULT: '#10B981',
-          hover: '#059669',
-          dark: '#047857',
+          DEFAULT: '#58CC02',
+          hover: '#46A302',
+          dark: '#46A302',
         },
         amber: {
           50: '#FFFBEB',
@@ -57,8 +57,8 @@ export default {
         mono: ['JetBrains Mono', 'monospace'],
       },
       boxShadow: {
-        'btn-mint': '0 4px 0 #047857',
-        'btn-mint-pressed': '0 1px 0 #047857',
+        'btn-mint': '0 4px 0 #46A302',
+        'btn-mint-pressed': '0 1px 0 #46A302',
         'btn-amber': '0 4px 0 #B45309',
         'btn-amber-pressed': '0 1px 0 #B45309',
         'btn-sky': '0 4px 0 #0369A1',

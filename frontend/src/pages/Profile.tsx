@@ -20,13 +20,14 @@ export const Profile: React.FC = () => {
       .then(setProfile)
       .catch(() => {
         setProfile({
-          id: 1,
-          name: 'Ángel Porlán',
-          username: 'angelporlan',
-          email: 'angel@example.com',
-          subscription_role: 'pro',
-          coins: 140,
-          streak: 3,
+          id: 0,
+          name: 'Invitado',
+          username: 'invitado',
+          email: '',
+          subscription_role: 'free',
+          coins: 0,
+          hearts: 0,
+          streak: 0,
           daily_goal: 5,
         })
       })

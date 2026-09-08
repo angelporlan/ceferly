@@ -58,8 +58,6 @@ export const getExercises = async (req, res) => {
             if (newInc.include && newInc.include.length > 0) {
                 newInc.attributes = ['id', 'category_id'];
                 newInc.include = newInc.include.map(subInc => ({ ...subInc, attributes: [] }));
-            } else {
-                newInc.attributes = [];
             }
             return newInc;
         });
@@ -81,7 +79,7 @@ export const getExercises = async (req, res) => {
             ],
             limit: parseInt(limit),
             offset: parseInt(offset),
-            attributes: ['id', 'title', 'type', 'question_text', 'options', 'reading_text', 'correct_answer'],
+            attributes: ['id', 'title', 'type', 'question_text', 'options', 'reading_text', 'correct_answer', 'explanation_rule', 'content', 'level_id'],
             distinct: true,
             order: [
                 ['id', 'ASC']
@@ -108,6 +106,7 @@ export const getExercises = async (req, res) => {
             const attempts = exJson.UserExerciseAttempts || [];
             const latestAttempt = attempts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
 
+            const level = exJson.Level || null;
             return {
                 id: exJson.id,
                 title: exJson.title,
@@ -121,6 +120,9 @@ export const getExercises = async (req, res) => {
                 reading_text: exJson.reading_text,
                 correctAnswer: exJson.correct_answer,
                 correct_answer: exJson.correct_answer,
+                explanation_rule: exJson.explanation_rule,
+                content: exJson.content,
+                level: level ? { id: level.id, name: level.name } : null,
                 isCompleted: !!latestAttempt,
                 score: latestAttempt ? latestAttempt.score : null
             };
@@ -191,7 +193,10 @@ export const getExerciseById = async (req, res) => {
             correctAnswer: formattedCorrectAnswer,
             readingText: exJson.reading_text,
             audioUrl: exJson.audio_url,
-            options: parsedOptions
+            options: parsedOptions,
+            explanation_rule: exJson.explanation_rule,
+            content: exJson.content,
+            level: exJson.Level ? { id: exJson.Level.id, name: exJson.Level.name } : null
         };
 
         res.json(formatted);
