@@ -38,6 +38,10 @@ export const User = sequelize.define("User", {
         type: DataTypes.INTEGER,
         defaultValue: 0
     },
+    hearts: {
+        type: DataTypes.INTEGER,
+        defaultValue: 5
+    },
     avatar_seed: {
         type: DataTypes.STRING,
         allowNull: true

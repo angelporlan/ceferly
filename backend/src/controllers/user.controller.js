@@ -4,6 +4,8 @@ import { Subcategory } from "../models/Subcategory.js";
 import { Category } from "../models/Category.js";
 import { Level } from "../models/Level.js";
 import { Sequelize, Op } from "sequelize";
+import { MAX_HEARTS } from "../services/gamification.js";
+import { checkoutShopItem } from "../services/shop.service.js";
 
 import { AiUsageDaily } from "../models/AiUsageDaily.js";
 import { AI_LIMITS } from "../config/aiLimits.js";
@@ -318,7 +320,13 @@ export const getNumberOfAttemptsToday = async (req, res) => {
         const dailyGoal = user.daily_goal || 5;
         const percentage = Math.min(Math.floor((numberOfAttempts / dailyGoal) * 100), 100);
 
-        res.json({ numberOfAttempts, dailyGoal, percentage, streak: user.streak || 0 });
+        res.json({
+            numberOfAttempts,
+            attemptsToday: numberOfAttempts,
+            dailyGoal,
+            percentage,
+            streak: user.streak || 0
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error getting number of attempts" });
@@ -344,30 +352,36 @@ export const updateDailyGoal = async (req, res) => {
     }
 };
 
-export const purchaseAvatar = async (req, res) => {
+export const purchaseShopItem = async (req, res) => {
     try {
         const user = req.user;
-        const AVATAR_COST = 50;
+        const itemId = req.body.itemId || req.body.packId || "pack-classic";
+        const result = await checkoutShopItem(user, itemId);
 
-        if (user.coins < AVATAR_COST) {
-            return res.status(400).json({ message: "Insufficient coins" });
+        if (!result.ok) {
+            return res.status(400).json({
+                message: result.reason === "INSUFFICIENT" ? "Insufficient coins" : "Cannot complete purchase",
+                reason: result.reason,
+                coins: result.coins
+            });
         }
 
-        const { randomUUID } = await import("crypto");
-
-        user.coins -= AVATAR_COST;
-        user.avatar_seed = `avatar-${randomUUID()}`;
-        await user.save();
-
         res.json({
-            message: "Avatar purchased successfully",
+            message: "Purchase successful",
             coins: user.coins,
-            avatar_seed: user.avatar_seed
+            hearts: user.hearts,
+            avatar_seed: user.avatar_seed,
+            itemId
         });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: "Error purchasing avatar" });
+        res.status(500).json({ message: "Error processing purchase" });
     }
+};
+
+export const purchaseAvatar = async (req, res) => {
+    req.body.itemId = req.body.itemId || req.body.packId || "pack-fire";
+    return purchaseShopItem(req, res);
 };
 
 
@@ -378,13 +392,36 @@ export const getGlobalRankings = async (req, res) => {
 
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 20;
-        const type = req.query.type || 'mostActive';
+        const type = req.query.type || 'coins';
         const offset = (page - 1) * limit;
 
         let resultData = [];
         let totalCount = 0;
 
-        if (type === 'mostActive') {
+        if (type === 'coins' || type === 'league') {
+            totalCount = await User.count();
+            const users = await User.findAll({
+                attributes: ['id', 'name', 'username', 'streak', 'coins', 'avatar_seed', 'hearts'],
+                order: [['coins', 'DESC'], ['streak', 'DESC']],
+                limit,
+                offset
+            });
+
+            resultData = users.map((item) => {
+                const plain = item.get({ plain: true });
+                return {
+                    id: plain.id,
+                    name: plain.name,
+                    username: plain.username,
+                    avatar_seed: plain.avatar_seed,
+                    streak: plain.streak || 0,
+                    coins: plain.coins || 0,
+                    hearts: plain.hearts ?? MAX_HEARTS,
+                    score: plain.coins || 0,
+                    value: plain.coins || 0
+                };
+            });
+        } else if (type === 'mostActive') {
             totalCount = await UserExerciseAttempt.count({
                 distinct: true,
                 col: 'user_id'

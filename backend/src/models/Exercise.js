@@ -26,6 +26,14 @@ export const Exercise = sequelize.define("Exercise", {
     },
     reading_text: {
         type: DataTypes.TEXT
+    },
+    explanation_rule: {
+        type: DataTypes.TEXT,
+        allowNull: true
+    },
+    content: {
+        type: DataTypes.JSON,
+        allowNull: true
     }
 }, {
     tableName: "exercises",

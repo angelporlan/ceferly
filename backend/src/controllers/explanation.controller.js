@@ -5,6 +5,7 @@ import { AttemptExplanation } from "../models/AttemptExplanation.js";
 import { checkAndConsumeAiUsage } from "../services/aiUsage.service.js";
 import { User } from "../models/user.js";
 import { createOpenRouterChatCompletion, createGeminiCompletion } from "../services/ai.service.js";
+import { explainAndPersistAttempt, persistAttemptExplanation, buildExplanationPrompt } from "../services/explanation.service.js";
 
 const aiServer = process.env.AI_SERVER || 'OpenRouter';
 
@@ -14,6 +15,48 @@ if (aiServer === 'Groq') {
         apiKey: process.env.GROQ_API_KEY,
     });
 }
+
+const resolveModelName = () => {
+    const isGemini = aiServer?.toLowerCase() === 'gemini';
+    const isGroq = aiServer === 'Groq';
+    if (isGroq) return "openai/gpt-oss-120b";
+    if (isGemini) return process.env.GEMINI_MODEL || "gemini-3.5-flash";
+    return "tngtech/deepseek-r1t2-chimera:free";
+};
+
+export const createTeacherCompletion = async (prompt, { fallback } = {}) => {
+    const model = resolveModelName();
+    const isGemini = aiServer?.toLowerCase() === 'gemini';
+    const isGroq = aiServer === 'Groq';
+
+    try {
+        if (isGemini) {
+            return await createGeminiCompletion({ prompt, model, temperature: 0.4 });
+        }
+        if (isGroq) {
+            const completion = await aiClient.chat.completions.create({
+                model,
+                messages: [{ role: "user", content: prompt }],
+                temperature: 0.4
+            });
+            return completion.choices[0].message.content;
+        }
+        const completion = await createOpenRouterChatCompletion({
+            model,
+            messages: [{ role: "user", content: prompt }],
+            temperature: 0.4
+        });
+        return completion.choices[0].message.content;
+    } catch (error) {
+        if (fallback) {
+            return JSON.stringify({
+                general_feedback: "Explicación pedagógica de Cambridge (modo local).",
+                explanation: fallback
+            });
+        }
+        throw error;
+    }
+};
 
 export const explainAttempt = async (req, res) => {
     try {
@@ -33,13 +76,6 @@ export const explainAttempt = async (req, res) => {
 
         if (!attempt) {
             return res.status(404).json({ message: "Attempt not found" });
-        }
-
-        if (attempt.is_fully_correct) {
-            return res.json({
-                explanation: "Your answer is fully correct. No explanation needed",
-                cached: true
-            });
         }
 
         const cachedExplanation = await AttemptExplanation.findOne({
@@ -63,149 +99,26 @@ export const explainAttempt = async (req, res) => {
             });
         }
 
-        const systemPromptJson = `
-You are an English B2 exam teacher.
+        const fallback = attempt.exercise?.explanation_rule
+            || "Compara tu respuesta con la clave Cambridge y revisa la estructura gramatical o la colocación.";
 
-Output requirements:
-- Return the explanation in strict JSON format.
-- Structure:
-{
-  "general_feedback": "string (motivational feedback + summary of performance)",
-  "corrections": [
-    {
-        "question_id": number (the gap id),
-        "status": "correct" | "incorrect",
-        "user_answer": "string",
-        "correct_answer": "string",
-        "explanation": "string (concise grammar/vocabulary rule)"
-    }
-  ]
-}
-`;
-
-        let prompt = '';
-
-        const isMultipleChoice = attempt.exercise.type === 'multiple_choice' || attempt.exercise.type === 'multiple-choice';
-        const isConditionals = attempt.exercise.type === 'conditionals';
-        const isVocabulary = attempt.exercise.type === 'vocabulary';
-
-        if (isConditionals) {
-            prompt = `
-${systemPromptJson}
-
-Exercise type: Conditionals (Fill in the blanks with correct verb forms)
-
-Exercise:
-${attempt.exercise.question_text}
-
-Correct answers:
-${JSON.stringify(attempt.exercise.correct_answer)}
-
-Student answers:
-${JSON.stringify(attempt.user_answer)}
-
-For each incorrect answer, explain:
-- Why the student's verb form is incorrect
-- What the correct verb form should be and why (Zero, First, Second conditional rules)
-`;
-        } else if (isVocabulary) {
-            prompt = `
-${systemPromptJson}
-
-Exercise type: Vocabulary (Word Formation, Phrasal Verbs, or Collocations)
-
-Exercise:
-${attempt.exercise.question_text}
-
-Correct answers:
-${JSON.stringify(attempt.exercise.correct_answer)}
-
-Student answers:
-${JSON.stringify(attempt.user_answer)}
-
-For each incorrect answer:
-- Explain the meaning of the correct word.
-- If it's a collocation, explain which words go together.
-- If it's word formation, explain the suffix/prefix used.
-`;
-        } else {
-            prompt = `
-${systemPromptJson}
-
-Exercise Type: ${attempt.exercise.type}
-
-Exercise:
-${attempt.exercise.question_text}
-
-Correct answers:
-${JSON.stringify(attempt.exercise.correct_answer)}
-
-Student answers:
-${JSON.stringify(attempt.user_answer)}
-
-Explain clearly why the student answer is wrong and what the correct option is for each incorrect gap.
-`;
-        }
-
-        const isGemini = aiServer?.toLowerCase() === 'gemini';
-        const isGroq = aiServer === 'Groq';
-
-        const model = isGroq
-            ? "openai/gpt-oss-120b"
-            : isGemini
-            ? (process.env.GEMINI_MODEL || "gemini-3.5-flash")
-            : "tngtech/deepseek-r1t2-chimera:free";
-
-        let explanationText;
-        if (isGemini) {
-            explanationText = await createGeminiCompletion({
-                prompt,
-                model,
-                temperature: 0.4
-            });
-        } else if (isGroq) {
-            const completion = await aiClient.chat.completions.create({
-                model: model,
-                messages: [
-                    {
-                        role: "user",
-                        content: prompt
-                    }
-                ],
-                temperature: 0.4
-            });
-
-            explanationText = completion.choices[0].message.content;
-        } else {
-            const completion = await createOpenRouterChatCompletion({
-                model,
-                messages: [
-                    {
-                        role: "user",
-                        content: prompt
-                    }
-                ],
-                temperature: 0.4
-            });
-
-            explanationText = completion.choices[0].message.content;
-        }
-
-        explanationText = explanationText.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
-        explanationText = explanationText.replace(/```json/g, "").replace(/```/g, "").trim();
-
-        const finalUsage = await checkAndConsumeAiUsage(user);
-
-        await AttemptExplanation.create({
-            attempt_id: attempt.id,
-            explanation: explanationText,
-            model: model
+        const result = await explainAndPersistAttempt({
+            userId,
+            attemptId: attempt.id,
+            model: resolveModelName(),
+            generateText: (prompt) => createTeacherCompletion(prompt, { fallback })
         });
 
+        let remaining;
+        if (!result.cached) {
+            const finalUsage = await checkAndConsumeAiUsage(user);
+            remaining = finalUsage.remaining;
+        }
+
         return res.json({
-            explanation: explanationText,
-            cached: false,
-            remaining: finalUsage.remaining
+            explanation: result.explanation,
+            cached: result.cached,
+            remaining
         });
 
     } catch (error) {
@@ -216,62 +129,46 @@ Explain clearly why the student answer is wrong and what the correct option is f
 
 export const explainDirect = async (req, res) => {
     try {
-        const { questionText, userAnswer, correctAnswer, exerciseType = "Grammar" } = req.body;
+        const {
+            questionText,
+            userAnswer,
+            correctAnswer,
+            exerciseType = "Grammar",
+            explanationRule,
+            attemptId
+        } = req.body;
 
-        const prompt = `
-You are an expert Cambridge English B2/C1 teacher.
-Explain clearly why the student's answer is wrong and the correct grammatical/vocabulary rule in a concise, encouraging way.
+        const fallback = explanationRule
+            || `En el examen de Cambridge, la respuesta esperada es ${JSON.stringify(correctAnswer)}.`;
+        const prompt = buildExplanationPrompt({
+            questionText,
+            userAnswer,
+            correctAnswer,
+            exerciseType,
+            explanationRule
+        });
 
-Exercise Type: ${exerciseType}
-Question: ${questionText || "N/A"}
-Student Answer: ${JSON.stringify(userAnswer)}
-Correct Answer: ${JSON.stringify(correctAnswer)}
-
-Return strict JSON:
-{
-  "general_feedback": "Motivational summary of the mistake",
-  "explanation": "Clear, concise grammatical rule and why the correct answer fits"
-}
-`;
-
-        const isGemini = aiServer?.toLowerCase() === 'gemini';
-        const model = isGemini ? (process.env.GEMINI_MODEL || "gemini-3.5-flash") : "tngtech/deepseek-r1t2-chimera:free";
-
-        let explanationText;
-        if (isGemini) {
-            explanationText = await createGeminiCompletion({
-                prompt,
-                model,
-                temperature: 0.4
-            });
-        } else if (aiServer === 'Groq') {
-            const completion = await aiClient.chat.completions.create({
-                model: "openai/gpt-oss-120b",
-                messages: [{ role: "user", content: prompt }],
-                temperature: 0.4
-            });
-            explanationText = completion.choices[0].message.content;
-        } else {
-            const completion = await createOpenRouterChatCompletion({
-                model,
-                messages: [{ role: "user", content: prompt }],
-                temperature: 0.4
-            });
-            explanationText = completion.choices[0].message.content;
-        }
-
-        explanationText = explanationText.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
-        explanationText = explanationText.replace(/```json/g, "").replace(/```/g, "").trim();
-
+        const raw = await createTeacherCompletion(prompt, { fallback });
         let parsed;
         try {
-            parsed = JSON.parse(explanationText);
+            const cleaned = String(raw).replace(/```json/g, "").replace(/```/g, "").trim();
+            parsed = JSON.parse(cleaned);
         } catch {
-            parsed = { explanation: explanationText };
+            parsed = { explanation: raw };
+        }
+
+        const explanation = parsed.explanation || parsed.general_feedback || String(raw);
+
+        if (attemptId && req.user?.id) {
+            await persistAttemptExplanation({
+                attemptId,
+                explanation,
+                model: resolveModelName()
+            });
         }
 
         return res.json({
-            explanation: parsed.explanation || parsed.general_feedback || explanationText,
+            explanation,
             raw: parsed
         });
     } catch (err) {

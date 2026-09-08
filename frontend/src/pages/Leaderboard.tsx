@@ -13,24 +13,15 @@ interface RankingUser {
   isCurrentUser?: boolean
 }
 
-const FALLBACK_RANKINGS: RankingUser[] = [
-  { id: 101, rank: 1, name: 'Elena Rostova', username: 'elena_c2', streak: 42, score: 1840 },
-  { id: 102, rank: 2, name: 'Lucas Silva', username: 'lucas_cambridge', streak: 28, score: 1620 },
-  { id: 103, rank: 3, name: 'Marc Benet', username: 'marc_b2', streak: 15, score: 1480 },
-  { id: 1, rank: 4, name: 'Ángel Porlán (Tú)', username: 'angelporlan', streak: 7, score: 1210, isCurrentUser: true },
-  { id: 104, rank: 5, name: 'Sophie Martin', username: 'sophie_uk', streak: 12, score: 1150 },
-  { id: 105, rank: 6, name: 'David Müller', username: 'd_muller', streak: 5, score: 980 },
-  { id: 106, rank: 7, name: 'Carla Díaz', username: 'carla_en', streak: 9, score: 850 },
-]
-
 export const Leaderboard: React.FC = () => {
-  const [rankings, setRankings] = useState<RankingUser[]>(FALLBACK_RANKINGS)
+  const [rankings, setRankings] = useState<RankingUser[]>([])
+  const [empty, setEmpty] = useState(false)
 
   useEffect(() => {
     const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000/api'
     const token = localStorage.getItem('token')
 
-    fetch(`${API_BASE}/users/rankings`, {
+    fetch(`${API_BASE}/users/rankings?type=coins`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     })
       .then((res) => (res.ok ? res.json() : null))
@@ -44,12 +35,19 @@ export const Leaderboard: React.FC = () => {
               name: item.name || item.username,
               username: item.username,
               streak: item.streak ?? 0,
-              score: item.score ?? item.coins ?? 100,
+              score: item.score ?? item.coins ?? item.value ?? 0,
             }))
           )
+          setEmpty(false)
+        } else {
+          setRankings([])
+          setEmpty(true)
         }
       })
-      .catch(() => {})
+      .catch(() => {
+        setRankings([])
+        setEmpty(true)
+      })
   }, [])
 
   return (
@@ -76,6 +74,12 @@ export const Leaderboard: React.FC = () => {
       </div>
 
       {/* Rankings List */}
+      {empty && (
+        <Card className="p-6 text-sm font-bold text-slateText-muted">
+          Todavía no hay ranking. Completa ejercicios para aparecer aquí con tus monedas reales.
+        </Card>
+      )}
+
       <Card className="p-0 overflow-hidden divide-y-2 divide-ceferlyBorder">
         {rankings.map((user) => {
           return (

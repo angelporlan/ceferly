@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useSearchParams } from 'react-router-dom'
 import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { Badge } from '../components/ui/Badge'
@@ -13,22 +13,19 @@ interface Exercise {
   level?: { name: string }
 }
 
-const FALLBACK_EXERCISES: Exercise[] = [
-  { id: 1, title: 'Conditionals Type 1 & 2', type: 'multiple_choice', questionText: 'Choose the correct verb tense to complete the conditional sentence.' },
-  { id: 2, title: 'Mixed Conditionals Practice', type: 'gap_fill', questionText: 'Fill in the blank with the appropriate form of the verb in brackets.' },
-  { id: 3, title: 'Inverted Conditionals (Had I known...)', type: 'key_word_transformation', questionText: 'Complete the second sentence so that it has a similar meaning to the first sentence.' },
-]
-
 export const ExercisesList: React.FC = () => {
   const { subcategoryId } = useParams<{ subcategoryId: string }>()
-  const [exercises, setExercises] = useState<Exercise[]>(FALLBACK_EXERCISES)
+  const [searchParams] = useSearchParams()
+  const level = searchParams.get('level') || ''
+  const [exercises, setExercises] = useState<Exercise[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000/api'
     const token = localStorage.getItem('token')
+    const levelQuery = level ? `&level=${encodeURIComponent(level)}` : ''
 
-    fetch(`${API_BASE}/exercises?subcategoryId=${subcategoryId}`, {
+    fetch(`${API_BASE}/exercises?subcategoryId=${subcategoryId}${levelQuery}&limit=20`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     })
       .then((res) => (res.ok ? res.json() : null))
@@ -36,11 +33,13 @@ export const ExercisesList: React.FC = () => {
         const list = Array.isArray(data) ? data : (data?.exercises || [])
         if (Array.isArray(list) && list.length > 0) {
           setExercises(list)
+        } else {
+          setExercises([])
         }
       })
-      .catch(() => {})
+      .catch(() => setExercises([]))
       .finally(() => setLoading(false))
-  }, [subcategoryId])
+  }, [subcategoryId, level])
 
   return (
     <div className="flex flex-col gap-6 max-w-3xl mx-auto">
@@ -55,7 +54,7 @@ export const ExercisesList: React.FC = () => {
 
       <div className="card-playful p-6 bg-gradient-to-r from-mint-50 to-white border-mint/30">
         <span className="text-xs font-black uppercase tracking-wider text-mint-dark">
-          Subcategoría #{subcategoryId ?? '1'}
+          Subcategoría #{subcategoryId ?? '1'} {level ? `· ${level}` : ''}
         </span>
         <h1 className="text-2xl sm:text-3xl font-black text-slateText-main mt-1">
           Ejercicios Disponibles
@@ -69,6 +68,12 @@ export const ExercisesList: React.FC = () => {
         <div className="text-center py-8 font-bold text-slateText-muted">
           Cargando ejercicios...
         </div>
+      )}
+
+      {!loading && exercises.length === 0 && (
+        <Card className="p-6 text-sm font-bold text-slateText-muted">
+          No hay ejercicios en esta combinación todavía. Prueba otro nivel o categoría.
+        </Card>
       )}
 
       {/* Exercise cards list */}

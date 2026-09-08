@@ -3,7 +3,7 @@ import { Exercise } from "../models/Exercise.js";
 import { Subcategory } from "../models/Subcategory.js";
 import { AttemptExplanation } from "../models/AttemptExplanation.js";
 import { Category } from "../models/Category.js";
-import { updateStreakWhenDailyGoalReached } from "./user.controller.js";
+import { recordExerciseAttempt, NO_HEARTS_CODE, EXERCISE_NOT_FOUND_CODE } from "../services/attempt.service.js";
 
 const normalizeAnswer = (value) => {
     if (value === null || value === undefined) {
@@ -108,73 +108,41 @@ const serializeAttemptSummary = (attempt) => {
 
 export const createExerciseAttempt = async (req, res) => {
     try {
-        const userId = req.user.id;
         const { id: exerciseId } = req.params;
-
         const {
             user_answer,
             userAnswer,
             total_gaps,
-            totalGaps,
-            correct_gaps,
-            correctGaps,
-            is_fully_correct,
-            isFullyCorrect,
-            score
+            totalGaps
         } = req.body;
 
         const resolvedUserAnswer = user_answer !== undefined ? user_answer : userAnswer;
         const resolvedTotalGaps = total_gaps !== undefined ? total_gaps : (totalGaps !== undefined ? totalGaps : 1);
-        const resolvedCorrectGaps = correct_gaps !== undefined ? correct_gaps : (correctGaps !== undefined ? correctGaps : 0);
-        const resolvedIsFullyCorrect = is_fully_correct !== undefined ? is_fully_correct : (isFullyCorrect !== undefined ? isFullyCorrect : false);
-        const resolvedScore = score !== undefined ? score : (resolvedIsFullyCorrect ? 100 : 0);
 
-        const exercise = await Exercise.findByPk(exerciseId);
-        if (!exercise) {
-            return res.status(404).json({ message: "Exercise not found" });
-        }
-
-        const attempt = await UserExerciseAttempt.create({
-            user_id: userId,
-            exercise_id: exerciseId,
-            user_answer: resolvedUserAnswer,
-            total_gaps: resolvedTotalGaps,
-            correct_gaps: resolvedCorrectGaps,
-            is_fully_correct: resolvedIsFullyCorrect,
-            score: resolvedScore
+        const { attempt, rewards, scored } = await recordExerciseAttempt({
+            user: req.user,
+            exerciseId,
+            userAnswer: resolvedUserAnswer,
+            totalGaps: resolvedTotalGaps
         });
-
-        const user = req.user;
-
-        const REWARD_MAP = {
-            free: 10,
-            pro: 15,
-            premium: 20
-        };
-
-        const activeRole = user.getActiveRole();
-
-        const coinsToAdd = REWARD_MAP[activeRole] || 10;
-        user.coins = (user.coins || 0) + coinsToAdd;
-
-        const todayStr = new Date().toISOString().split('T')[0];
-        const { Op } = await import("sequelize");
-        const numberOfAttemptsToday = await UserExerciseAttempt.count({
-            where: {
-                user_id: user.id,
-                created_at: { [Op.gte]: todayStr }
-            }
-        });
-
-        await updateStreakWhenDailyGoalReached(user, numberOfAttemptsToday);
-
-        await user.save();
 
         res.status(201).json({
             message: "Attempt saved",
-            attempt
+            attempt,
+            rewards,
+            scored
         });
     } catch (error) {
+        if (error.code === EXERCISE_NOT_FOUND_CODE) {
+            return res.status(404).json({ message: "Exercise not found" });
+        }
+        if (error.code === NO_HEARTS_CODE) {
+            return res.status(403).json({
+                message: "No hearts remaining",
+                hearts: req.user?.hearts ?? 0,
+                playBlocked: true
+            });
+        }
         console.error(error);
         res.status(500).json({ message: "Error saving attempt" });
     }

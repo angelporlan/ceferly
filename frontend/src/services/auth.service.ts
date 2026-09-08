@@ -7,6 +7,7 @@ export interface UserProfile {
   email: string
   subscription_role: 'free' | 'pro' | 'premium'
   coins: number
+  hearts: number
   streak: number
   daily_goal: number
   avatar_seed?: string

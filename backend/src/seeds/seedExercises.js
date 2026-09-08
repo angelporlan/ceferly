@@ -1,7 +1,6 @@
 import { Exercise } from "../models/Exercise.js";
 import { Level } from "../models/Level.js";
 import { Subcategory } from "../models/Subcategory.js";
-import { Op } from "sequelize";
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -67,17 +66,14 @@ export const seedExercises = async () => {
       subCategoryIdToUse = subcategoryMap["Multiple Choice"];
     }
 
+    const title = data.title_like.replaceAll('%', '').trim();
     await Exercise.findOrCreate({
-      where: {
-        question_text: {
-          [Op.like]: data.title_like,
-        },
-      },
+      where: { title },
       defaults: {
         subcategory_id: subCategoryIdToUse,
         level_id: level.id,
         type: data.type || "multiple_choice",
-        title: data.title_like.replaceAll('%', ''),
+        title,
         question_text: data.question_text,
         options: data.options,
         correct_answer: data.correct_answer,

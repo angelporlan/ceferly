@@ -16,6 +16,10 @@ export const ResultsPage: React.FC = () => {
     correctAnswer?: string
     userAnswer?: string
     questionText?: string
+    explanationRule?: string
+    hearts?: number
+    coins?: number
+    streak?: number
   } | null
 
   const isCorrect = state?.isCorrect ?? true
@@ -56,6 +60,8 @@ export const ResultsPage: React.FC = () => {
             userAnswer: state?.userAnswer ?? '',
             correctAnswer: state?.correctAnswer ?? '',
             exerciseType: state?.exerciseTitle ?? 'Cambridge Grammar',
+            explanationRule: state?.explanationRule,
+            attemptId: state?.attemptId,
           }),
         })
       }
@@ -118,14 +124,21 @@ export const ResultsPage: React.FC = () => {
 
         <Card className="p-4 flex flex-col items-center gap-1 border-amber/40 bg-amber-50/50">
           <span className="text-[10px] font-black uppercase text-amber-dark">Puntos XP</span>
-          <span className="text-2xl font-black text-amber">+{isCorrect ? '20' : '10'}</span>
+          <span className="text-2xl font-black text-amber">{state?.coins ?? 0}</span>
         </Card>
 
         <Card className="p-4 flex flex-col items-center gap-1 border-sky/40 bg-sky-50/50">
           <span className="text-[10px] font-black uppercase text-sky-dark">Racha</span>
-          <span className="text-2xl font-black text-sky">3 días</span>
+          <span className="text-2xl font-black text-sky">{state?.streak ?? 0} d</span>
         </Card>
       </div>
+
+      {state?.explanationRule && (
+        <Card className="w-full p-5 text-left border-mint/30 bg-mint-50/40">
+          <h3 className="font-black text-sm text-mint-dark mb-1">Regla Cambridge</h3>
+          <p className="text-xs font-semibold text-slateText-main leading-relaxed">{state.explanationRule}</p>
+        </Card>
+      )}
 
       {/* AI Explanation Assistant Box */}
       <Card className="w-full p-5 text-left border-amethyst/30 bg-gradient-to-br from-amethyst-50 to-white flex flex-col gap-3">

@@ -26,9 +26,15 @@ const DEMO_SKILL_NODES: SkillNode[] = [
 
 export const Dashboard: React.FC = () => {
   const [skillNodes, setSkillNodes] = useState<SkillNode[]>(DEMO_SKILL_NODES)
-  const [streak, setStreak] = useState(1)
+  const [streak, setStreak] = useState(0)
   const [attemptsToday, setAttemptsToday] = useState(0)
   const [dailyGoal, setDailyGoal] = useState(5)
+  const [selectedLevel, setSelectedLevel] = useState(localStorage.getItem('ceferly-level') || 'B2')
+  const [levels, setLevels] = useState<{ name: string; exam?: string; totalExercises?: number }[]>([
+    { name: 'B1' },
+    { name: 'B2' },
+    { name: 'C1' },
+  ])
 
   useEffect(() => {
     const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000/api'
@@ -62,6 +68,17 @@ export const Dashboard: React.FC = () => {
       })
       .catch(() => {})
 
+    fetch(`${API_BASE}/levels`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setLevels(data.filter((level: { name: string }) => ['B1', 'B2', 'C1'].includes(level.name)))
+        }
+      })
+      .catch(() => {})
+
     // 2. Fetch user stats if logged in
     if (token) {
       fetch(`${API_BASE}/users/me`, {
@@ -70,7 +87,7 @@ export const Dashboard: React.FC = () => {
         .then((res) => (res.ok ? res.json() : null))
         .then((userData) => {
           if (userData) {
-            setStreak(userData.streak ?? 1)
+            setStreak(userData.streak ?? 0)
             setDailyGoal(userData.daily_goal ?? 5)
           }
         })
@@ -81,8 +98,9 @@ export const Dashboard: React.FC = () => {
       })
         .then((res) => (res.ok ? res.json() : null))
         .then((attemptData) => {
-          if (attemptData && attemptData.attemptsToday !== undefined) {
-            setAttemptsToday(attemptData.attemptsToday)
+          const todayCount = attemptData.attemptsToday ?? attemptData.numberOfAttempts
+          if (todayCount !== undefined) {
+            setAttemptsToday(todayCount)
           }
         })
         .catch(() => {})
@@ -97,14 +115,30 @@ export const Dashboard: React.FC = () => {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <span className="text-xs font-black uppercase tracking-widest text-mint-light">
-                Unidad 1 · Nivel B2 First
+                Use of English · Nivel {selectedLevel}
               </span>
               <h1 className="text-2xl sm:text-3xl font-black text-white mt-1">
-                Dominio de Gramática y Vocabulario
+                {selectedLevel === 'B1' ? 'B1 Preliminary' : selectedLevel === 'C1' ? 'C1 Advanced' : 'B2 First'}
               </h1>
               <p className="text-white/90 text-sm font-bold mt-1">
-                Aprende las estructuras clave para superar el examen Cambridge B2 First.
+                Parts 1–4: Multiple Choice Cloze, Open Cloze, Word Formation y Key Word Transformation.
               </p>
+              <div className="flex gap-2 mt-3">
+                {levels.map((level) => (
+                  <button
+                    key={level.name}
+                    onClick={() => {
+                      setSelectedLevel(level.name)
+                      localStorage.setItem('ceferly-level', level.name)
+                    }}
+                    className={`px-3 py-1 rounded-full text-xs font-black ${
+                      selectedLevel === level.name ? 'bg-white text-mint' : 'bg-white/20 text-white'
+                    }`}
+                  >
+                    {level.name}
+                  </button>
+                ))}
+              </div>
             </div>
             <Link to="/categories">
               <Button variant="secondary" size="md" rightIcon={<ChevronRight className="w-4 h-4" />}>
@@ -128,7 +162,7 @@ export const Dashboard: React.FC = () => {
             return (
               <div key={node.id} className={`flex flex-col items-center ${offset} transition-transform`}>
                 <Link
-                  to={isLocked ? '#' : `/categories/${node.id}/exercises`}
+                  to={isLocked ? '#' : `/categories/${node.id}/exercises?level=${selectedLevel}`}
                   className={`
                     relative group flex flex-col items-center select-none
                     ${isLocked ? 'cursor-not-allowed opacity-75' : 'cursor-pointer'}
