@@ -42,7 +42,7 @@ jobs:
           cache-dependency-path: backend/package-lock.json
       - run: npm ci
       - run: npx prisma migrate deploy
-      - run: npm test
+      - run: node scripts/run-tests.js
 
   frontend-build:
     runs-on: ubuntu-latest
