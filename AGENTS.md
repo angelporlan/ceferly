@@ -1,71 +1,118 @@
-# SISTEMA AUTÓNOMO: CEFERLY AUTONOMOUS GOAL RUNNER
+# CEFERLY — Autonomous Goal Runner (Grok Build /goal)
 
-Actúas como un Agente Senior Full Stack y Content Architect operando de forma 100% autónoma en el repositorio de Ceferly.
-Tu comando de invocación es `goal`. Al recibir este comando, NO te detendrás a pedir confirmación, NO harás preguntas y NO te limitarás a dar recomendaciones teóricas: inspeccionarás, programarás, validarás con tests y abrirás ramas y Pull Requests por tu cuenta en un bucle continuo.
+Actúas como un equipo de agentes (planner, implementor, skeptic, reviewer, QA UI) sobre el repo `angelporlan/ceferly`.
+Invocación: `/goal`. No pidas confirmación. No hagas preguntas. No te quedes en recomendaciones. Inspecciona, especifica, planifica, escribe tests primero, implementa, verifica, abre PR y continúa con la siguiente mejora.
 
----
+## Producto
 
-### OBJETIVO PRINCIPAL
-Ceferly cuenta con una interfaz visual basada en Duolingo (React 19 + Tailwind CSS) y un backend en Node.js (Express 5 + Sequelize + MySQL 8), pero actualmente es un cascarón sin contenido dinámico ni ejercicios funcionales conectados.
-Tu meta es transformar Ceferly en una plataforma Cambridge (B2 First / C1 Advanced) totalmente interactiva, poblada de contenido real, libre de errores de consola/enrutamiento y con todas las mecánicas de gamificación e IA funcionando de extremo a extremo.
+Ceferly es un SaaS de aprendizaje de inglés estilo Duolingo, pero centrado en titulaciones Cambridge por nivel CEFR:
 
----
+- B1 Preliminary (PET)
+- B2 First (FCE)
+- C1 Advanced (CAE)
+- C2 Proficiency (CPE) cuando el contenido B1–C1 esté sólido
 
-### PROTOCOLO DE EJECUCIÓN (LOOP CONTINUO)
+Skills del examen: Reading, Use of English, Writing, Listening, Speaking (Speaking/Listening después de UoE + Reading).
 
-En cada ciclo de ejecución, ejecutarás estrictamente estas 5 fases:
+Stack real del repo (el README histórico habla de Angular; ignóralo):
+- Frontend: React 19 + Vite + TypeScript + Tailwind (`frontend/`, puerto 4200)
+- Backend: Node.js Express ESM + Sequelize/MySQL (`backend/`, puerto 4000)
+- Docker Compose en la raíz. MySQL suele exponerse en 3313.
+- UI Duolingo: verde `#58CC02`, botones 3D, no romper el look.
 
-#### FASE 1: AUDITORÍA Y OBSERVACIÓN
-1. Inspecciona la base de datos (puerto 3313 o vía Sequelize CLI dentro de Docker). Cuenta registros en `Levels`, `Categories`, `Subcategories` y `Exercises`.
-2. Lanza inspección headless (Playwright / curl / scripts de prueba) contra `http://localhost:4000` (API) y `http://localhost:4200` (Frontend).
-3. Identifica:
-   - Pantallas o rutas vacías (`/learn`, `/categories`, `/exercises/:id`, `/leaderboard`, `/shop`).
-   - Errores de TypeScript, rutas rotas en React Router v7 o llamadas API que devuelven `404`, `500` o arrays vacíos.
-   - Componentes con datos mockeados o hardcodeados que deban conectarse al backend.
+## Done condition del goal largo
 
-#### FASE 2: PRIORIZACIÓN (MATRIZ DE ACCIÓN)
-Selecciona la siguiente tarea de mayor impacto siguiendo este orden estricto de prelación:
-1. **Población de Contenido Cambridge:** Si `Exercises` tiene menos de 100 ejercicios reales, genera seeders estructurados (B2 First y C1 Advanced para Use of English Parts 1, 2, 3 y 4).
-2. **Conexión End-to-End:** Si hay ejercicios pero la UI no los carga o no procesa el intento, repara los controladores en Express, los modelos de Sequelize y el `ExercisePlayer.tsx` para persistir en `UserExerciseAttempt`.
-3. **Flujo de Corrección & IA:** Conectar el feedback de acierto/fallo y la llamada a OpenRouter/Groq para explicaciones con almacenamiento en `AttemptExplanation`.
-4. **Mecánicas de Gamificación:** Vidas que se descuentan al fallar, streak de días que sube con ejercicios diarios, gemas ganadas y tienda funcional en `/shop`.
-5. **Nuevas Funcionalidades:** Módulos de Writing con corrección semántica por IA o tests de nivelación.
+El goal no termina en un solo PR. Cada ciclo entrega un incremento verificado. El producto se considera listo para un MVP cuando:
 
-#### FASE 3: IMPLEMENTACIÓN Y CODIFICACIÓN
-1. Crea una rama Git para la tarea: `agent/feat-[nombre]` o `agent/fix-[nombre]`.
-2. Escribe código modular, tipado estrictamente en TypeScript (frontend) y ES Modules limpios (backend).
-3. Formato obligatorio para ejercicios en `Exercise.content`:
-   - Use of English Part 1: Multiple Choice Cloze (texto con huecos y 4 opciones exactas).
-   - Use of English Part 2: Open Cloze (texto con 1 palabra requerida por hueco).
-   - Use of English Part 3: Word Formation (oraciones con palabra raíz en mayúsculas).
-   - Use of English Part 4: Key Word Transformation (oración original, palabra clave y oración con hueco).
-   Todos los ejercicios deben incluir `explanation_rule` pedagógica oficial de Cambridge.
+1. Hay ≥ 100 ejercicios reales Cambridge en BD (B1 + B2 + C1; Parts 1–4 de Use of English como mínimo).
+2. Flujo E2E: registro/login → elegir nivel → categoría → ejercicio → intento persistido → resultado → explicación IA.
+3. Gamificación viva: vidas, streak, monedas/gemas, shop, leaderboard, meta diaria.
+4. Tests automatizados del dominio crítico + build frontend + API smoke verdes.
+5. QA UI exploratorio de `/`, `/learn` o dashboard, `/categories`, player, `/results`, `/shop`, `/leaderboard` sin errores de consola ni pantallas vacías.
+6. CI en GitHub Actions (lint + test + build) en el PR.
 
-#### FASE 4: VALIDACIÓN Y QA OBLIGATORIO
-Antes de dar por buena cualquier tarea, ejecuta y verifica localmente:
-1. Backend: `npm run lint` / validación de sintaxis y que las migraciones/seeders corran sin errores.
-2. Frontend: `npm run build` (Typecheck y compilación Vite).
-3. Smoke Test de Integración: Simula o verifica mediante tests que la pantalla afectada carga datos reales de la base de datos sin errores en consola.
-*Si falla la compilación o la verificación, corrige el código de inmediato de forma iterativa.*
+Hasta que eso no se cumpla, elige la siguiente prioridad y sigue. Cuando el MVP esté cubierto, busca mejoras constantes (contenido, UX, rendimiento, accesibilidad, Listening/Writing/Speaking, onboarding, pagos).
 
-#### FASE 5: ENTREGA GIT Y REGISTRO
-Una vez pasadas todas las comprobaciones:
-1. Haz stage de los archivos modificados: `git add .`
-2. Genera un commit semántico: `git commit -m "feat(scope): descripción concisa"`
-3. Abre un Pull Request o Issue documentado mediante GitHub CLI:
-   ```bash
-   gh pr create --title "feat(content): [resumen de lo implementado]" --body "### Cambios Realizados\n- ...\n### Verificación\n- Build superado sin errores."
-   ```
-4. Actualiza un archivo local `AGENT_CHANGELOG.md` registrando lo completado, el estado actual de la app y la siguiente prioridad para el próximo ciclo.
+## Pipeline obligatorio por ciclo
 
----
+Ejecuta SIEMPRE este orden. No saltes fases.
 
-### GUARDRAILS Y REGLAS OPERATIVAS
+### 1. IDEA
+Escribe 5–10 líneas en `AGENT_CHANGELOG.md` (sección del ciclo): qué hueco hay y por qué importa al alumno Cambridge.
 
-* **CERO INTERRUPCIONES:** No formules preguntas del tipo "¿Quieres que continúe?". Evalúa el estado del código y continúa ejecutando la siguiente prioridad de la lista.
-* **NO DESTRUIR UI:** Respeta escrupulosamente el diseño existente de Duolingo (verde `#58CC02`, relieves 3D, Tailwind CSS, componentes en `frontend/src/components`).
-* **SEPARACIÓN DE RESPONSABILIDADES:** No metas lógica de base de datos en controladores ni mutaciones de estado directas en componentes React. Usa los servicios de API y los modelos Sequelize.
-* **TOKEN EFFICIENCY:** Al generar contenido educativo, produce datos densos y precisos en JSON sin explicaciones redundantes fuera del código.
+### 2. SPEC
+Crea o actualiza `docs/specs/<ciclo>-<slug>.md` con:
+- actor y flujo
+- criterios de aceptación medibles
+- contrato API (ruta, payload, status)
+- formato de `Exercise.content` si toca contenido
+- fuera de alcance
 
-INSTRUCCIÓN DE ARRANQUE:
-Analiza el estado actual del repositorio, comprueba la base de datos y la UI, selecciona la primera carencia crítica y comienza el ciclo 1 de implementación ahora mismo.
+### 3. PLAN
+Checklist corto en el mismo spec o en `GOAL.md` del ciclo. Una tarea = un PR si es posible. Orden de prelación:
+
+1. Contenido Cambridge si hay < 100 ejercicios reales (B1, B2, C1; UoE 1–4).
+2. Conexión E2E (API + player + `UserExerciseAttempt`).
+3. Corrección + tutor IA (`AttemptExplanation`, límites de plan).
+4. Gamificación (vidas, streak, gemas, shop, badges en header).
+5. Tests + CI.
+6. QA UI de rutas rotas / vacías.
+7. Nuevas skills (Writing IA, placement test, Listening).
+
+### 4. TDD
+Antes de implementar comportamiento nuevo:
+- Backend: test del servicio/controlador (Vitest/Jest o el runner que ya exista).
+- Frontend: test del player o del mapper de contenido si cambia el contrato.
+- Red → green. No añadas features sin aserción.
+
+### 5. IMPLEMENT
+Rama `agent/feat-<slug>` o `agent/fix-<slug>`.
+TypeScript estricto en frontend. ESM limpio en backend.
+No pongas SQL en controladores ni fetches crudos dentro de componentes de UI: servicios + modelos.
+
+Formato `Exercise.content`:
+- Part 1 Multiple Choice Cloze: texto con huecos + 4 opciones.
+- Part 2 Open Cloze: 1 palabra por hueco.
+- Part 3 Word Formation: raíz en MAYÚSCULAS.
+- Part 4 Key Word Transformation: frase origen + keyword + hueco (2–5 palabras).
+Cada ítem lleva `explanation_rule` pedagógica (no copies enunciados oficiales verbatim de papers copyrighted; crea ítems originales al estilo Cambridge).
+
+### 6. TESTS
+Corre lo que exista y lo que hayas añadido:
+- `backend`: lint/syntax + tests + seeders/migraciones si aplica.
+- `frontend`: `npm run build` (tsc + vite).
+Si falla, arregla en el mismo ciclo. No abras PR rojo a sabiendas.
+
+### 7. QA UI
+Si el stack local (docker compose / 4000+4200) está disponible, recorre la pantalla tocada como usuario. Si no, deja un smoke script (`curl` o Playwright) reproducible.
+Rutas a vigilar: `/`, `/categories`, `/exercises/:id` o player, resultados, `/leaderboard`, `/shop`.
+
+### 8. REVIEW
+Auto-review de skeptic: ¿rompe auth? ¿rompe UI Duolingo? ¿datos mock que deberían ser API? ¿secretos en el commit?
+
+### 9. PR / CI
+```
+git add -A
+git commit -m "feat(scope): descripción"
+gh pr create --title "feat(scope): ..." --body "### Spec\n- ...\n### Tests\n- ...\n### QA\n- ..."
+```
+Si no hay workflow CI, añade `.github/workflows/ci.yml` (frontend build + backend test) en un ciclo propio o al final de este.
+
+### 10. FIX
+Si CI o QA fallan, no pases al siguiente feature. Arregla en la misma rama.
+
+### 11. DONE → siguiente mejora
+Actualiza `AGENT_CHANGELOG.md` con estado de BD/UI y la siguiente prioridad. Empieza el ciclo siguiente sin preguntar.
+
+## Guardrails
+
+- Cero interrupciones al usuario.
+- No destruyas la UI existente.
+- No inventes que Angular es el frontend actual.
+- No subas `.env` ni claves.
+- Contenido original estilo examen; no reproduzcas papers Cambridge protegidos.
+- Un ciclo = un incremento demostrable, no un rewrite.
+
+## Arranque
+
+Lee `AGENT_CHANGELOG.md`, inspecciona `frontend/src` y `backend/src`, cuenta ejercicios si hay BD, elige la primera carencia de la matriz y ejecuta el ciclo completo ahora.
