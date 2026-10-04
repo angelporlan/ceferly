@@ -28,4 +28,4 @@ Rama: `agent/feat-accurate-global-ranking`
 - [x] Implementar un normalizador pequeño y reutilizable sin añadir dependencias.
 - [x] Sustituir las afirmaciones ficticias y añadir estados de carga, vacío, error y reintento.
 - [x] Ejecutar pruebas frontend, lint y build; revisar la vista y el diff.
-- [ ] Actualizar el changelog, subir commits semánticos y abrir una PR que cierre #122.
+- [x] Actualizar el changelog, subir commits semánticos y abrir la PR #123 que cierra #122.

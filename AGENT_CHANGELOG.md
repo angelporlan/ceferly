@@ -13,7 +13,7 @@
 - Primer test rojo esperado antes de crear el normalizador: módulo aún inexistente.
 
 ### Estado
-- Issue #122 enlazado desde la rama `agent/feat-accurate-global-ranking`; PR pendiente.
+- Issue #122 enlazado desde la PR #123 (`agent/feat-accurate-global-ranking`); PR abierta, CI en curso.
 
 ## [Ciclo 4] - Documentación alineada con React y Vite (#95)
 
