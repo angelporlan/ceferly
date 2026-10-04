@@ -28,4 +28,4 @@ Rama: `agent/fix-results-empty-state`
 - [x] Añadir primero tests rojos del validador de contexto.
 - [x] Mostrar un estado sin resultado cuando `location.state` no sea válido.
 - [x] Ejecutar tests frontend, lint dirigido, build y smoke de la ruta.
-- [ ] Actualizar changelog, subir commits semánticos y abrir la PR que cierre #128.
+- [x] Actualizar changelog, subir commits semánticos y abrir la PR #129 que cierra #128.

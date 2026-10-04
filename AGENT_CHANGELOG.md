@@ -14,7 +14,7 @@
 - El test rojo inicial confirmó que el validador aún no existía.
 
 ### Estado
-- Issue #128 enlazado desde la rama `agent/fix-results-empty-state`; PR pendiente.
+- Issue #128 enlazado desde la PR #129 (`agent/fix-results-empty-state`); PR abierta, CI en curso.
 
 ## [Ciclo 4] - Documentación alineada con React y Vite (#95)
 
