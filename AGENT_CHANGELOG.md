@@ -14,7 +14,7 @@
 - Sin cambios de interfaz ni llamadas reales a IA/Stripe.
 
 ### Estado
-- Issue #120 abierto; E2E verificado en `agent/test-full-learning-explanation-e2e`, PR pendiente de creación.
+- Issue #120 enlazado desde la PR #121 en `agent/test-full-learning-explanation-e2e`; PR abierta para revisión.
 
 ## [Ciclo 4] - Documentación alineada con React y Vite (#95)
 
