@@ -28,7 +28,7 @@ El ciclo restringe el endpoint a valores JSON de tipo number que sean enteros en
 - [x] Una petición sin token sigue respondiendo 401 y no modifica al usuario.
 - [x] Los tests de endpoint pasan con migraciones en MySQL desechable; la suite backend completa pasa 39/39.
 - [x] El diff no contiene cambios de UI, esquema ni rutas/autorización.
-- [ ] La PR lleva la etiqueta `needs-human-review` porque cambia datos persistidos de usuario.
+- [x] La PR lleva la etiqueta `needs-human-review` porque cambia datos persistidos de usuario.
 
 ## Plan
 
@@ -36,7 +36,15 @@ El ciclo restringe el endpoint a valores JSON de tipo number que sean enteros en
 2. [x] Añadir regresiones de endpoint para límites, tipos, persistencia y autenticación; comprobar que fallan antes del fix (un string numérico se guardó como 5; body ausente respondió 500).
 3. [x] Añadir validación estricta sin coerción y conservar la respuesta exitosa.
 4. [x] Ejecutar test focalizado y suite backend (39/39) con migraciones en MySQL aislado; revisar el flujo HTTP.
-5. [ ] Crear PR vinculada a #152, etiquetar `needs-human-review`, hacer self-review y dejarla abierta con CI verde.
+5. [x] Crear PR vinculada a #152, etiquetar `needs-human-review` y publicar self-review.
+6. [x] Esperar CI verde: 2 ejecuciones de backend-test y 2 de frontend-build.
+
+## Verificación final
+
+- Antes del fix, el test HTTP confirmó que `daily_goal: "5"` persistía como 5 y que un body ausente respondía 500.
+- Después del fix, el test de endpoint y la suite backend completa pasan: 39/39, con las migraciones Prisma aplicadas en MySQL desechable.
+- CI de PR #154: 2 ejecuciones de backend-test y 2 de frontend-build, todas verdes.
+- La PR está etiquetada `needs-human-review`; no se cambian esquema, UI, ruta ni middleware.
 
 ## Riesgos
 

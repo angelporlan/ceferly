@@ -9,7 +9,8 @@
 
 ### Estado
 - Fix y regresión en `agent/fix-daily-goal-integer-validation`; TDD rojo confirmó que el string `"5"` se guardaba como 5 y que un body ausente daba 500.
-- Verificación local: test HTTP focalizado y backend 39/39 con las 3 migraciones Prisma en MySQL desechable (`127.0.0.1:3322`); PR pendiente.
+- Verificación local: test HTTP focalizado y backend 39/39 con las 3 migraciones Prisma en MySQL desechable (`127.0.0.1:3322`).
+- PR #154 abierta con `needs-human-review` y self-review; CI verde (2 backend-test y 2 frontend-build).
 
 ## [Ciclo 29] - Aplicar el límite de palabras a B1 Part 4 (#143)
 
