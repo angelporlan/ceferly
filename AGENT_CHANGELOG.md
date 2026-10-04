@@ -18,7 +18,7 @@
 - QA UI/API: no aplica; no hay cambios ejecutables.
 
 ### Estado
-- En curso en `agent/docs-current-catalog-streak`; issue #151 reutilizado.
+- PR #153 abierta en `agent/docs-current-catalog-streak`, con self-review publicado; CI pendiente.
 
 ## Retrospectiva — ciclos 26–30
 

@@ -40,7 +40,8 @@ El cambio actualiza esas dos descripciones y añade notas de trabajo para el lin
 1. [x] Verificar cantidades en `uoeCatalog.test.js` y la regla de racha en servicio/modelo/tests.
 2. [x] Editar README, AGENTS, spec y changelog con las afirmaciones verificadas.
 3. [x] Repetir tests/build y lint global; hacer búsquedas de consistencia y `git diff --check`.
-4. [ ] Abrir PR `Closes #151`, realizar self-review y esperar CI verde.
+4. [x] Abrir PR `Closes #151` y publicar self-review.
+5. [ ] Esperar CI verde.
 
 ## Línea base
 
