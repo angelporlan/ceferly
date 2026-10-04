@@ -26,6 +26,19 @@
 - Los tests backend necesitan MySQL aislado con Prisma Migrate aplicado; si la conexión falta, el fallo no demuestra una regresión. Registrar ese entorno antes de interpretar el resultado.
 - Las ramas paralelas vuelven a solaparse en la cabecera del changelog. Actualizar `origin/main` y conservar ambas entradas evita PRs en conflicto; esta regla queda en `AGENTS.md`.
 
+## [Ciclo 29] - Aplicar el límite de palabras a B1 Part 4 (#143)
+
+### Resumen
+- Corregir B1 Part 4 #3 y #5: cada respuesta aceptada tiene entre 2 y 5 palabras y conserva la keyword.
+- En #5, usar una transformación pasiva natural de cuatro palabras con BECAUSE.
+- Contrato y plan: `docs/specs/ciclo29-b1-part4-word-limit.md`.
+
+### Estado
+- Implementación y regresiones completadas en `agent/fix-b1-part4-word-limit`; PR #148 abierta con `Closes #143`.
+- TDD: la prueba falló primero por `interests` y `because` de una palabra; tras corregir el catálogo, la suite backend completa pasa 27/27 y frontend 16/16 con build correcto tras integrar `main`.
+- QA detectó que el seeder no reconcilia filas ya persistidas; follow-up #147 abierto para actualizar contenido existente de forma segura.
+
+## [Ciclo 13] - Desglose correcto de respuestas en el historial (#111)
 ## [Ciclo 23] - Métricas personales confirmadas en Dashboard (#132)
 
 ### Resumen
