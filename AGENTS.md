@@ -58,6 +58,7 @@ Stack real:
 - Backend: Express ESM + Sequelize/MySQL (`backend/`, :4000)
 - Docker Compose. MySQL suele estar en 3313.
 - UI Duolingo: verde `#58CC02`. No romper el look.
+- El ranking actual es global por monedas (racha desempata); no anuncies XP, ligas ni temporadas que la API no implemente.
 
 ## Pipeline por ciclo
 
