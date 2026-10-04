@@ -16,6 +16,8 @@ test("incorrect answers decrement hearts and still award coins", () => {
         ...before,
         role: "free",
         isFullyCorrect: false,
+        attemptsToday: 1,
+        dailyGoal: 1,
         now: new Date("2026-09-08T12:00:00.000Z")
     });
 
@@ -36,6 +38,8 @@ test("correct answers keep hearts and raise coins and daily streak", () => {
         ...before,
         role: "pro",
         isFullyCorrect: true,
+        attemptsToday: 1,
+        dailyGoal: 1,
         now: new Date("2026-09-08T12:00:00.000Z")
     });
 

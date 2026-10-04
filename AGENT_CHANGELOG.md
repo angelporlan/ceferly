@@ -1,5 +1,21 @@
 # AGENT CHANGELOG
 
+## [Ciclo 25] - Recompensa única y meta diaria para Writing (#134)
+
+### Resumen
+- Writing concede monedas una sola vez por usuario y ejercicio; los reenvíos siguen guardándose y suman a la meta diaria.
+- El historial persistido de intentos sirve de deduplicación y una transacción serializa los envíos del mismo usuario.
+- Contrato y plan: `docs/specs/ciclo25-writing-rewards.md`.
+
+### Verificación local
+- TDD: la prueba nueva falló antes del cambio al observar dos recompensas para dos reenvíos concurrentes.
+- `backend npm test`: 17/17; `frontend npm run build`: correcto.
+- `node --check` para los archivos backend modificados y `git diff --check`: correctos.
+- Sin cambios de UI; la prueba de servicio cubre reenvíos simultáneos, aislamiento por usuario y el umbral diario mixto.
+
+### Estado
+- Implementación local lista en `agent/fix-writing-reward-dedupe`; issue #134 abierto, PR/CI pendientes.
+
 ## [Ciclo 21] - Resultado vacío sin contexto (#128)
 
 ### Resumen

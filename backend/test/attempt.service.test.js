@@ -15,7 +15,7 @@ import { SHOP_PRICES, MAX_HEARTS } from "../src/services/gamification.js";
 
 const unique = (prefix) => `${prefix}-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
 
-async function createFixtures() {
+async function createFixtures({ dailyGoal = 1 } = {}) {
     await sequelize.authenticate();
 
     const [level] = await Level.findOrCreate({ where: { name: "B1" } });
@@ -45,7 +45,8 @@ async function createFixtures() {
         password_hash: "not-used-in-this-test",
         coins: 40,
         hearts: 5,
-        streak: 0
+        streak: 0,
+        daily_goal: dailyGoal
     });
 
     return { user, exercise };
