@@ -5,6 +5,7 @@ import { Button } from '../components/ui/Button'
 import { Badge } from '../components/ui/Badge'
 import { ProgressBar } from '../components/ui/ProgressBar'
 import { Flame, Star, Trophy, Sparkles, BookOpen, ChevronRight, CheckCircle2, Lock } from 'lucide-react'
+import { parseDashboardStats, type DashboardStats } from './dashboardStats.mjs'
 
 interface SkillNode {
   id: string
@@ -14,6 +15,12 @@ interface SkillNode {
   stars: number
   totalStars: number
 }
+
+type StatsState =
+  | { status: 'loading' }
+  | { status: 'anonymous' }
+  | { status: 'error' }
+  | { status: 'ready'; stats: DashboardStats }
 
 const DEMO_SKILL_NODES: SkillNode[] = [
   { id: '1', title: 'Conditionals (Zero, 1st, 2nd, 3rd)', category: 'Grammar', status: 'active', stars: 2, totalStars: 3 },
@@ -26,9 +33,10 @@ const DEMO_SKILL_NODES: SkillNode[] = [
 
 export const Dashboard: React.FC = () => {
   const [skillNodes, setSkillNodes] = useState<SkillNode[]>(DEMO_SKILL_NODES)
-  const [streak, setStreak] = useState(0)
-  const [attemptsToday, setAttemptsToday] = useState(0)
-  const [dailyGoal, setDailyGoal] = useState(5)
+  const [statsState, setStatsState] = useState<StatsState>(() =>
+    localStorage.getItem('token') ? { status: 'loading' } : { status: 'anonymous' }
+  )
+  const [statsRequest, setStatsRequest] = useState(0)
   const [selectedLevel, setSelectedLevel] = useState(localStorage.getItem('ceferly-level') || 'B2')
   const [levels, setLevels] = useState<{ name: string; exam?: string; totalExercises?: number }[]>([
     { name: 'B1' },
@@ -81,33 +89,42 @@ export const Dashboard: React.FC = () => {
       })
       .catch(() => {})
 
-    // 2. Fetch user stats if logged in
-    if (token) {
-      fetch(`${API_BASE}/users/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then((res) => (res.ok ? res.json() : null))
-        .then((userData) => {
-          if (userData) {
-            setStreak(userData.streak ?? 0)
-            setDailyGoal(userData.daily_goal ?? 5)
-          }
-        })
-        .catch(() => {})
-
-      fetch(`${API_BASE}/users/me/numberOfAttemptsToday`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then((res) => (res.ok ? res.json() : null))
-        .then((attemptData) => {
-          const todayCount = attemptData.attemptsToday ?? attemptData.numberOfAttempts
-          if (todayCount !== undefined) {
-            setAttemptsToday(todayCount)
-          }
-        })
-        .catch(() => {})
-    }
   }, [])
+
+  useEffect(() => {
+    let isCurrentRequest = true
+    const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000/api'
+    const token = localStorage.getItem('token')
+
+    if (!token) {
+      return () => {
+        isCurrentRequest = false
+      }
+    }
+
+    const loadStats = async () => {
+      try {
+        const response = await fetch(`${API_BASE}/users/me/numberOfAttemptsToday`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        if (!response.ok) throw new Error('User statistics request failed')
+
+        const data: unknown = await response.json()
+        const stats = parseDashboardStats(data)
+        if (!stats) throw new Error('User statistics response is incomplete')
+        if (isCurrentRequest) setStatsState({ status: 'ready', stats })
+      } catch {
+        if (isCurrentRequest) setStatsState({ status: 'error' })
+      }
+    }
+
+    void loadStats()
+
+    return () => {
+      isCurrentRequest = false
+    }
+  }, [statsRequest])
+
   return (
     <div className="flex flex-col lg:flex-row gap-8 items-start">
       {/* Main Learning Pathway */}
@@ -227,38 +244,81 @@ export const Dashboard: React.FC = () => {
 
       {/* Side Widgets Section */}
       <div className="w-full lg:w-80 flex flex-col gap-5 sticky top-24">
-        {/* Daily Goal Card */}
-        <Card className="p-5 flex flex-col gap-3">
-          <div className="flex items-center justify-between">
+        {statsState.status === 'ready' ? (
+          <>
+            {/* Daily Goal Card */}
+            <Card className="p-5 flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <h2 className="text-base font-black text-slateText-main flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-mint" />
+                  Meta diaria
+                </h2>
+                <Badge variant="mint">{statsState.stats.attemptsToday} / {statsState.stats.dailyGoal}</Badge>
+              </div>
+              <p className="text-xs text-slateText-muted font-bold">
+                {statsState.stats.attemptsToday >= statsState.stats.dailyGoal
+                  ? '¡Enhorabuena! Has completado tu meta diaria.'
+                  : `Completa ${Math.max(0, statsState.stats.dailyGoal - statsState.stats.attemptsToday)} ejercicios más hoy para mantener tu racha al máximo.`}
+              </p>
+              <ProgressBar value={statsState.stats.attemptsToday} max={statsState.stats.dailyGoal} color="mint" showLabel />
+            </Card>
+
+            {/* Streak Challenge Card */}
+            <Card className="p-5 bg-gradient-to-br from-amber-50 to-white border-amber/30 flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-amber text-white flex items-center justify-center shadow-btn-amber">
+                  <Flame className="w-6 h-6 fill-white" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black text-slateText-main">Racha activa de {statsState.stats.streak} {statsState.stats.streak === 1 ? 'día' : 'días'}</h3>
+                  <p className="text-xs text-amber-dark font-bold">¡No pierdas tu progreso!</p>
+                </div>
+              </div>
+              <p className="text-xs text-slateText-muted">
+                Practica un poco cada día para consolidar lo aprendido.
+              </p>
+            </Card>
+          </>
+        ) : (
+          <Card
+            className="p-5 flex flex-col gap-3"
+            role={statsState.status === 'loading' ? 'status' : statsState.status === 'error' ? 'alert' : undefined}
+          >
             <h2 className="text-base font-black text-slateText-main flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-mint" />
-              Meta diaria
+              Tu progreso
             </h2>
-            <Badge variant="mint">{attemptsToday} / {dailyGoal}</Badge>
-          </div>
-          <p className="text-xs text-slateText-muted font-bold">
-            {attemptsToday >= dailyGoal
-              ? '¡Enhorabuena! Has completado tu meta diaria.'
-              : `Completa ${Math.max(0, dailyGoal - attemptsToday)} ejercicios más hoy para mantener tu racha al máximo.`}
-          </p>
-          <ProgressBar value={attemptsToday} max={dailyGoal} color="mint" showLabel />
-        </Card>
-
-        {/* Streak Challenge Card */}
-        <Card className="p-5 bg-gradient-to-br from-amber-50 to-white border-amber/30 flex flex-col gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-amber text-white flex items-center justify-center shadow-btn-amber">
-              <Flame className="w-6 h-6 fill-white" />
-            </div>
-            <div>
-              <h3 className="text-sm font-black text-slateText-main">Racha activa de {streak} {streak === 1 ? 'día' : 'días'}</h3>
-              <p className="text-xs text-amber-dark font-bold">¡No pierdas tu progreso!</p>
-            </div>
-          </div>
-          <p className="text-xs text-slateText-muted">
-            Los estudiantes con más de 7 días de racha tienen un 84% más de probabilidades de aprobar su examen B2/C1.
-          </p>
-        </Card>
+            {statsState.status === 'loading' && (
+              <p className="text-xs text-slateText-muted font-bold">Cargando tu meta diaria y racha...</p>
+            )}
+            {statsState.status === 'anonymous' && (
+              <>
+                <p className="text-xs text-slateText-muted font-bold">
+                  Inicia sesión para consultar tu meta diaria y tu racha.
+                </p>
+                <Link to="/login" className="text-xs font-black text-mint hover:underline">
+                  Iniciar sesión
+                </Link>
+              </>
+            )}
+            {statsState.status === 'error' && (
+              <>
+                <p className="text-xs text-slateText-muted font-bold">
+                  No se pudo cargar tu progreso. Inténtalo de nuevo.
+                </p>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    setStatsState({ status: 'loading' })
+                    setStatsRequest((request) => request + 1)
+                  }}
+                >
+                  Reintentar
+                </Button>
+              </>
+            )}
+          </Card>
+        )}
 
         {/* Cambridge Exam Tip */}
         <Card className="p-5 flex flex-col gap-2 bg-sky-50 border-sky/30">
