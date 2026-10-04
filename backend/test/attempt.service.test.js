@@ -15,7 +15,7 @@ import { SHOP_PRICES, MAX_HEARTS } from "../src/services/gamification.js";
 
 const unique = (prefix) => `${prefix}-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
 
-async function createFixtures() {
+async function createFixtures({ dailyGoal = 1 } = {}) {
     await sequelize.authenticate();
 
     const [level] = await Level.findOrCreate({ where: { name: "B1" } });
@@ -45,7 +45,8 @@ async function createFixtures() {
         password_hash: "not-used-in-this-test",
         coins: 40,
         hearts: 5,
-        streak: 0
+        streak: 0,
+        daily_goal: dailyGoal
     });
 
     return { user, exercise };
@@ -97,6 +98,62 @@ test("recordExerciseAttempt persists an attempt and updates coins/streak/hearts"
     assert.equal(right.scored.isFullyCorrect, true);
     await user.reload();
     assert.equal(user.hearts, beforeHearts - 1);
+});
+
+test("recordExerciseAttempt persists streak only after the daily goal", async (t) => {
+    let user;
+    let exercise;
+    try {
+        ({ user, exercise } = await createFixtures({ dailyGoal: 2 }));
+    } catch (error) {
+        t.diagnostic(`DB unavailable: ${error.message}`);
+        throw error;
+    }
+
+    t.after(async () => {
+        if (user) {
+            await UserExerciseAttempt.destroy({ where: { user_id: user.id } });
+            await user.destroy();
+        }
+        if (exercise) await exercise.destroy();
+    });
+
+    user.streak = 2;
+    user.last_completed_date = "2026-09-07";
+    await user.save();
+
+    const firstAttempt = await recordExerciseAttempt({
+        user,
+        exerciseId: exercise.id,
+        userAnswer: "catch",
+        totalGaps: 1,
+        now: new Date("2026-09-08T10:00:00.000Z")
+    });
+    assert.equal(firstAttempt.rewards.streak, 2);
+    assert.equal(firstAttempt.rewards.lastCompletedDate, "2026-09-07");
+
+    const goalAttempt = await recordExerciseAttempt({
+        user,
+        exerciseId: exercise.id,
+        userAnswer: "catch",
+        totalGaps: 1,
+        now: new Date("2026-09-08T11:00:00.000Z")
+    });
+    assert.equal(goalAttempt.rewards.streak, 3);
+    assert.equal(goalAttempt.rewards.lastCompletedDate, "2026-09-08");
+
+    const extraAttempt = await recordExerciseAttempt({
+        user,
+        exerciseId: exercise.id,
+        userAnswer: "catch",
+        totalGaps: 1,
+        now: new Date("2026-09-08T12:00:00.000Z")
+    });
+    assert.equal(extraAttempt.rewards.streak, 3);
+
+    await user.reload();
+    assert.equal(user.streak, 3);
+    assert.equal(user.last_completed_date, "2026-09-08");
 });
 
 test("checkoutShopItem persists a coin spend", async (t) => {

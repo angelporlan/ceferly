@@ -88,3 +88,7 @@ Prelación: contenido <100 ejercicios → E2E → IA → gamificación → tests
 ## Arranque
 
 `gh issue list`, `gh pr list`, `AGENT_CHANGELOG.md`. Si no hay issue abierto de la siguiente prioridad, créalo. Luego rama + TDD + commits + PR + self-review.
+
+## Gotchas del repo
+
+- La racha diaria debe avanzar al alcanzar `User.daily_goal`; el endpoint de progreso cuenta intentos guardados en el día UTC.
