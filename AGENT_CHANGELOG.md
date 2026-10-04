@@ -1,5 +1,24 @@
 # AGENT CHANGELOG
 
+## [Ciclo 27] - Correcciones editoriales de Use of English (#142)
+
+### Resumen
+- C1 Advanced Part 1 #1 ahora evalúa `interpret a phrase to mean`; se retiró `regarded`, que también completaba naturalmente el enunciado anterior.
+- B2 First Part 4 #7 conserva una sola transformación correcta de cinco palabras: `prefer staying in to going`.
+- Se añadieron tests de regresión para el enunciado/opciones C1 y la longitud/keyword PREFER de B2.
+- Contrato y plan: `docs/specs/ciclo27-cambridge-uoe-answer-quality.md`.
+
+### Verificación
+- TDD: ambos tests nuevos fallaron antes de los cambios; tests enfocados del catálogo: 4/4.
+- Suite backend: 18/23; los cinco fallos son tests con MySQL porque `127.0.0.1:3313` no estaba disponible.
+- Frontend `npm run build`: correcto. No se tocaron rutas ni componentes UI.
+- `node --check` y `git diff --check`: correctos.
+- Review independiente: aprobado; la unicidad C1 se confirma editorialmente y la respuesta B2 completa el enunciado con cinco palabras.
+
+### Estado
+- Issue #142 en `agent/fix-cambridge-uoe-editorial`; PR en preparación.
+- Follow-up #143: respuestas de una palabra en B1 Part 4 #3 y #5.
+
 ## [Ciclo 10] - Aplicar racha al cumplir la meta diaria (#106)
 
 ### Resumen
