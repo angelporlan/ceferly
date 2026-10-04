@@ -79,7 +79,6 @@ Ofrece dos niveles de acceso mediante compras de Stripe Checkout de tipo `paymen
 *   **Plan Pro (9,99 € por compra)**: Acceso durante 30 días, hasta 15 consultas de IA al día y las prestaciones descritas por el producto Pro en el backend.
 *   **Plan Premium (19,99 € por compra)**: Acceso durante 30 días y hasta 40 consultas de IA al día, junto con las prestaciones descritas por el producto Premium.
 *   **Flujo**: El backend crea una sesión de Stripe Checkout. `POST /api/payments/verify-session` comprueba con Stripe que el pago se completó y concede el rol de la sesión durante 30 días.
-*   **Retorno**: El backend configura actualmente `/success` y `/cancel`, mientras que React declara `/payment/success` y `/payment/cancel`. Este desajuste está registrado en el issue [#117](https://github.com/angelporlan/ceferly/issues/117).
 
 ---
 

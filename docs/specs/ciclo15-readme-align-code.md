@@ -13,7 +13,7 @@ Este ciclo cambia solo documentación. No modifica comportamiento, pagos, rutas 
 ## Criterios de aceptación
 
 - **AC-001**: README presenta los 108 ejercicios del catálogo como contenido original estilo Cambridge: 36 para cada nivel B1/B2/C1 y 27 para cada parte 1–4.
-- **AC-002**: La explicación de Stripe coincide con `mode: "payment"` y la activación de 30 días; el desajuste conocido de URLs de retorno queda referido al issue #117.
+- **AC-002**: La explicación de Stripe coincide con `mode: "payment"` y la activación de 30 días.
 - **AC-003**: Las secciones de API distinguen endpoints públicos, de autenticación obligatoria y opcional, según los routers actuales; no inventan un webhook.
 - **AC-004**: La guía local describe la ejecución de migraciones/seeds según entorno y usa nombres de variables existentes.
 - **AC-005**: `GOAL_PROMPT.md` dice que manifests, configuración y código ejecutable son fuente de verdad; README y `frontend/README.md` se mantienen alineados con ellos.
@@ -24,7 +24,7 @@ Este ciclo cambia solo documentación. No modifica comportamiento, pagos, rutas 
 
 - **INV-001**: No se cambia código de aplicación ni configuración.
 - **INV-002**: No se denomina oficial ni se copian materiales de Cambridge.
-- **INV-003**: El README describe honestamente el desajuste de retorno de Stripe ya rastreado en #117, sin modificar su comportamiento.
+- **INV-003**: El retorno de Stripe se corrige de forma separada en el issue #117; esta PR documental no cambia rutas ni código de pagos.
 
 ## Plan
 
