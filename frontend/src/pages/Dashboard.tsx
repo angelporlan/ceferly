@@ -7,6 +7,14 @@ import { ProgressBar } from '../components/ui/ProgressBar'
 import { Flame, Trophy, Sparkles, BookOpen, ChevronRight } from 'lucide-react'
 import { mapDashboardCatalog, type DashboardCatalogItem } from './dashboardCatalog.mjs'
 import { parseDailyGoal } from '../utils/dailyGoal.mjs'
+import { parseDashboardStats, type DashboardStats } from './dashboardStats.mjs'
+type StatsState =
+  | { status: 'loading' }
+  | { status: 'anonymous' }
+  | { status: 'error' }
+  | { status: 'ready'; stats: DashboardStats }
+  
+  
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000/api'
 
@@ -15,15 +23,7 @@ interface DailyGoalFeedback {
   kind: 'success' | 'error'
 }
 
-interface UserSummaryResponse {
-  streak?: number
-  daily_goal?: number
-}
 
-interface AttemptsTodayResponse {
-  attemptsToday?: number
-  numberOfAttempts?: number
-}
 
 interface LevelResponse {
   name: string
@@ -39,13 +39,15 @@ type CatalogState =
 export const Dashboard: React.FC = () => {
   const [catalogState, setCatalogState] = useState<CatalogState>({ status: 'loading' })
   const [catalogRequest, setCatalogRequest] = useState(0)
-  const [streak, setStreak] = useState(0)
-  const [attemptsToday, setAttemptsToday] = useState(0)
   const [dailyGoal, setDailyGoal] = useState(5)
   const [dailyGoalDraft, setDailyGoalDraft] = useState('5')
   const [isEditingDailyGoal, setIsEditingDailyGoal] = useState(false)
   const [isSavingDailyGoal, setIsSavingDailyGoal] = useState(false)
   const [dailyGoalFeedback, setDailyGoalFeedback] = useState<DailyGoalFeedback | null>(null)
+  const [statsState, setStatsState] = useState<StatsState>(() =>
+    localStorage.getItem('token') ? { status: 'loading' } : { status: 'anonymous' }
+  )
+const [statsRequest, setStatsRequest] = useState(0)
   const [selectedLevel, setSelectedLevel] = useState(localStorage.getItem('ceferly-level') || 'B2')
   const isAuthenticated = Boolean(localStorage.getItem('token'))
   const [levels, setLevels] = useState<{ name: string; exam?: string; totalExercises?: number }[]>([
@@ -98,34 +100,46 @@ export const Dashboard: React.FC = () => {
       })
       .catch(() => {})
 
-    // 2. Fetch user stats if logged in
-    if (token) {
-      fetch(`${API_BASE}/users/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then((res) => (res.ok ? res.json() : null))
-        .then((userData: UserSummaryResponse | null) => {
-          if (userData) {
-            setStreak(userData.streak ?? 0)
-            setDailyGoal(userData.daily_goal ?? 5)
-          }
-        })
-        .catch(() => {})
-
-      fetch(`${API_BASE}/users/me/numberOfAttemptsToday`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then((res) => (res.ok ? res.json() : null))
-        .then((attemptData: AttemptsTodayResponse | null) => {
-          if (!attemptData) return
-          const todayCount = attemptData.attemptsToday ?? attemptData.numberOfAttempts
-          if (todayCount !== undefined) {
-            setAttemptsToday(todayCount)
-          }
-        })
-        .catch(() => {})
-    }
   }, [])
+
+  useEffect(() => {
+    let isCurrentRequest = true
+    const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000/api'
+    const token = localStorage.getItem('token')
+
+    if (!token) {
+      return () => {
+        isCurrentRequest = false
+      }
+    }
+
+    const loadStats = async () => {
+      try {
+        const response = await fetch(`${API_BASE}/users/me/numberOfAttemptsToday`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        if (!response.ok) throw new Error('User statistics request failed')
+
+        const data: unknown = await response.json()
+        const stats = parseDashboardStats(data)
+        if (!stats) throw new Error('User statistics response is incomplete')
+        if (isCurrentRequest) {
+          setDailyGoal(stats.dailyGoal)
+          setDailyGoalDraft(String(stats.dailyGoal))
+          setStatsState({ status: 'ready', stats })
+        }
+      } catch {
+        if (isCurrentRequest) setStatsState({ status: 'error' })
+      }
+    }
+
+    void loadStats()
+
+    return () => {
+      isCurrentRequest = false
+    }
+  }, [statsRequest])
+
 
   const startEditingDailyGoal = () => {
     setDailyGoalDraft(String(dailyGoal))
@@ -164,6 +178,11 @@ export const Dashboard: React.FC = () => {
       if (savedGoal === null) throw new Error('El servidor devolvió una meta inválida.')
 
       setDailyGoal(savedGoal)
+      setStatsState((current) =>
+        current.status === 'ready'
+          ? { ...current, stats: { ...current.stats, dailyGoal: savedGoal } }
+          : current,
+      )
       setDailyGoalDraft(String(savedGoal))
       setIsEditingDailyGoal(false)
       setDailyGoalFeedback({ message: 'Meta diaria guardada.', kind: 'success' })
@@ -294,102 +313,145 @@ export const Dashboard: React.FC = () => {
 
       {/* Side Widgets Section */}
       <div className="w-full lg:w-80 flex flex-col gap-5 sticky top-24">
-        {/* Daily Goal Card */}
-        <Card className="p-5 flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-black text-slateText-main flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-mint" />
-              Meta diaria
-            </h2>
-            <Badge variant="mint">{attemptsToday} / {dailyGoal}</Badge>
-          </div>
-          <p className="text-xs text-slateText-muted font-bold">
-            {attemptsToday >= dailyGoal
-              ? '¡Enhorabuena! Has completado tu meta diaria.'
-              : `Completa ${Math.max(0, dailyGoal - attemptsToday)} ejercicios más hoy para mantener tu racha al máximo.`}
-          </p>
-          <ProgressBar value={attemptsToday} max={dailyGoal} color="mint" showLabel />
-          {isEditingDailyGoal ? (
-            <form
-              className="flex flex-col gap-3 border-t border-ceferlyBorder pt-3"
-              onSubmit={(event) => {
-                event.preventDefault()
-                void handleSaveDailyGoal()
-              }}
-            >
-              <label className="flex flex-col gap-1 text-xs font-bold text-slateText-muted">
-                Ejercicios por día
-                <input
-                  aria-label="Meta diaria en ejercicios"
-                  className="input-playful py-2 text-sm"
-                  type="number"
-                  min={1}
-                  max={100}
-                  step={1}
-                  required
-                  value={dailyGoalDraft}
-                  disabled={isSavingDailyGoal}
-                  onChange={(event) => setDailyGoalDraft(event.target.value)}
-                />
-              </label>
-              <p className="text-[11px] font-semibold text-slateText-muted">Elige entre 1 y 100 ejercicios diarios.</p>
-              <div className="flex gap-2">
-                <Button type="submit" size="sm" disabled={isSavingDailyGoal}>
-                  {isSavingDailyGoal ? 'Guardando…' : 'Guardar'}
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  disabled={isSavingDailyGoal}
-                  onClick={() => {
-                    setIsEditingDailyGoal(false)
-                    setDailyGoalFeedback(null)
+        {statsState.status === 'ready' ? (
+          <>
+            {/* Daily Goal Card */}
+            <Card className="p-5 flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <h2 className="text-base font-black text-slateText-main flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-mint" />
+                  Meta diaria
+                </h2>
+                <Badge variant="mint">{statsState.stats.attemptsToday} / {statsState.stats.dailyGoal}</Badge>
+              </div>
+              <p className="text-xs text-slateText-muted font-bold">
+                {statsState.stats.attemptsToday >= statsState.stats.dailyGoal
+                  ? '¡Enhorabuena! Has completado tu meta diaria.'
+                  : `Completa ${Math.max(0, statsState.stats.dailyGoal - statsState.stats.attemptsToday)} ejercicios más hoy para mantener tu racha al máximo.`}
+              </p>
+              <ProgressBar value={statsState.stats.attemptsToday} max={statsState.stats.dailyGoal} color="mint" showLabel />
+              {isEditingDailyGoal ? (
+                <form
+                  className="flex flex-col gap-3 border-t border-ceferlyBorder pt-3"
+                  onSubmit={(event) => {
+                    event.preventDefault()
+                    void handleSaveDailyGoal()
                   }}
                 >
-                  Cancelar
-                </Button>
-              </div>
-            </form>
-          ) : (
-            <div className="flex justify-end">
-              {isAuthenticated ? (
-                <Button variant="ghost" size="sm" onClick={startEditingDailyGoal}>
-                  Editar meta
-                </Button>
+                  <label className="flex flex-col gap-2 text-xs font-black text-slateText-main">
+                    Ejercicios por día
+                    <input
+                      aria-label="Meta diaria en ejercicios"
+                      className="w-full rounded-xl border border-ceferlyBorder px-3 py-2 text-sm font-bold"
+                      type="number"
+                      min={1}
+                      max={100}
+                      step={1}
+                      required
+                      value={dailyGoalDraft}
+                      disabled={isSavingDailyGoal}
+                      onChange={(event) => setDailyGoalDraft(event.target.value)}
+                    />
+                  </label>
+                  <p className="text-xs text-slateText-muted">Elige entre 1 y 100 ejercicios diarios.</p>
+                  <div className="flex gap-2">
+                    <Button type="submit" size="sm" disabled={isSavingDailyGoal}>
+                      {isSavingDailyGoal ? 'Guardando…' : 'Guardar'}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      disabled={isSavingDailyGoal}
+                      onClick={() => {
+                        setIsEditingDailyGoal(false)
+                        setDailyGoalFeedback(null)
+                      }}
+                    >
+                      Cancelar
+                    </Button>
+                  </div>
+                </form>
               ) : (
-                <Link to="/login" className="text-xs font-black text-mint-dark underline underline-offset-2">
-                  Inicia sesión para ajustar tu meta
-                </Link>
+                <div className="flex justify-end">
+                  {isAuthenticated ? (
+                    <Button variant="ghost" size="sm" onClick={startEditingDailyGoal}>
+                      Editar meta
+                    </Button>
+                  ) : (
+                    <Link to="/login" className="text-xs font-black text-mint hover:underline">
+                      Inicia sesión para ajustar tu meta
+                    </Link>
+                  )}
+                </div>
               )}
-            </div>
-          )}
-          {dailyGoalFeedback && (
-            <p
-              className={`text-xs font-bold ${dailyGoalFeedback.kind === 'error' ? 'text-coral-dark' : 'text-mint-dark'}`}
-              role={dailyGoalFeedback.kind === 'error' ? 'alert' : 'status'}
-              aria-live="polite"
-            >
-              {dailyGoalFeedback.message}
-            </p>
-          )}
-        </Card>
+              {dailyGoalFeedback && (
+                <p
+                  className={dailyGoalFeedback.kind === 'success' ? 'text-xs text-mint-dark' : 'text-xs text-red-600'}
+                  role={dailyGoalFeedback.kind === 'error' ? 'alert' : 'status'}
+                  aria-live="polite"
+                >
+                  {dailyGoalFeedback.message}
+                </p>
+              )}
+            </Card>
 
-        {/* Streak Challenge Card */}
-        <Card className="p-5 bg-gradient-to-br from-amber-50 to-white border-amber/30 flex flex-col gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-amber text-white flex items-center justify-center shadow-btn-amber">
-              <Flame className="w-6 h-6 fill-white" />
-            </div>
-            <div>
-              <h3 className="text-sm font-black text-slateText-main">Racha activa de {streak} {streak === 1 ? 'día' : 'días'}</h3>
-              <p className="text-xs text-amber-dark font-bold">¡No pierdas tu progreso!</p>
-            </div>
-          </div>
-          <p className="text-xs text-slateText-muted">
-            Practica un poco cada día para consolidar lo aprendido.
-          </p>
-        </Card>
+            {/* Streak Challenge Card */}
+            <Card className="p-5 bg-gradient-to-br from-amber-50 to-white border-amber/30 flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-amber text-white flex items-center justify-center shadow-btn-amber">
+                  <Flame className="w-6 h-6 fill-white" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black text-slateText-main">Racha activa de {statsState.stats.streak} {statsState.stats.streak === 1 ? 'día' : 'días'}</h3>
+                  <p className="text-xs text-amber-dark font-bold">¡No pierdas tu progreso!</p>
+                </div>
+              </div>
+              <p className="text-xs text-slateText-muted">
+                Practica un poco cada día para consolidar lo aprendido.
+              </p>
+            </Card>
+          </>
+        ) : (
+          <Card
+            className="p-5 flex flex-col gap-3"
+            role={statsState.status === 'loading' ? 'status' : statsState.status === 'error' ? 'alert' : undefined}
+          >
+            <h2 className="text-base font-black text-slateText-main flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-mint" />
+              Tu progreso
+            </h2>
+            {statsState.status === 'loading' && (
+              <p className="text-xs text-slateText-muted font-bold">Cargando tu meta diaria y racha...</p>
+            )}
+            {statsState.status === 'anonymous' && (
+              <>
+                <p className="text-xs text-slateText-muted font-bold">
+                  Inicia sesión para consultar tu meta diaria y tu racha.
+                </p>
+                <Link to="/login" className="text-xs font-black text-mint hover:underline">
+                  Iniciar sesión
+                </Link>
+              </>
+            )}
+            {statsState.status === 'error' && (
+              <>
+                <p className="text-xs text-slateText-muted font-bold">
+                  No se pudo cargar tu progreso. Inténtalo de nuevo.
+                </p>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    setStatsState({ status: 'loading' })
+                    setStatsRequest((request) => request + 1)
+                  }}
+                >
+                  Reintentar
+                </Button>
+              </>
+            )}
+          </Card>
+        )}
 
         {/* Cambridge Exam Tip */}
         <Card className="p-5 flex flex-col gap-2 bg-sky-50 border-sky/30">

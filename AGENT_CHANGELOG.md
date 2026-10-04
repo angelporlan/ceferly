@@ -1,5 +1,20 @@
 # AGENT CHANGELOG
 
+## [Ciclo 23] - Métricas personales confirmadas en Dashboard (#132)
+
+### Resumen
+- La meta diaria y la racha ahora usan los datos válidos de `/users/me/numberOfAttemptsToday`; se eliminan defaults personales inventados y se conservan ceros confirmados por la API.
+- Sin sesión se ofrece iniciar sesión; carga, error, payload inválido y reintento tienen estados explícitos.
+- Contrato y plan: `docs/specs/ciclo23-dashboard-stats-truth.md`; no cambian backend, edición de meta ni reglas de racha.
+
+### Verificación local
+- TDD: el test del parser falló antes de implementarlo; `npm test` pasa 3/3 y `npm run build` pasa.
+- Lint de helper y tests pasa. El lint completo conserva 16 errores y 1 aviso, con dos errores preexistentes en el mapeo de categorías del Dashboard cubiertos por #98/PR #102.
+- Smoke UI local: invitado, carga lenta, error HTTP, payload malformado y reintento con ceros API; la UI no inventa cifras ante datos ausentes.
+- CI de la PR #133: `backend-test` y `frontend-build` verdes en `push` y `pull_request`.
+
+### Estado
+- Issue #132 enlazado por la PR #133, abierta con checks verdes en `agent/fix-dashboard-stats-truth`.
 ## [Ciclo 6] - Claves de respuesta ocultas hasta el intento (#97)
 
 ### Resumen
