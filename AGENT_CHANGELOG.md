@@ -1,5 +1,21 @@
 # AGENT CHANGELOG
 
+## [Ciclo 7] - Deuda de ESLint (#98)
+
+### Resumen
+- Sustituir los errores explícitos de `any` en las respuestas de autenticación por tipos y manejo seguro con `unknown`.
+- Mostrar un estado de error reintentable si falla la petición de recuperación de contraseña, sin confirmar si existe la cuenta.
+- Añadir ESLint al job frontend de CI y conservar las mejoras de UI que `main` ya incorporó.
+
+### Verificación
+- Línea base original del ciclo: 16 errores y 1 warning; antes de sincronizar, `main` en `bbdfbd1` daba 10 errores y 0 warnings.
+- En el HEAD final `fcb8039`, `backend-test` y `frontend-build` pasaron en `push` y `pull_request` (4/4); frontend-build ejecuta tests, lint y build.
+- QA invitado: `/login`, `/register` y `/forgot-password` renderizan. No se enviaron formularios. GSI rechaza el origen local `127.0.0.1`, no autorizado para el client ID configurado.
+
+### Estado
+- PR #102 integrada en `main`; issue #98 cerrado. Follow-up de inicialización de Google resuelto por la PR #103.
+- Spec: `docs/specs/ciclo7-eslint-debt.md`.
+
 ## [Ciclo 5] - Essays guardados y feedback cualitativo (#94)
 
 ### Resumen
@@ -24,46 +40,352 @@ El player admite respuestas largas para `essay` y `writing`, persiste el texto o
 
 ### Seguimientos
 - #97: ocultar claves de respuesta antes del intento.
-- #98: resolver errores existentes de ESLint.
+- #98: resolver errores existentes de ESLint; issue cerrado al integrar la PR #102.
 
 ## [Ciclo 3] - Catálogo sin subcategorías vacías (#92)
 
+## [Ciclo 33] - Reconciliar guía de `daily_goal` tras el merge (#155)
+
 ### Resumen
-`GET /api/categories` omite subcategorías con 0 ejercicios. `/learn` y `/categories` ya no enlazan a listas en blanco (Tenses, Passive Voice, Listening).
+- Actualizar `AGENTS.md` con la validación estricta de enteros JSON que ya está integrada en `main` mediante PR #154.
+- Registrar el merge de las PRs #153 y #154 y el cierre de sus issues #151 y #152 en los ciclos correspondientes.
+- Sincronizar la verificación final de la spec del ciclo 32 y documentar este ajuste en `docs/specs/ciclo33-daily-goal-doc-state.md`.
 
 ### Verificación
-- Tests: `attachCountsAndDropEmpty` + suite completa 16/16.
-- Live `GET /api/categories`: Grammar/Reading/Use of English/Vocabulary/Writing; ningún `totalItems === 0`.
-- Frontend build OK.
+- Línea base de `main` (`24ceedd`): backend 41/41 con MySQL aislado y cuatro migraciones; frontend 28/28 y build correctos. La rama se sincronizó después con `main` en `7b88567`.
+- `npm run lint` conserva 12 errores y 1 aviso preexistentes, seguidos por #98/PR #102.
+- Revisión documental y `git diff --check`; sin cambios ejecutables.
 
-### Siguiente prioridad
-Writing con corrección semántica por IA, o Listening con audio.
+### Estado
+- PR #156 integrada en `main`; issue #155 cerrado.
+- `backend-test` y `frontend-build` pasaron en GitHub Actions; el lint global conserva el baseline documentado en #98/PR #102.
 
-## [Ciclo 2] - Cambridge B1/B2/C1 Use of English, vidas persistidas y CI
+## [Ciclo 25] - Recompensa única y meta diaria para Writing (#134)
 
-### Resumen del Ciclo
-Se cubrió la barra del MVP: 108 ejercicios originales de Use of English (Parts 1–4) para B1 Preliminary, B2 First y C1 Advanced con `explanation_rule`; el player ya no se queda en DEMO; los intentos persisten con scoring de servidor; las explicaciones de IA se guardan en `AttemptExplanation` (con cliente LLM inyectable); corazones, racha y monedas viven en el usuario; la tienda gasta precios de servidor; CI ejecuta `npm test` + build frontend.
+### Resumen
+- Writing concede monedas una sola vez por usuario y ejercicio; los reenvíos siguen guardándose y suman a la meta diaria.
+- El historial persistido de intentos sirve de deduplicación y una transacción serializa los envíos del mismo usuario.
+- Contrato y plan: `docs/specs/ciclo25-writing-rewards.md`.
 
-### Cambios Realizados
-- Catálogo Cambridge (`backend/src/cambridge/`) y seeder `seedCambridgeUseOfEnglish`.
-- Columnas `exercises.explanation_rule`, `exercises.content`, `users.hearts`.
-- Servicios enviados: `gamification`, `scoring`, `attempt`, `explanation`, `shop`.
-- `POST /exercises/:id/attempt` puntúa en servidor, descuenta vidas al fallar y bloquea con 0 corazones.
-- `POST /attempts/:id/explain` persiste explicación (LLM o regla pedagógica de fallback).
-- `GET /api/levels`, ranking por monedas, `POST /users/me/shop`.
-- UI: player sin DEMO, header/shop/learn leen racha/monedas/vidas reales, recarga de vidas, verde `#58CC02`.
-- Runner `node --test` (12 tests) y `.github/workflows/ci.yml`.
-- Seeder legado deja de duplicar filas (`findOrCreate` por `title`).
+### Verificación local
+- TDD: la prueba nueva falló antes del cambio al observar dos recompensas para dos reenvíos concurrentes.
+- `backend npm test`: 17/17; `frontend npm run build`: correcto.
+- `node --check` para los archivos backend modificados y `git diff --check`: correctos.
+- Sin cambios de UI; la prueba de servicio cubre reenvíos simultáneos, aislamiento por usuario y el umbral diario mixto.
+- CI de la PR #137: `backend-test` y `frontend-build` verdes.
 
-### Estado actual
-- API `:4000` y UI `:4200` arriba.
-- Conteos con `explanation_rule`: B1 36 catálogo (+fixtures de test), B2 36, C1 36. Parts 1–4 cubiertas.
-- E2E verificado: register → levels → categories → exercise → attempt (hearts 5→4) → explain persistido → shop heart-refill.
+### Estado
+- PR #137 integrada en `main`; issue #134 cerrado.
+
+## [Ciclo 21] - Resultado vacío sin contexto (#128)
+## [Ciclo 9] - Recompensas sincronizadas en Header (#104)
+
+### Resumen
+El Header escucha actualizaciones de stats que publican los intentos y las compras de tienda; sus contadores ya no requieren recarga. El player muestra `coinsDelta` real y el Header anuncia hitos de racha de 3, 7 y 30 días con badges accesibles.
 
 ### Verificación
-- `backend npm test` 12/12, dos corridas.
-- `frontend npm run build` exit 0.
-- CI local: tests + build OK.
+- `frontend npm test`: 5/5, con tests para eventos, merge parcial, límites de badges y feedback de monedas guardadas.
+- `frontend npm run build`: correcto.
+- ESLint focalizado en `Header.tsx`, `ExercisePlayer.tsx` y `Shop.tsx`: correcto.
+- `frontend npm run lint` global sigue con 15 errores y 1 warning del estado base; sigue el issue #98 y su PR #102.
+- QA navegador: `/learn` y `/shop` renderizan y muestran Header/tienda en estado invitado. No había API en `:4000`, así que el intento persistido y la compra autenticada se cubren con lógica unitaria y CI, no con una sesión real local.
 
-### Siguiente prioridad
-C2 Proficiency (Use of English) o Writing con corrección semántica por IA; Listening sigue sin audio.
+### Estado
+- Issue #104 enlazado desde la PR #105, abierta para revisión; `backend-test` y `frontend-build` pasaron para el commit `34f3e7a`.
+- Spec: `docs/specs/ciclo9-live-gamification-header.md`.
+## [Ciclo 8] - Inicialización única de Google Identity Services (#101)
+
+### Resumen
+GSI se inicializa una sola vez por client ID y usa un dispatcher hacia el handler de la pantalla montada. Login y registro siguen renderizando el botón y conservan el fallback.
+
+### Verificación
+- `frontend npm run build`: correcto.
+- `backend npm test`: 16/16.
+- QA: se alternó cuatro veces entre login y registro; no reapareció el warning de inicialización múltiple y la consola del navegador no registró warnings ni errores.
+- `frontend npm run lint`: 14 errores preexistentes de tipos en el estado de `main`, sin warnings; el issue #98 los corrige en la PR #102.
+
+### Estado
+- Issue #101 reutilizado; warning reproducido antes del cambio en QA del ciclo anterior.
+- PR #103 pasó a `main` en `7b88567`, enlazada a #101 y etiquetada `needs-human-review` por afectar el flujo de login.
+## [Ciclo 12] - E2E HTTP del intento de práctica (#110)
+
+### Resumen
+- Separa `app.js` del bootstrap para montar Express en pruebas sin ejecutar migraciones ni seeds de desarrollo.
+- Añade un E2E HTTP de registro → catálogo → intento → historial, con fixture determinista, aserciones de persistencia/recompensas y limpieza.
+- El cliente de Stripe se crea al usar pagos, así importar las rutas en pruebas no requiere claves ni llamadas externas.
+
+### Verificación
+- TDD: la prueba falló al faltar `app.js`; pasó tras extraer la app.
+- MySQL temporal con migraciones: E2E 1/1; backend completo 17/17.
+- `frontend npm run build`: OK; `git diff --check`: OK.
+- La validación del historial detectó el desglose incorrecto de respuestas escalares; seguimiento registrado en #111.
+
+### Estado
+- PR #112 se integró en `main` mediante `cff16db`, enlazada a #110.
+- La filtración de claves de respuesta sigue en la PR #100; este E2E no las usa para generar la respuesta.
+- Spec: `docs/specs/ciclo12-practice-attempt-e2e.md`.
+## [Ciclo 15] - README y GOAL_PROMPT alineados con el código (#116)
+
+## [Ciclo 17] - E2E integrado desde registro hasta explicación (#120)
+
+### Resumen
+- Se añadió un E2E que registra al alumno por HTTP y conserva su JWT para recorrer niveles, categorías, lista/detalle de ejercicio, intento, resultado y explicación.
+- Monta routers reales en Express temporal, persiste la explicación con `explanation_rule` y bloquea llamadas de red a proveedores.
+- La spec de `docs/specs/ciclo17-full-learning-explanation-e2e.md` fija el flujo y su limpieza.
+
+### Verificación
+- E2E integrado: 1/1; suite backend: 17/17 con MySQL temporal y migraciones.
+- Frontend: `npm run build` OK; `git diff --check` OK.
+- En la primera ejecución del test, la forma escalar del fixture no coincidió con el resultado compuesto esperado; el fixture ahora usa respuestas por hueco y el flujo pasa. El manejo general de respuestas escalares sigue en #111/PR #113.
+- Sin cambios de interfaz ni llamadas reales a IA/Stripe.
+
+### Estado
+- PR #121 se integró en `main` mediante `24ceedd`, enlazada a #120.
+## [Ciclo 32] - Validar enteros en `daily_goal` (#152)
+
+### Resumen
+- Rechazar en el endpoint valores no enteros o fuera de rango antes de guardar la preferencia diaria del usuario.
+- Mantener la ruta y autenticación, y verificar la no mutación ante peticiones inválidas.
+- Contrato y plan: `docs/specs/ciclo32-daily-goal-integer-validation.md`.
+
+### Estado
+- TDD rojo confirmó que el string `"5"` se guardaba como 5 y que un body ausente daba 500; el endpoint ahora rechaza ambos casos con 400.
+- PR #154 pasó `backend-test` y `frontend-build` y se integró en `main` con el merge commit `ad0cfb1`; issue #152 cerrado.
+- La PR llevó `needs-human-review`. La verificación de la base actual (`24ceedd`) registra backend 41/41 con cuatro migraciones, frontend 28/28 y build correctos; lint global conserva 12 errores y 1 aviso preexistentes (#98/PR #102).
+
+## [Ciclo 31] - README con catálogo y racha actuales (#151)
+
+### Resumen
+- Corregir en README la cantidad y distribución actual de ejercicios y la regla de racha ligada a `daily_goal`.
+- Añadir instrucciones breves para diagnosticar el lint global desde archivos enfocados y sincronizar PRs con `main` conservando el changelog; no cambiar el comportamiento del producto.
+- Corregir en AGENTS la descripción de validación de `daily_goal`; abrir #152 para el guard de enteros pendiente en backend.
+- Spec: `docs/specs/ciclo31-readme-current-catalog-and-streak.md`.
+
+### Verificación
+- Línea base inicial (`31ca4b1`): backend 28/28, frontend 19/19 y build correctos.
+- Tras sincronizar `main` (`2277923`): backend 33/33 en MySQL temporal, frontend 22/22 y build correctos.
+- Lint global: continúa con 12 errores y 1 aviso preexistentes en auth/profile/ForgotPassword, cubiertos por #98/PR #102; no cambió el baseline.
+- `git diff origin/main...HEAD --check` y búsqueda de afirmaciones antiguas del conteo/racha y de Angular: OK.
+- La auditoría detectó y separó en #152 la falta de validación de enteros del endpoint; no se modificó código en este ciclo documental.
+- TDD no aplica a este ciclo solo documental.
+- QA UI/API: no aplica; no hay cambios ejecutables.
+
+### Estado
+- PR #153 pasó sus checks y se integró en `main` con el merge commit `3061eff`; issue #151 cerrado.
+- La validación entera pendiente en el momento de este ciclo se completó después en el ciclo 32 mediante PR #154 (#152).
+
+## Retrospectiva — ciclos 26–30
+
+- Las correcciones de contenido deben verificarse en catálogo y en filas ya sembradas; el seeder `findOrCreate` no reconcilia registros existentes, así que usar migraciones condicionales y probar intentos asociados (#147).
+- Los tests backend necesitan MySQL aislado con Prisma Migrate aplicado; si la conexión falta, el fallo no demuestra una regresión. Registrar ese entorno antes de interpretar el resultado.
+- Las ramas paralelas vuelven a solaparse en la cabecera del changelog. Actualizar `origin/main` y conservar ambas entradas evita PRs en conflicto; esta regla queda en `AGENTS.md`.
+## [Ciclo 23] - Soluciones compuestas legibles en ExercisePlayer (#139)
+
+### Resumen
+- El feedback tras un intento incorrecto presenta mapas de respuestas numeradas en orden, mantiene legibles las respuestas escalares/alternativas y se anuncia a lectores de pantalla.
+- Se especificó el comportamiento en `docs/specs/ciclo23-readable-answer-feedback.md`; el cambio no modifica scoring ni API.
+- Se abrió el issue #140 para el bug separado de entrada y scoring de ejercicios con varios huecos.
+
+### Verificación
+- TDD: `npm test` falló antes de crear el formateador; después pasa 14/14.
+- `npm run build` pasa; ESLint dirigido a `ExercisePlayer.tsx`, `answerDisplay.mjs` y `answerDisplay.test.mjs` pasa sin avisos; `git diff --check` pasa.
+- Smoke visual/accesible con mock local: `/exercises/139` no enseña la solución en idle y, tras una respuesta incorrecta, muestra `1. warmly / in a friendly way · 2. politely` y actualiza el estado accesible; `/results` conserva la respuesta legible en el fallback, sin JSON crudo.
+
+### Estado
+- Issue #139 enlazado desde la [PR #145](https://github.com/angelporlan/ceferly/pull/145); checks `backend-test` y `frontend-build` verdes.
+
+## [Ciclo 30] - Reconciliar contenido UoE ya sembrado (#147)
+
+### Resumen
+- Añadir una migración de datos versionada para aplicar a ejercicios persistidos las correcciones de B1 Part 4 #3 y #5.
+- Condicionar las actualizaciones a los valores antiguos conocidos y conservar IDs e intentos asociados.
+- Spec: `docs/specs/ciclo30-reconcile-seeded-uoe-content.md`.
+
+### Verificación
+- TDD: el test falló antes de añadir la migración porque el archivo versionado aún no existía; después pasó.
+- Backend: 29/29 tests en MySQL temporal aislado, con `origin/main` actualizado y todas las migraciones aplicadas.
+- Frontend: 16/16 tests y build de producción OK.
+- QA: el test conserva intentos y ediciones manuales; no hay rutas UI afectadas; `git diff --check` OK.
+
+### Estado
+- Issue #147 enlazado desde la PR #150 en `agent/fix-seeded-uoe-content`; relacionado con #143.
+
+## [Ciclo 29] - Aplicar el límite de palabras a B1 Part 4 (#143)
+
+### Resumen
+- Corregir B1 Part 4 #3 y #5: cada respuesta aceptada tiene entre 2 y 5 palabras y conserva la keyword.
+- En #5, usar una transformación pasiva natural de cuatro palabras con BECAUSE.
+- Contrato y plan: `docs/specs/ciclo29-b1-part4-word-limit.md`.
+
+### Estado
+- Implementación y regresiones completadas en `agent/fix-b1-part4-word-limit`; PR #148 abierta con `Closes #143`.
+- TDD: la prueba falló primero por `interests` y `because` de una palabra; tras corregir el catálogo, la suite backend completa pasa 27/27 y frontend 16/16 con build correcto tras integrar `main`.
+- QA detectó que el seeder no reconcilia filas ya persistidas; follow-up #147 abierto para actualizar contenido existente de forma segura.
+
+## [Ciclo 13] - Desglose correcto de respuestas en el historial (#111)
+## [Ciclo 23] - Métricas personales confirmadas en Dashboard (#132)
+
+### Resumen
+- La meta diaria y la racha ahora usan los datos válidos de `/users/me/numberOfAttemptsToday`; se eliminan defaults personales inventados y se conservan ceros confirmados por la API.
+- Sin sesión se ofrece iniciar sesión; carga, error, payload inválido y reintento tienen estados explícitos.
+- Contrato y plan: `docs/specs/ciclo23-dashboard-stats-truth.md`; no cambian backend, edición de meta ni reglas de racha.
+
+### Verificación local
+- TDD: el test del parser falló antes de implementarlo; `npm test` pasa 3/3 y `npm run build` pasa.
+- Lint de helper y tests pasa. El lint completo conserva 16 errores y 1 aviso, con dos errores preexistentes en el mapeo de categorías del Dashboard cubiertos por #98/PR #102.
+- Smoke UI local: invitado, carga lenta, error HTTP, payload malformado y reintento con ceros API; la UI no inventa cifras ante datos ausentes.
+- CI de la PR #133: `backend-test` y `frontend-build` verdes en `push` y `pull_request`.
+
+### Estado
+- Issue #132 enlazado por la PR #133, abierta con checks verdes en `agent/fix-dashboard-stats-truth`.
+## [Ciclo 6] - Claves de respuesta ocultas hasta el intento (#97)
+
+### Resumen
+Las rutas GET de ejercicios ya no serializan `correct_answer` ni `correctAnswer`. El reproductor usa el scoring autenticado del servidor y muestra la solución tras guardar el intento; a visitantes sin sesión les ofrece iniciar sesión.
+
+### Verificación
+- Backend: suite completa 19/19; regresiones para listado, detalle y ejercicio aleatorio.
+- Frontend: `npm run build` y ESLint focalizado de `ExercisePlayer.tsx` OK.
+- API real: list/detail/random respondieron 200 sin claves; el POST sin sesión respondió 401.
+- QA UI: invitado recibe el enlace de acceso sin ver solución; sesión autenticada ve la solución tras enviar, conserva vidas/racha y llega a `/results`; consola del navegador sin errores.
+- El lint completo conserva errores previos en archivos fuera del cambio; seguimiento existente en issue #98.
+
+### Estado
+- Issue #97 enlazado desde PR #100; checks de backend y frontend verdes. PR abierta con `needs-human-review` porque comprobar una respuesta ahora requiere sesión.
+- No se hicieron cambios de esquema. La corrección previa de README Angular → React quedó integrada en `main` mediante PR #96.
+## [Ciclo 24] - Contadores de Header con datos autenticados (#135)
+
+### Resumen
+- El Header muestra racha, monedas y vidas solo después de validar la respuesta de `/users/me`; ceros explícitos siguen visibles y valores por defecto dejan de presentarse como perfil confirmado.
+- Invitados conservan el acceso de login; carga, fallo o payload incompleto ocultan los chips sin tocar el flujo de recompensas de #104.
+- Contrato y plan: `docs/specs/ciclo24-header-stats-truth.md`.
+
+### Verificación local
+- TDD: el test del parser falló antes de implementarlo; `npm test` pasa 3/3 y `npm run build` pasa.
+- Lint dirigido pasa. El lint global conserva 15 errores y 1 aviso; este cambio elimina el error previo de Header y el resto sigue cubierto por #98/PR #102.
+- Smoke UI local: invitado, carga lenta, perfil válido, error HTTP, payload incompleto y ceros API confirmados.
+- CI de la PR #136: `backend-test` y `frontend-build` verdes.
+
+### Estado
+- Issue #135 enlazado por la PR #136, abierta con checks verdes en `agent/fix-header-stats-truth`.
+
+## [Ciclo 4] - Documentación alineada con React y Vite (#95)
+
+## [Ciclo 27] - Correcciones editoriales de Use of English (#142)
+
+
+### Resumen
+- C1 Advanced Part 1 #1 usa `conclude that + clause` para expresar la decisión del juez con un único complemento natural.
+- B2 First Part 4 #7 conserva una sola transformación correcta de cinco palabras: `prefer staying in to going`.
+- Se añadieron tests de regresión para el enunciado/opciones C1 y la longitud/keyword PREFER de B2.
+- Contrato y plan: `docs/specs/ciclo27-cambridge-uoe-answer-quality.md`.
+
+
+### Verificación
+- TDD: ambos tests nuevos fallaron antes de los cambios; tests enfocados del catálogo: 4/4.
+- Suite backend: 18/23; los cinco fallos son tests con MySQL porque `127.0.0.1:3313` no estaba disponible.
+- Frontend `npm run build`: correcto. No se tocaron rutas ni componentes UI.
+- `node --check` y `git diff --check`: correctos.
+- Review independiente: aprobado; la unicidad C1 se confirma editorialmente y la respuesta B2 completa el enunciado con cinco palabras.
+
+
+### Estado
+- Issue #142 enlazado desde la PR #146 en `agent/fix-cambridge-uoe-editorial`; CI `backend-test` y `frontend-build` verdes.
+- Follow-up #143: respuestas de una palabra en B1 Part 4 #3 y #5.
+
+## [Ciclo 26] - Catálogo equilibrado de 144 ejercicios Use of English (#138)
+
+### Resumen
+- Se añadieron 36 ejercicios originales a B1 Preliminary, B2 First y C1 Advanced.
+- El catálogo suma 144 preguntas: 48 por nivel, 36 por parte y 12 en cada combinación nivel/parte.
+- Contrato y plan en `docs/specs/ciclo26-uoe-catalog-144.md`.
+
+### Verificación local
+- TDD: las pruebas nuevas fallaron con el catálogo inicial (`108 !== 144`, 36 en vez de 48 por nivel).
+- `backend npm test`: 19/19; `frontend npm run build`: correcto.
+- `git diff --check`: correcto; tests validan tipos, títulos únicos, respuestas, explicaciones y formato de Part 4.
+- Sin cambios de UI, esquema ni seeder.
+- CI de la PR #141: `backend-test` y `frontend-build` verdes.
+
+### Estado
+- Issue #138 enlazado por la PR #141, abierta en `agent/feat-uoe-catalog-144` con checks verdes.
+
+## [Ciclo 13] - Desglose correcto de respuestas en el historial (#111)
+
+### Resumen
+- Normaliza valores escalares como una única respuesta para `marked_answers` y `feedback_summary`.
+- Mantiene el orden y la comparación existentes en las respuestas multiparte.
+- Extrae el formateo a `attempt-feedback.js` para reutilizarlo en el endpoint y probarlo de forma aislada.
+
+### Verificación
+- TDD: tests rojos con helper ausente; 4 tests focalizados pasan tras el fix.
+- Backend completo: 20/20 en MySQL temporal; frontend build y `git diff --check`: OK.
+- El test del controlador confirma que `GET /api/attempts/:id` devuelve una sola marca correcta para una respuesta escalar.
+
+### Estado
+- Issue #111 enlazado a la PR #113, abierta desde `agent/fix-scalar-attempt-feedback`.
+- Spec: `docs/specs/ciclo13-scalar-attempt-feedback.md`.
+## [Ciclo 11] - Editar meta diaria desde Dashboard (#108)
+
+
+### Resumen
+- La tarjeta de meta diaria permite ajustar de 1 a 100 ejercicios y actualiza el progreso tras confirmar el servidor.
+- Los errores de validación, red o servidor conservan la última meta confirmada y anuncian el estado con feedback accesible.
+- Las personas visitantes ven el acceso al inicio de sesión en vez de un control que no podrían guardar.
+
+
+### Verificación
+- `frontend npm test`: 2/2.
+- `frontend npm run build`: OK; `npx eslint src/pages/Dashboard.tsx`: OK; `git diff --check`: OK.
+- QA UI: `/learn` cargó como visitante y mostró la meta, el progreso y el enlace de inicio de sesión.
+- El guardado autenticado requiere backend y sesión; no se verificó en navegador en esta sesión.
+
+
+### Estado
+- Issue #108 enlazado a la PR #109, abierta con la etiqueta `needs-human-review`.
+- Spec: `docs/specs/ciclo11-daily-goal-settings.md`.
+## [Ciclo 18] - Clasificación global coherente con el API (#122)
+
+
+### Resumen
+- La vista de ranking ahora refleja la clasificación global por monedas y la racha como desempate; elimina la liga, los ascensos, la cuenta atrás y la etiqueta XP que no respaldaba el backend.
+- Normaliza la respuesta paginada `{ data, meta }`, muestra monedas y distingue carga, vacío, error y reintento.
+- Añade `node:test` frontend sin dependencias nuevas y un gotcha accionable en `AGENTS.md`.
+
+
+### Verificación
+- Frontend: 3/3 tests y build OK; smoke visual local con ranking poblado, vacío y error visible.
+- `git diff --check` OK. `npm run lint` sigue con 15 errores en otras pantallas/componentes, registrados en #98/PR #102; esta pantalla ya no aporta el `any` que causaba uno de los errores.
+- Primer test rojo esperado antes de crear el normalizador: módulo aún inexistente.
+
+
+### Estado
+- Issue #122 enlazado desde la PR #123 (`agent/feat-accurate-global-ranking`); PR abierta y checks `backend-test` + `frontend-build` verdes.
+## [Ciclo 28] - Puntuar cada hueco en ejercicios compuestos (#140)
+
+### Resumen
+- El reproductor muestra un campo por marcador numerado, exige completarlos y envía las respuestas como objeto indexado; `/results` conserva ese objeto.
+- El scorer compara cada valor con su clave, deriva el total desde la solución y persiste aciertos parciales y porcentaje sin conceder recompensa de respuesta completa.
+- Spec: `docs/specs/ciclo28-multigap-exercise-scoring.md`.
+
+### Verificación
+- Frontend: `npm test` 14/14, ESLint dirigido sin errores y `npm run build` OK.
+- Backend scorer: `node --test test/scoring.test.js` 6/6; TDD confirmó primero los cuatro casos nuevos fallando.
+- Backend: `npm test` — 26/26 con migraciones aplicadas en MySQL desechable aislado; incluye persistencia de respuestas parciales (`2/3`, score `67`).
+- QA con mock HTTP local: dos campos numerados, botón bloqueado hasta completar ambos, POST `{userAnswer:{"1":"finished","2":"wrong"},totalGaps:2}`, feedback de intento no completo y navegación a `/results`.
+- Revisión de catálogo: marcadores visibles coinciden con claves de solución en 26/26 Word Formation, 30/30 Key Word Transformation y 20/20 Conditionals.
+
+### Estado
+- Issue #140 enlazado por la PR #149 (`agent/fix-multigap-exercise-scoring`), abierta para revisión; `backend-test` y `frontend-build` verdes y self-review publicado.
+
+## [Ciclo 10] - Aplicar racha al cumplir la meta diaria (#106)
+
+
+### Resumen
+La racha solo avanza cuando el número de intentos persistidos del día UTC alcanza `daily_goal`. Los intentos por debajo de la meta conservan la racha y fecha anterior; los intentos siguientes no vuelven a incrementarla. Se eliminó el helper de controlador que no tenía callers.
+
+
+### Verificación
+- TDD: el test de umbral falló antes del cambio (`3 !== 2`) y pasó después.
+- `backend npm test`: 18/18 con MySQL temporal en `127.0.0.1:3313`, migraciones aplicadas.
+- `frontend npm run build`: correcto.

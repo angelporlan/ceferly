@@ -16,6 +16,8 @@ test("incorrect answers decrement hearts and still award coins", () => {
         ...before,
         role: "free",
         isFullyCorrect: false,
+        attemptsToday: 1,
+        dailyGoal: 1,
         now: new Date("2026-09-08T12:00:00.000Z")
     });
 
@@ -36,6 +38,8 @@ test("correct answers keep hearts and raise coins and daily streak", () => {
         ...before,
         role: "pro",
         isFullyCorrect: true,
+        attemptsToday: 1,
+        dailyGoal: 1,
         now: new Date("2026-09-08T12:00:00.000Z")
     });
 
@@ -53,6 +57,8 @@ test("writing completion earns role coins and streak without spending a heart", 
         role: "pro",
         isFullyCorrect: false,
         isCompletionOnly: true,
+        attemptsToday: 1,
+        dailyGoal: 1,
         now: new Date("2026-09-08T12:00:00.000Z")
     });
 
@@ -71,7 +77,7 @@ test("writing retries keep completion behavior without granting coins again", ()
         role: "pro",
         isFullyCorrect: false,
         isCompletionOnly: true,
-        awardCoins: false,
+        grantCoins: false,
         now: new Date("2026-09-08T12:30:00.000Z")
     });
 
@@ -79,6 +85,53 @@ test("writing retries keep completion behavior without granting coins again", ()
     assert.equal(after.coins, 19);
     assert.equal(after.coinsDelta, 0);
     assert.equal(after.streak, 3);
+});
+
+test("daily streak advances only once after the configured goal is reached", () => {
+    const base = {
+        coins: 10,
+        hearts: 5,
+        streak: 2,
+        lastCompletedDate: "2026-09-07",
+        role: "free",
+        isFullyCorrect: true,
+        dailyGoal: 3,
+        now: new Date("2026-09-08T12:00:00.000Z")
+    };
+
+    const belowGoal = applyAttemptRewards({ ...base, attemptsToday: 2 });
+    assert.equal(belowGoal.streak, 2);
+    assert.equal(belowGoal.lastCompletedDate, "2026-09-07");
+
+    const reachedGoal = applyAttemptRewards({ ...base, attemptsToday: 3 });
+    assert.equal(reachedGoal.streak, 3);
+    assert.equal(reachedGoal.lastCompletedDate, "2026-09-08");
+
+    const extraAttempt = applyAttemptRewards({
+        ...base,
+        streak: reachedGoal.streak,
+        lastCompletedDate: reachedGoal.lastCompletedDate,
+        attemptsToday: 4
+    });
+    assert.equal(extraAttempt.streak, 3);
+
+    const consecutiveDay = applyAttemptRewards({
+        ...base,
+        streak: extraAttempt.streak,
+        lastCompletedDate: extraAttempt.lastCompletedDate,
+        attemptsToday: 3,
+        now: new Date("2026-09-09T12:00:00.000Z")
+    });
+    assert.equal(consecutiveDay.streak, 4);
+
+    const missedDay = applyAttemptRewards({
+        ...base,
+        streak: consecutiveDay.streak,
+        lastCompletedDate: consecutiveDay.lastCompletedDate,
+        attemptsToday: 3,
+        now: new Date("2026-09-11T12:00:00.000Z")
+    });
+    assert.equal(missedDay.streak, 1);
 });
 
 test("play is blocked when no hearts remain", () => {

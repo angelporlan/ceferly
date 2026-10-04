@@ -6,6 +6,7 @@ import { Input } from '../components/ui/Input'
 import { GoogleLoginButton } from '../components/auth/GoogleLoginButton'
 import { authService } from '../services/auth.service'
 import { Lock, Mail } from 'lucide-react'
+import { getErrorMessage } from '../utils/errors'
 
 export const Login: React.FC = () => {
   const navigate = useNavigate()
@@ -22,8 +23,8 @@ export const Login: React.FC = () => {
     try {
       await authService.login(email, password)
       navigate('/learn')
-    } catch (err: any) {
-      setError(err.message || 'Credenciales no válidas')
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Credenciales no válidas'))
     } finally {
       setLoading(false)
     }

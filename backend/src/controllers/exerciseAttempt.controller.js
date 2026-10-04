@@ -5,82 +5,22 @@ import { AttemptExplanation } from "../models/AttemptExplanation.js";
 import { Category } from "../models/Category.js";
 import { recordExerciseAttempt, NO_HEARTS_CODE, EXERCISE_NOT_FOUND_CODE } from "../services/attempt.service.js";
 import { isWritingExerciseType } from "../services/scoring.js";
+import { buildMarkedAnswers } from "../services/attempt-feedback.js";
 
 const EMPTY_WRITING_ANSWER_CODE = "EMPTY_WRITING_ANSWER";
 const WRITING_ANSWER_TOO_LONG_CODE = "WRITING_ANSWER_TOO_LONG";
 
-const normalizeAnswer = (value) => {
-    if (value === null || value === undefined) {
-        return "";
+const formatCorrectAnswer = (answer) => {
+    if (typeof answer !== "object" || answer === null || Array.isArray(answer)) {
+        return answer;
     }
 
-    if (typeof value === "string") {
-        return value.trim().toLowerCase();
+    const keys = Object.keys(answer);
+    if (keys.length === 1 && answer[keys[0]]) {
+        return answer[keys[0]];
     }
 
-    if (Array.isArray(value)) {
-        return JSON.stringify(value);
-    }
-
-    if (typeof value === "object") {
-        return JSON.stringify(value);
-    }
-
-    return String(value).trim().toLowerCase();
-};
-
-const getAnswerValue = (answers, key) => {
-    if (!answers || typeof answers !== "object") {
-        return undefined;
-    }
-
-    if (Object.prototype.hasOwnProperty.call(answers, key)) {
-        return answers[key];
-    }
-
-    const numericKey = Number(key);
-    if (!Number.isNaN(numericKey) && Object.prototype.hasOwnProperty.call(answers, numericKey)) {
-        return answers[numericKey];
-    }
-
-    return undefined;
-};
-
-const sortAnswerKeys = (keys) =>
-    [...keys].sort((left, right) => {
-        const leftNumber = Number(left);
-        const rightNumber = Number(right);
-
-        if (!Number.isNaN(leftNumber) && !Number.isNaN(rightNumber)) {
-            return leftNumber - rightNumber;
-        }
-
-        return String(left).localeCompare(String(right), undefined, { numeric: true });
-    });
-
-const buildMarkedAnswers = (userAnswer, correctAnswer) => {
-    const answerMap = correctAnswer && typeof correctAnswer === "object"
-        ? correctAnswer
-        : {};
-
-    const keys = sortAnswerKeys(new Set([
-        ...Object.keys(answerMap),
-        ...Object.keys(userAnswer || {})
-    ]));
-
-    return keys.map((key) => {
-        const userValue = getAnswerValue(userAnswer, key);
-        const correctValue = getAnswerValue(answerMap, key);
-        const isCorrect = normalizeAnswer(userValue) === normalizeAnswer(correctValue);
-
-        return {
-            question_id: Number.isNaN(Number(key)) ? key : Number(key),
-            user_answer: userValue ?? null,
-            correct_answer: correctValue ?? null,
-            is_correct: isCorrect,
-            status: isCorrect ? "correct" : "incorrect"
-        };
-    });
+    return answer;
 };
 
 const serializeAttemptSummary = (attempt) => {
@@ -124,7 +64,7 @@ export const createExerciseAttempt = async (req, res) => {
         const resolvedUserAnswer = user_answer !== undefined ? user_answer : userAnswer;
         const resolvedTotalGaps = total_gaps !== undefined ? total_gaps : (totalGaps !== undefined ? totalGaps : 1);
 
-        const { attempt, rewards, scored } = await recordExerciseAttempt({
+        const { attempt, rewards, scored, exercise } = await recordExerciseAttempt({
             user: req.user,
             exerciseId,
             userAnswer: resolvedUserAnswer,
@@ -135,7 +75,8 @@ export const createExerciseAttempt = async (req, res) => {
             message: "Attempt saved",
             attempt,
             rewards,
-            scored
+            scored,
+            correctAnswer: formatCorrectAnswer(exercise.correct_answer)
         });
     } catch (error) {
         if (error.code === EXERCISE_NOT_FOUND_CODE) {

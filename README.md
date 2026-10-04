@@ -1,8 +1,8 @@
-# QuickGram (Ceferly) 🇬🇧🚀
+# Ceferly 🇬🇧🚀
 
-**QuickGram** (también conocido internamente como **Ceferly**) es una plataforma web interactiva diseñada para la preparación de exámenes oficiales de inglés, enfocada inicialmente en el nivel **B2 (Cambridge First Certificate - FCE)** con vistas a expandirse a niveles superiores como **C1 (Advanced - CAE)**. 
+**Ceferly** (nombre anterior: **QuickGram**) es una plataforma web para preparar titulaciones Cambridge B1 Preliminary, B2 First y C1 Advanced. El catálogo actual incluye 144 ejercicios originales de Use of English inspirados en el formato de Cambridge: 48 por nivel, 36 por parte y 12 por combinación de nivel y parte. No son ejercicios ni papers oficiales de Cambridge.
 
-El proyecto combina la resolución de ejercicios prácticos oficiales (Grammar, Reading, Use of English y Writing) con **Inteligencia Artificial (IA)**, la cual actúa como un tutor personalizado que corrige las tareas abiertas (Essays) y proporciona explicaciones gramaticales detalladas en tiempo real de cada uno de los errores cometidos.
+La aplicación combina práctica de inglés, seguimiento del progreso y explicaciones de respuestas mediante **Inteligencia Artificial (IA)**. Las explicaciones de intentos se guardan para poder consultarlas desde la caché.
 
 ---
 
@@ -12,17 +12,18 @@ El proyecto se estructura como una aplicación monorrepositorio dividida en dos 
 
 ### 1. Backend (`/backend`)
 *   **Servidor**: Node.js con Express (v5.2.1) en formato ESM (ES Modules).
-*   **Base de Datos y ORM**: MySQL gestionado a través de **Sequelize** (v6.37.7) con el driver `mysql2`.
-*   **Inteligencia Artificial**: Integración con **Google Gemini** (`gemini-3.5-flash` vía `@google/genai`), **OpenRouter API** (modelos como `deepseek-r1`) o **Groq SDK** para generar explicaciones gramaticales personalizadas y calificar redacciones.
-*   **Pasarela de Pago**: **Stripe** (v20.1.0) para la gestión de suscripciones de usuarios (`pro` y `premium`).
+*   **Base de Datos y ORM**: **MySQL** con **Sequelize** (v6.37.7) en tiempo de ejecución y **Prisma Migrate** para desplegar migraciones.
+*   **Inteligencia Artificial**: Proveedores configurables **Google Gemini**, **OpenRouter** o **Groq** para generar explicaciones de ejercicios.
+*   **Pasarela de Pago**: **Stripe** (v20.1.0) Checkout; cada compra concede 30 días de acceso `pro` o `premium`.
 *   **Autenticación**: JSON Web Tokens (**JWT**) y **Google Auth Library** para login con cuentas de Google.
 *   **Correos Electrónicos**: Integración con **Resend** para el envío de correos de recuperación de contraseña.
 
 ### 2. Frontend (`/frontend`)
-*   **Framework**: **Angular 19** (v19.1.0) utilizando componentes autónomos (*Standalone Components*).
-*   **Estilos**: CSS nativo y diseño responsivo, adaptado a una estética oscura de temática premium con colores verdes neón (`#2ecc71`).
-*   **Animaciones**: **ngx-lottie** y **lottie-web** para animaciones interactivas e indicadores de racha/éxito.
-*   **Pasarela de Pago**: `@stripe/stripe-js` (v8.6.0) para integrar las pantallas de pago de Stripe Checkout de forma transparente.
+*   **Framework**: **React 19** con **TypeScript**, compilado y servido en desarrollo con **Vite** (puerto `4200`).
+*   **Estilos**: **Tailwind CSS 3** y CSS, con la identidad visual verde de Ceferly (`#58CC02`).
+*   **Rutas**: `react-router-dom` (React Router v7).
+*   **Animaciones**: `lottie-web` para las animaciones disponibles.
+*   **Pasarela de Pago**: `@stripe/stripe-js` para las pantallas de pago.
 
 ---
 
@@ -42,13 +43,13 @@ erDiagram
 ```
 
 ### Detalle de las Tablas:
-1.  **`users` (`User.js`)**: Almacena los datos del usuario, incluyendo el nombre, email, contraseña hasheada con `bcrypt`, racha de días de estudio (`streak`), última fecha en que completó su meta (`last_completed_date`), monedas (`coins`), semilla del avatar (`avatar_seed`), ID de Google para inicio rápido y estado de su suscripción de Stripe (`subscription_role` y `subscription_expires_at`).
-2.  **`levels` (`Level.js`)**: Niveles de inglés del Marco Común Europeo (ej. `B2`, `C1`).
+1.  **`users` (`User.js`)**: Almacena el nombre, email, contraseña con `bcrypt`, meta diaria (`daily_goal`), racha (`streak`), fecha del último intento (`last_completed_date`), monedas, corazones, semilla del avatar, ID de Google y rol/fecha de expiración del acceso (`subscription_role` y `subscription_expires_at`).
+2.  **`levels` (`Level.js`)**: Niveles de inglés del Marco Común Europeo (ej. `B1`, `B2`, `C1`).
 3.  **`categories` (`Category.js`)**: Categorías generales del idioma (ej. `Grammar`, `Vocabulary`, `Reading`, `Listening`, `Use of English`, `Writing`).
 4.  **`subcategories` (`Subcategory.js`)**: Tipos de ejercicios específicos dentro de cada categoría (ej. `Conditionals`, `Word Formation`, `Essay`, `Gapped Text`).
 5.  **`exercises` (`Exercise.js`)**: Contiene las preguntas, opciones de selección (para respuestas múltiples), el texto base (si aplica) y la estructura de respuestas correctas en formato JSON (`correct_answer`).
 6.  **`user_exercise_attempts` (`UserExerciseAttempt.js`)**: Historial de intentos de ejercicios por parte de los usuarios. Almacena las respuestas proporcionadas, los aciertos, el total de huecos y la puntuación final.
-7.  **`attempt_explanations` (`AttemptExplanation.js`)**: Almacena en caché las explicaciones generadas por la IA para un intento de ejercicio fallido, evitando re-consultar a la API externa si el usuario vuelve a ver sus resultados.
+7.  **`attempt_explanations` (`AttemptExplanation.js`)**: Almacena explicaciones de intentos para servirlas desde caché cuando se vuelven a consultar.
 8.  **`ai_usage_daily` (`AiUsageDaily.js`)**: Lleva la cuenta de cuántas consultas a la IA realiza cada usuario al día para aplicar los límites del plan.
 
 ---
@@ -56,92 +57,85 @@ erDiagram
 ## 🚀 Funcionalidades Clave
 
 ### 1. Corrección Inteligente y Tutoría por IA
-Cuando un usuario comete fallos en un ejercicio, puede solicitar una **explicación por IA**. 
-*   El backend detecta el tipo de ejercicio (condicionales, vocabulario, opción múltiple, etc.) y genera un prompt dinámico para el modelo LLM.
-*   El LLM responde en un formato JSON estricto estructurado en: `general_feedback` (comentario motivacional) y `corrections` (explicando para cada hueco incorrecto por qué está mal la respuesta del alumno y cuál es la regla gramatical correcta).
+Cuando un usuario revisa un intento, puede solicitar una **explicación por IA**.
+*   El backend compone un prompt con la pregunta, la respuesta del usuario, la respuesta correcta y, si existe, `explanation_rule`.
+*   El prompt solicita JSON con `general_feedback` y `explanation`; el parser también acepta texto plano.
+*   Si falla el proveedor, el backend puede utilizar la regla pedagógica del ejercicio como fallback.
 *   **Caché**: Si el intento ya tiene una explicación en `attempt_explanations`, se sirve al instante desde la base de datos sin consumir tokens de IA.
 
 ### 2. Gamificación
-*   **Meta Diaria e Hilo de Racha (Streak)**: Los usuarios definen una meta diaria de intentos (por defecto, 5). Al cumplirla, la racha aumenta en 1. Si pasan un día entero sin cumplir la meta, el contador vuelve a 0.
-*   **Monedas (`coins`)**: Se otorgan monedas al finalizar cualquier ejercicio. La cantidad varía según el plan de suscripción (`free`: +10, `pro`: +15, `premium`: +20).
-*   **Tienda de Avatares**: Los usuarios pueden gastar 50 monedas en comprar un avatar único y aleatorio (generado visualmente mediante una semilla en base a su username o un string aleatorio en el cliente).
+*   **Meta Diaria e Hilo de Racha (Streak)**: La meta diaria se puede editar en Dashboard (5 por defecto; el control acepta enteros de 1 a 100). La racha avanza una sola vez al alcanzar la meta con intentos guardados durante el día UTC; continúa si la meta anterior se alcanzó ayer y, en otro caso, vuelve a 1. Un intento aislado por debajo de la meta no actualiza la racha.
+*   **Monedas (`coins`)**: Un intento totalmente correcto concede `free`: 10, `pro`: 15 o `premium`: 20 monedas. Los intentos incorrectos o parcialmente correctos conceden 2 monedas.
+*   **Tienda**: `heart-refill` restaura vidas por 30 monedas. Los paquetes de avatar cuestan 30, 50, 75 o 100 monedas y asignan una semilla de paquete (`seed-pack-*`); la compra y el saldo se procesan en el backend.
 
 ### 3. Clasificación Global (Rankings)
-Permite a los usuarios competir de forma sana en dos categorías:
+Permite consultar rankings globales de monedas (tipo predeterminado), ejercicios distintos completados (`mostActive`) y promedio de puntuación (`highestAverage`):
+*   **Monedas**: Ordenado por monedas acumuladas y, en caso de empate, por racha.
 *   **Más Activos (Most Active)**: Ordenado por el número de ejercicios únicos completados.
 *   **Mejor Promedio (Highest Average)**: Ordenado por la calificación media obtenida en todos sus intentos.
 
 ### 4. Pasarela de Pagos Stripe
-Soporta dos planes de suscripción de pago mensual:
-*   **Plan Pro (9.99€/mes)**: Acceso ilimitado a ejercicios y estadísticas avanzadas, además de aumentar el límite de IA a 15 consultas diarias.
-*   **Plan Premium (19.99€/mes)**: Incluye todo lo anterior, hasta 40 consultas diarias de IA, tutorías y certificados.
-*   **Flujo**: El backend crea una sesión de Stripe Checkout y devuelve la URL. Al realizarse el pago, Stripe redirige a `/success?session_id=...` en el frontend, el cual llama a `/api/payments/verify-session` en el backend para validar el pago y extender la suscripción por 30 días de forma segura.
+Ofrece dos niveles de acceso mediante compras de Stripe Checkout de tipo `payment` (no son cargos recurrentes automáticos):
+*   **Plan Pro (9,99 € por compra)**: Acceso durante 30 días, hasta 15 consultas de IA al día y las prestaciones descritas por el producto Pro en el backend.
+*   **Plan Premium (19,99 € por compra)**: Acceso durante 30 días y hasta 40 consultas de IA al día, junto con las prestaciones descritas por el producto Premium.
+*   **Flujo**: El backend crea una sesión de Stripe Checkout. `POST /api/payments/verify-session` comprueba con Stripe que el pago se completó y concede el rol de la sesión durante 30 días.
 
 ---
 
-## 💻 Análisis de las Vistas del Frontend
+## 💻 Rutas actuales del Frontend
 
-El enrutador de Angular (`app.routes.ts`) organiza la aplicación de la siguiente forma:
+Las rutas están definidas en `frontend/src/App.tsx` con React Router:
 
-### Zona Pública / Autenticación
-*   `✏️ /register` y `🔑 /login`: Formularios responsivos de registro e inicio de sesión tradicional y con Google Sign-In.
-*   `📧 /forgot-password` y `🔒 /reset-password/:token`: Flujo de recuperación de contraseña con tokens de expiración temporal y envío de correos vía Resend.
+### Acceso y ejercicios
+*   `/login`, `/register` y `/forgot-password`: inicio de sesión, registro y recuperación de contraseña.
+*   `/exercises/:id`: reproductor de ejercicios.
 
-### Panel Principal (`MainLayoutComponent`)
-Contenedor con barra lateral (**Sidebar**) de navegación que incluye:
-*   `🏠 /` (Home): Dashboard principal. Muestra el progreso diario (progreso de la meta con gráfico circular), la racha de días, el saldo de monedas, estadísticas de éxito y un historial de las últimas actividades.
-*   `📚 /categories`: Listado de categorías de estudio (Use of English, Reading, Grammar, etc.).
-*   `🏷️ /category/:slug`: Detalle de una categoría mostrando sus subcategorías disponibles y descripciones.
-*   `📝 /exercises/list/:subcategory`: Listado de los ejercicios disponibles para una subcategoría concreta para que el usuario elija cuál realizar.
-*   `🔥 /streak`: Vista detallada de la racha, días seguidos estudiando y metas de estudio diarias.
-*   `🛒 /shop`: Tienda de avatares interactiva donde comprar seeds de avatar con monedas virtuales acumuladas.
-*   `👑 /roles`: Gestión de suscripciones de usuario para contratar o emular los planes de Stripe Pro/Premium.
-*   `🏆 /rankings`: Clasificaciones globales de usuarios (Más activos / Mejor Promedio).
-*   `👤 /user`: Perfil del usuario con opción de modificar nombre de usuario, contraseña, correo, meta diaria o eliminar la cuenta.
-
-### Vistas de Ejercicios y Resultados
-*   `✍️ /exercise/:subcategory`: Página a pantalla completa para la resolución de un ejercicio. Incrusta dinámicamente un componente dependiendo del formato de la tarea:
-    *   `multiple-choice` / `reading-multiple-choice`: Selección de opción correcta (A, B, C, D).
-    *   `conditionals` / `gap-fill` / `word-formation`: Rellenar huecos escribiendo la palabra correcta en base al contexto o derivándola de una palabra raíz.
-    *   `key-word-transformation`: Completar una frase para que signifique lo mismo que la anterior utilizando obligatoriamente una palabra clave y entre 2 y 5 palabras adicionales.
-    *   `essay`: Caja de texto abierta para redactar un ensayo/email que será calificado directamente por IA.
-    *   `gapped-text` y `multiple-matching`: Ejercicios avanzados de Reading que simulan las partes 6 y 7 del examen de Cambridge.
-*   `📊 /results/:attemptId`: Vista de resultados detallada que divide la pantalla para mostrar las respuestas enviadas por el usuario, las correctas marcadas en verde/rojo y un botón para desplegar la **corrección y explicación de la Inteligencia Artificial**.
+### Aplicación
+*   `/` redirige a `/learn`.
+*   `/learn`: panel de aprendizaje.
+*   `/categories` y `/categories/:subcategoryId/exercises`: categorías y lista de ejercicios de una subcategoría.
+*   `/results`: resultados del ejercicio.
+*   `/shop`: tienda.
+*   `/leaderboard`: clasificación.
+*   `/profile`: perfil.
+*   `/payment/success` y `/payment/cancel`: resultado del flujo de pago.
 
 ---
 
 ## 🚦 Endpoints de la API Backend
 
-Todos los endpoints están protegidos por el middleware `authenticate` (JWT) a excepción de las rutas de login/registro y el webhook de Stripe.
+La autenticación se configura en cada router; no hay un middleware JWT global ni una ruta de webhook de Stripe. En las secciones siguientes se indica la política de cada grupo: **público**, **JWT opcional** o **JWT obligatorio**. `POST /payments/verify-session` es público y el backend valida el pago consultando Stripe.
 
-### Autenticación (`/api`)
+### Autenticación (rutas públicas, prefijo `/api`)
 *   `POST /login` - Login clásico. Devuelve el JWT.
 *   `POST /register` - Registro clásico con contraseña encriptada.
 *   `POST /auth/google` - Login y registro rápido mediante Google Sign-In.
 *   `POST /forgot-password` - Envía correo con token para restaurar contraseña.
 *   `POST /reset-password` - Actualiza la contraseña usando el token del correo.
 
-### Ejercicios (`/api`)
+### Ejercicios (JWT opcional, prefijo `/api`)
 *   `GET /categories` - Listado de categorías.
 *   `GET /subcategories` - Listado de subcategorías.
 *   `GET /exercises` - Listado de ejercicios con filtros opcionales (por ejemplo, subcategoría y nivel).
 *   `GET /exercises/:id` - Trae los datos de un ejercicio específico.
+*   `GET /levels` - Lista los niveles disponibles.
 
-### Intentos (`/api`)
+### Intentos (JWT obligatorio, prefijo `/api`)
 *   `POST /exercises/:id/attempt` - Envía y registra un intento de ejercicio por parte del usuario, calculando y sumando las monedas y actualizando su racha diaria.
 *   `GET /attempts` - Listado paginado de todos los intentos del usuario autenticado.
 *   `GET /attempts/:id` - Detalle de un intento junto con la explicación de la IA si ya existe en caché.
 *   `GET /attempts/stats/global` - Estadísticas del usuario: número total de intentos y porcentaje medio de acierto.
 
-### Explicaciones con IA (`/api`)
-*   `POST /attempts/:id/explain` - Llama al modelo de lenguaje (DeepSeek/GPT) para generar la explicación del intento del ejercicio, validando previamente el límite diario y guardando el resultado en caché.
+### Explicaciones con IA (según ruta, prefijo `/api`)
+*   `POST /attempts/:id/explain` (**JWT obligatorio**) - Genera o devuelve desde caché la explicación del intento propio y comprueba el límite diario.
+*   `POST /ai/explain` y `POST /explain` (**JWT opcional**) - Solicitan una explicación directa; la persistencia solo aplica si se envía un intento con una sesión autenticada.
 
-### Pagos con Stripe (`/api`)
-*   `POST /create-checkout-session-pro` - Crea la sesión de pago para el plan Pro de Stripe.
-*   `POST /create-checkout-session-premium` - Crea la sesión de pago para el plan Premium de Stripe.
-*   `POST /payments/verify-session` - Verifica si una sesión de Stripe Checkout ha sido pagada correctamente y activa la suscripción del usuario en la base de datos.
+### Pagos con Stripe (prefijo `/api`)
+*   `POST /create-checkout-session-pro` (**JWT obligatorio**) - Crea una sesión de pago para el plan Pro.
+*   `POST /create-checkout-session-premium` (**JWT obligatorio**) - Crea una sesión de pago para el plan Premium.
+*   `POST /payments/verify-session` (**público**) - Verifica el estado de la sesión con Stripe y actualiza el rol del usuario asociado.
 
-### Gestión de Usuario (`/api`)
+### Gestión de Usuario (JWT obligatorio, prefijo `/api`; rankings opcional)
 *   `GET /users/me` - Obtiene la información del perfil completo del usuario autenticado (y revisa el estado de su racha).
 *   `PUT /users/me` - Modifica el nombre o el nombre de usuario (`username`).
 *   `PUT /users/me/password` - Actualiza la contraseña validando la anterior.
@@ -151,15 +145,16 @@ Todos los endpoints están protegidos por el middleware `authenticate` (JWT) a e
 *   `POST /users/me/role` - Cambia manualmente el rol de suscripción (útil para pruebas locales).
 *   `GET /users/me/numberOfAttemptsToday` - Obtiene el recuento de ejercicios realizados hoy y el progreso de su meta diaria.
 *   `PUT /users/me/daily-goal` - Cambia la meta diaria de ejercicios del usuario.
-*   `POST /users/me/avatar` - Compra una nueva semilla de avatar aleatoria por 50 monedas.
-*   `GET /users/rankings` - Clasificación global de usuarios con filtros de orden (`mostActive` o `highestAverage`) y paginación.
+*   `POST /users/me/shop` - Compra un paquete de avatar o recarga de vidas usando los precios del backend.
+*   `POST /users/me/avatar` - Alias de compra de avatar; usa `pack-fire` por defecto (50 monedas).
+*   `GET /users/rankings` (**JWT opcional**) - Clasificación global de usuarios con filtros de orden (`mostActive` o `highestAverage`) y paginación.
 
 ---
 
 ## 🚀 Puesta en Marcha Local
 
 ### Requisitos Previos
-*   Node.js (versión 18 o superior).
+*   Node.js 22 (la versión usada por la imagen Docker del frontend).
 *   Una base de datos MySQL activa.
 *   Una cuenta en OpenRouter (o Groq) y Stripe (claves de prueba) si deseas probar las integraciones de IA y pagos.
 
@@ -184,6 +179,7 @@ Todos los endpoints están protegidos por el middleware `authenticate` (JWT) a e
     DB_USER=usuario_mysql
     DB_PASS=contrasena_mysql
     DB_HOST=127.0.0.1
+    DB_PORT=3306 # Opcional; MySQL usa 3306 por defecto
     
     # Inteligencia Artificial
     AI_SERVER=Gemini # Gemini, OpenRouter o Groq
@@ -199,7 +195,7 @@ Todos los endpoints están protegidos por el middleware `authenticate` (JWT) a e
     # Email (Resend)
     RESEND_API_KEY=re_tu_api_key_de_resend
     ```
-4.  *(Opcional)* Si es la primera ejecución y quieres crear las tablas y rellenarlas con datos iniciales (Seeds), descomenta las líneas correspondientes en `/backend/src/server.js` (líneas 41 a 50) y arranca el servidor para poblar la base de datos de manera automática. Luego vuelve a comentarlas para evitar sobreescritura de datos reales.
+4.  En local, al iniciar el backend se despliegan migraciones de Prisma y se ejecutan seeds automáticamente cuando `ENV=TEST` o `NODE_ENV` no es `production`. No hace falta editar `server.js`. Apunta esas ejecuciones solo a una base de datos de desarrollo/prueba; no uses `ENV=TEST` contra datos de producción. Para producción, configura `ENV=PROD` y `NODE_ENV=production`.
 5.  Inicia el servidor en modo desarrollo:
     ```bash
     npm run dev
@@ -214,15 +210,13 @@ Todos los endpoints están protegidos por el middleware `authenticate` (JWT) a e
     ```bash
     npm install
     ```
-3.  Verifica la configuración del archivo `/frontend/src/environments/environment.ts` asegurándote de que la URL apunta al backend:
-    ```typescript
-    export const environment = {
-        production: false,
-        apiUrl: 'http://localhost:4000'
-    };
+3.  (Opcional) Configura la URL base de la API en un archivo `frontend/.env`:
+    ```env
+    VITE_API_BASE_URL=http://localhost:4000/api
     ```
-4.  Inicia la aplicación Angular localmente:
+    Si no defines esta variable, el frontend usa `http://localhost:4000/api`.
+4.  Inicia el servidor de desarrollo de Vite:
     ```bash
-    npm run start
+    npm run dev
     ```
 5.  Abre el navegador y accede a `http://localhost:4200/`.

@@ -40,8 +40,15 @@ export const coinRewardForAttempt = (role = "free", isFullyCorrect = false) => {
 export const applyDailyPracticeStreak = ({
     streak = 0,
     lastCompletedDate = null,
-    today = formatDateKey()
+    today = formatDateKey(),
+    attemptsToday = 0,
+    dailyGoal = 5
 } = {}) => {
+    const requiredAttempts = Math.max(1, Number(dailyGoal) || 5);
+    if (Number(attemptsToday) < requiredAttempts) {
+        return { streak: Number(streak) || 0, lastCompletedDate };
+    }
+
     if (lastCompletedDate === today) {
         return { streak: Number(streak) || 0, lastCompletedDate };
     }
@@ -61,17 +68,21 @@ export const applyAttemptRewards = ({
     role = "free",
     isFullyCorrect = false,
     isCompletionOnly = false,
-    awardCoins = true,
+    grantCoins = true,
+    attemptsToday = 0,
+    dailyGoal = 5,
     now = new Date()
 } = {}) => {
     const today = formatDateKey(now);
     const earnsCompletionReward = isFullyCorrect || isCompletionOnly;
     const nextHearts = earnsCompletionReward ? Number(hearts) : decrementHearts(hearts);
-    const coinsDelta = awardCoins ? coinRewardForAttempt(role, earnsCompletionReward) : 0;
+    const coinsDelta = grantCoins ? coinRewardForAttempt(role, earnsCompletionReward) : 0;
     const streakState = applyDailyPracticeStreak({
         streak,
         lastCompletedDate,
-        today
+        today,
+        attemptsToday,
+        dailyGoal
     });
 
     return {

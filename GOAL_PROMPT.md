@@ -19,7 +19,7 @@ Luego pega esto:
 ```
 /goal Convierte Ceferly en un SaaS de inglés estilo Duolingo centrado en titulaciones Cambridge (B1 Preliminary, B2 First, C1 Advanced, luego C2). Opera en bucle continuo sin preguntarme. En cada incremento sigue: idea → spec → plan → TDD → implement → tests → QA UI → review → PR/CI → fix → done, y al terminar un ciclo elige solo la siguiente mejora de mayor impacto.
 
-Lee AGENTS.md y AGENT_CHANGELOG.md. Stack real: frontend React 19 + Vite + Tailwind en :4200, backend Express ESM + Sequelize/MySQL en :4000, docker-compose en la raíz. No rompas la UI Duolingo (verde #58CC02).
+Lee AGENTS.md, AGENT_CHANGELOG.md y ambos README. La fuente de verdad para describir el stack y el comportamiento es el código ejecutable, sus manifests y su configuración; los README son documentación que debe corregirse si diverge, no una especificación que deba imponerse al código. Antes de cambiar o describir una tecnología, ruta, variable o flujo, verifícala en esas fuentes y alinea README.md y frontend/README.md con ellas. Stack actual verificado: frontend React 19 + Vite + TypeScript + Tailwind en :4200; backend Express ESM + Sequelize/MySQL, con Prisma Migrate, en :4000; docker-compose en la raíz. No rompas la UI Duolingo (verde #58CC02).
 
 Done del MVP (sigue iterando hasta cubrirlo, luego mejoras constantes):
 - ≥100 ejercicios originales estilo Cambridge (B1+B2+C1, Use of English parts 1–4 como mínimo)

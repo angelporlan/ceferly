@@ -1,59 +1,39 @@
-# Frontend
+# Frontend de Ceferly
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.1.3.
+Aplicación web construida con React 19, TypeScript y Vite. Tailwind CSS 3 y CSS se usan para los estilos; React Router gestiona la navegación.
 
-## Development server
+## Requisitos
 
-To start a local development server, run:
+- Node.js 22
+- npm
 
-```bash
-ng serve
-```
+## Desarrollo local
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Desde esta carpeta:
 
 ```bash
-ng generate component component-name
+npm install
+npm run dev
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Vite sirve la aplicación en `http://localhost:4200/`. Para compilarla para producción:
 
 ```bash
-ng generate --help
+npm run build
 ```
 
-## Building
+Los comandos disponibles están definidos en `package.json`: `dev`, `build`, `lint` y `preview`.
 
-To build the project run:
+## Configuración de la API
 
-```bash
-ng build
+El frontend usa `http://localhost:4000/api` por defecto. Para cambiar esa dirección, define `VITE_API_BASE_URL` en el archivo `.env` de esta carpeta, por ejemplo:
+
+```env
+VITE_API_BASE_URL=http://localhost:4000/api
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+En Docker Compose, la URL ya está configurada para el frontend.
 
-## Running unit tests
+## Rutas
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Las rutas se mantienen en `src/App.tsx`. Incluyen acceso (`/login`, `/register`, `/forgot-password`), ejercicios (`/exercises/:id`) y las vistas principales (`/learn`, `/categories`, `/results`, `/shop`, `/leaderboard`, `/profile` y las rutas de pago).
