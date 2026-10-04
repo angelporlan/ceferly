@@ -11,9 +11,10 @@
 - TDD: el test del parser falló antes de implementarlo; `npm test` pasa 3/3 y `npm run build` pasa.
 - Lint dirigido pasa. El lint global conserva 15 errores y 1 aviso; este cambio elimina el error previo de Header y el resto sigue cubierto por #98/PR #102.
 - Smoke UI local: invitado, carga lenta, perfil válido, error HTTP, payload incompleto y ceros API confirmados.
+- CI de la PR #136: `backend-test` y `frontend-build` verdes.
 
 ### Estado
-- En curso en `agent/fix-header-stats-truth`; PR y CI pendientes.
+- Issue #135 enlazado por la PR #136, abierta con checks verdes en `agent/fix-header-stats-truth`.
 
 ## [Ciclo 4] - Documentación alineada con React y Vite (#95)
 

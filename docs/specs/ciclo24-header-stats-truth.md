@@ -44,7 +44,7 @@ El Header inicializa racha, monedas y vidas en cero y siempre renderiza los chip
 - **Lint:** ESLint focalizado en `Header.tsx`, `headerStats.mjs` y el test pasa. `npm run lint` global conserva 15 errores y 1 aviso en otros archivos; el error previo de `setState` síncrono de Header desaparece y #98/PR #102 sigue cubriendo la deuda restante.
 - **Smoke UI con API mock local:** visitante anónimo sin chips y con enlace Entrar; carga sin cifras; perfil válido muestra `3/12/4`; HTTP 503 y payload sin `hearts` ocultan chips; payload válido `0/0/0` muestra los ceros confirmados.
 - **Revisión visual:** el Header conserva alineación y botón de perfil/entrada con y sin contadores.
-- **CI:** pendiente de la PR del ciclo.
+- **CI:** `backend-test` y `frontend-build` pasan en la PR #136.
 
 ## Riesgos y reversión
 
