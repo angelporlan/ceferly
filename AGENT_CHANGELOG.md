@@ -13,7 +13,7 @@ GSI se inicializa una sola vez por client ID y usa un dispatcher hacia el handle
 
 ### Estado
 - Issue #101 reutilizado; warning reproducido antes del cambio en QA del ciclo anterior.
-- PR pendiente de crear desde `agent/fix-google-gsi-init`; marcada para revisión humana por afectar el flujo de login.
+- Issue #101 enlazado desde PR #103, abierta con `needs-human-review` por afectar el flujo de login.
 
 ## [Ciclo 4] - Documentación alineada con React y Vite (#95)
 
