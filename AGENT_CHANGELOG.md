@@ -15,6 +15,21 @@
 
 ### Estado
 - Issue #117 enlazado desde la PR #119 en `agent/fix-stripe-return-urls`; PR abierta para revisión.
+## [Ciclo 19] - Estados reales para la pantalla de categorías (#124)
+
+### Resumen
+- Se eliminó `FALLBACK_CATEGORIES`; `/categories` ahora renderiza únicamente el catálogo real recibido del API.
+- Se filtran subcategorías y categorías sin ejercicios y se distinguen carga, vacío válido, error HTTP/red y reintento.
+- Se añadieron pruebas `node:test` frontend sin dependencias nuevas y una regla breve para no reintroducir nodos demo.
+
+### Verificación
+- Frontend: 3/3 tests y build OK; lint dirigido a los archivos cambiados OK.
+- Smoke local con datos ficticios efímeros: catálogo poblado, respuesta vacía y API no disponible; ningún estado vacío/error mostró enlaces demo.
+- El lint completo sigue fallando con 16 errores y 1 warning en otros archivos, ya cubiertos por #98/PR #102.
+- El primer test rojo falló porque `categoriesData.mjs` aún no existía, como esperaba TDD.
+
+### Estado
+- Issue #124 enlazado desde la PR #125 (`agent/fix-categories-api-states`); PR abierta y checks `backend-test` + `frontend-build` verdes.
 ## [Ciclo 20] - Estados de error para la lista de ejercicios (#126)
 
 ### Resumen
