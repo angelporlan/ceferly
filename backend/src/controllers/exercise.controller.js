@@ -7,6 +7,18 @@ import { UserExerciseAttempt } from "../models/UserExerciseAttempt.js";
 import { Sequelize } from "sequelize";
 import { attachCountsAndDropEmpty, countMapFromRows } from "../services/catalog.service.js";
 
+const omitAnswerKey = (exercise) => {
+    const serialized = typeof exercise?.toJSON === "function" ? exercise.toJSON() : exercise;
+    if (!serialized || typeof serialized !== "object") {
+        return serialized;
+    }
+
+    const safeExercise = { ...serialized };
+    delete safeExercise.correct_answer;
+    delete safeExercise.correctAnswer;
+    return safeExercise;
+};
+
 export const getExercises = async (req, res) => {
     try {
         const { level, subcategory, category, type, random, page = 1, limit = 10, subcategoryId, subcategory_id } = req.query;
@@ -46,10 +58,11 @@ export const getExercises = async (req, res) => {
         if (random) {
             const exercise = await Exercise.findOne({
                 where,
+                attributes: { exclude: ["correct_answer"] },
                 include: includeOption,
                 order: [Sequelize.fn('RAND')]
             });
-            return res.json(exercise);
+            return res.json(omitAnswerKey(exercise));
         }
 
         const offset = (page - 1) * limit;
@@ -80,7 +93,7 @@ export const getExercises = async (req, res) => {
             ],
             limit: parseInt(limit),
             offset: parseInt(offset),
-            attributes: ['id', 'title', 'type', 'question_text', 'options', 'reading_text', 'correct_answer', 'explanation_rule', 'content', 'level_id'],
+            attributes: ['id', 'title', 'type', 'question_text', 'options', 'reading_text', 'explanation_rule', 'content', 'level_id'],
             distinct: true,
             order: [
                 ['id', 'ASC']
@@ -119,8 +132,6 @@ export const getExercises = async (req, res) => {
                     : (typeof exJson.options === 'object' && exJson.options !== null ? Object.values(exJson.options) : []),
                 readingText: exJson.reading_text,
                 reading_text: exJson.reading_text,
-                correctAnswer: exJson.correct_answer,
-                correct_answer: exJson.correct_answer,
                 explanation_rule: exJson.explanation_rule,
                 content: exJson.content,
                 level: level ? { id: level.id, name: level.name } : null,
@@ -149,6 +160,7 @@ export const getExerciseById = async (req, res) => {
         const { id } = req.params;
 
         const exercise = await Exercise.findByPk(id, {
+            attributes: { exclude: ["correct_answer"] },
             include: [
                 {
                     model: Level,
@@ -171,7 +183,7 @@ export const getExerciseById = async (req, res) => {
             return res.status(404).json({ message: "Exercise not found" });
         }
 
-        const exJson = exercise.toJSON();
+        const exJson = omitAnswerKey(exercise);
 
         let parsedOptions = [];
         if (Array.isArray(exJson.options)) {
@@ -180,18 +192,9 @@ export const getExerciseById = async (req, res) => {
             parsedOptions = Object.values(exJson.options);
         }
 
-        let formattedCorrectAnswer = exJson.correct_answer;
-        if (typeof exJson.correct_answer === 'object' && exJson.correct_answer !== null && !Array.isArray(exJson.correct_answer)) {
-            const keys = Object.keys(exJson.correct_answer);
-            if (keys.length === 1 && exJson.correct_answer[keys[0]]) {
-                formattedCorrectAnswer = exJson.correct_answer[keys[0]];
-            }
-        }
-
         const formatted = {
             ...exJson,
             questionText: exJson.question_text,
-            correctAnswer: formattedCorrectAnswer,
             readingText: exJson.reading_text,
             audioUrl: exJson.audio_url,
             options: parsedOptions,
