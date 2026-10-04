@@ -25,6 +25,19 @@ const normalizeAnswer = (value) => {
     return String(value).trim().toLowerCase();
 };
 
+const formatCorrectAnswer = (answer) => {
+    if (typeof answer !== "object" || answer === null || Array.isArray(answer)) {
+        return answer;
+    }
+
+    const keys = Object.keys(answer);
+    if (keys.length === 1 && answer[keys[0]]) {
+        return answer[keys[0]];
+    }
+
+    return answer;
+};
+
 const getAnswerValue = (answers, key) => {
     if (!answers || typeof answers !== "object") {
         return undefined;
@@ -119,7 +132,7 @@ export const createExerciseAttempt = async (req, res) => {
         const resolvedUserAnswer = user_answer !== undefined ? user_answer : userAnswer;
         const resolvedTotalGaps = total_gaps !== undefined ? total_gaps : (totalGaps !== undefined ? totalGaps : 1);
 
-        const { attempt, rewards, scored } = await recordExerciseAttempt({
+        const { attempt, rewards, scored, exercise } = await recordExerciseAttempt({
             user: req.user,
             exerciseId,
             userAnswer: resolvedUserAnswer,
@@ -130,7 +143,8 @@ export const createExerciseAttempt = async (req, res) => {
             message: "Attempt saved",
             attempt,
             rewards,
-            scored
+            scored,
+            correctAnswer: formatCorrectAnswer(exercise.correct_answer)
         });
     } catch (error) {
         if (error.code === EXERCISE_NOT_FOUND_CODE) {

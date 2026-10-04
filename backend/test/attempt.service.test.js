@@ -10,6 +10,7 @@ import { Category } from "../src/models/Category.js";
 import { Subcategory } from "../src/models/Subcategory.js";
 import { UserExerciseAttempt } from "../src/models/UserExerciseAttempt.js";
 import { recordExerciseAttempt } from "../src/services/attempt.service.js";
+import { createExerciseAttempt } from "../src/controllers/exerciseAttempt.controller.js";
 import { checkoutShopItem } from "../src/services/shop.service.js";
 import { SHOP_PRICES, MAX_HEARTS } from "../src/services/gamification.js";
 
@@ -95,6 +96,30 @@ test("recordExerciseAttempt persists an attempt and updates coins/streak/hearts"
         now: new Date("2026-09-08T11:00:00.000Z")
     });
     assert.equal(right.scored.isFullyCorrect, true);
+    assert.equal(right.exercise.correct_answer, "catch");
+
+    exercise.correct_answer = { 1: "catch" };
+    await exercise.save();
+
+    const response = {
+        statusCode: 200,
+        status(code) {
+            this.statusCode = code;
+            return this;
+        },
+        json(body) {
+            this.body = body;
+            return this;
+        }
+    };
+    await createExerciseAttempt({
+        params: { id: exercise.id },
+        body: { userAnswer: "catch", totalGaps: 1 },
+        user
+    }, response);
+    assert.equal(response.statusCode, 201);
+    assert.equal(response.body.scored.isFullyCorrect, true);
+    assert.equal(response.body.correctAnswer, "catch");
     await user.reload();
     assert.equal(user.hearts, beforeHearts - 1);
 });

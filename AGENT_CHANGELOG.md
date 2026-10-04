@@ -1,5 +1,21 @@
 # AGENT CHANGELOG
 
+## [Ciclo 6] - Claves de respuesta ocultas hasta el intento (#97)
+
+### Resumen
+Las rutas GET de ejercicios ya no serializan `correct_answer` ni `correctAnswer`. El reproductor usa el scoring autenticado del servidor y muestra la solución tras guardar el intento; a visitantes sin sesión les ofrece iniciar sesión.
+
+### Verificación
+- Backend: suite completa 19/19; regresiones para listado, detalle y ejercicio aleatorio.
+- Frontend: `npm run build` y ESLint focalizado de `ExercisePlayer.tsx` OK.
+- API real: list/detail/random respondieron 200 sin claves; el POST sin sesión respondió 401.
+- QA UI: invitado recibe el enlace de acceso sin ver solución; sesión autenticada ve la solución tras enviar, conserva vidas/racha y llega a `/results`; consola del navegador sin errores.
+- El lint completo conserva errores previos en archivos fuera del cambio; seguimiento existente en issue #98.
+
+### Estado
+- Issue #97 enlazado a PR pendiente. La PR llevará `needs-human-review` porque el flujo de comprobación ahora depende explícitamente de sesión.
+- No se hicieron cambios de esquema. La corrección previa de README Angular → React quedó integrada en `main` mediante PR #96.
+
 ## [Ciclo 4] - Documentación alineada con React y Vite (#95)
 
 ### Resumen
