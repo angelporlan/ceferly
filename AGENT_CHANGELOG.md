@@ -1,5 +1,20 @@
 # AGENT CHANGELOG
 
+## [Ciclo 23] - Soluciones compuestas legibles en ExercisePlayer (#139)
+
+### Resumen
+- El feedback tras un intento incorrecto presenta mapas de respuestas numeradas en orden, mantiene legibles las respuestas escalares/alternativas y se anuncia a lectores de pantalla.
+- Se especificó el comportamiento en `docs/specs/ciclo23-readable-answer-feedback.md`; el cambio no modifica scoring ni API.
+- Se abrió el issue #140 para el bug separado de entrada y scoring de ejercicios con varios huecos.
+
+### Verificación
+- TDD: `npm test` falló antes de crear el formateador; después pasa 14/14.
+- `npm run build` pasa; ESLint dirigido a `ExercisePlayer.tsx`, `answerDisplay.mjs` y `answerDisplay.test.mjs` pasa sin avisos; `git diff --check` pasa.
+- Smoke visual/accesible con mock local: `/exercises/139` no enseña la solución en idle y, tras una respuesta incorrecta, muestra `1. warmly / in a friendly way · 2. politely` y actualiza el estado accesible; `/results` conserva la respuesta legible en el fallback, sin JSON crudo.
+
+### Estado
+- Issue #139 enlazado desde la [PR #145](https://github.com/angelporlan/ceferly/pull/145); checks `backend-test` y `frontend-build` verdes.
+
 ## [Ciclo 30] - Reconciliar contenido UoE ya sembrado (#147)
 
 ### Resumen
