@@ -14,7 +14,7 @@
 - El primer test rojo falló porque `categoriesData.mjs` aún no existía, como esperaba TDD.
 
 ### Estado
-- Issue #124 enlazado desde la PR #125 (`agent/fix-categories-api-states`); PR abierta, CI en curso.
+- Issue #124 enlazado desde la PR #125 (`agent/fix-categories-api-states`); PR abierta y checks `backend-test` + `frontend-build` verdes.
 
 ## [Ciclo 4] - Documentación alineada con React y Vite (#95)
 
