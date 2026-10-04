@@ -13,7 +13,7 @@ Las rutas GET de ejercicios ya no serializan `correct_answer` ni `correctAnswer`
 - El lint completo conserva errores previos en archivos fuera del cambio; seguimiento existente en issue #98.
 
 ### Estado
-- Issue #97 enlazado a PR pendiente. La PR llevará `needs-human-review` porque el flujo de comprobación ahora depende explícitamente de sesión.
+- Issue #97 enlazado desde PR #100; checks de backend y frontend verdes. PR abierta con `needs-human-review` porque comprobar una respuesta ahora requiere sesión.
 - No se hicieron cambios de esquema. La corrección previa de README Angular → React quedó integrada en `main` mediante PR #96.
 
 ## [Ciclo 4] - Documentación alineada con React y Vite (#95)
