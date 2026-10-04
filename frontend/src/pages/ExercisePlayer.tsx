@@ -4,6 +4,7 @@ import { ProgressBar } from '../components/ui/ProgressBar'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { Badge } from '../components/ui/Badge'
+import { formatCorrectAnswer } from '../lib/answerDisplay.mjs'
 import { X, Heart, CheckCircle2, AlertCircle, ArrowRight, ShoppingBag } from 'lucide-react'
 import {
   areNumberedGapAnswersComplete,
@@ -33,15 +34,6 @@ interface ExerciseData {
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000/api'
 
-const formatAnswerForDisplay = (answer: unknown) => {
-  if (Array.isArray(answer)) return answer.join(' / ')
-  if (answer !== null && typeof answer === 'object') {
-    return Object.entries(answer as Record<string, unknown>)
-      .map(([gap, value]) => gap + '. ' + (Array.isArray(value) ? value.join(' / ') : String(value)))
-      .join(' · ')
-  }
-  return String(answer ?? '')
-}
 
 const isChoiceExercise = (exercise: ExerciseData) => {
   const type = exercise.type || ''
@@ -188,9 +180,7 @@ export const ExercisePlayer: React.FC = () => {
         attemptId,
         exerciseTitle: exercise.title,
         isCorrect,
-        correctAnswer: typeof exercise.correctAnswer === 'object' && exercise.correctAnswer !== null
-          ? JSON.stringify(exercise.correctAnswer)
-          : exercise.correctAnswer,
+        correctAnswer: formattedCorrectAnswer,
         userAnswer,
         questionText: exercise.questionText,
         explanationRule: exercise.explanation_rule,
@@ -200,6 +190,8 @@ export const ExercisePlayer: React.FC = () => {
       },
     })
   }
+
+  const formattedCorrectAnswer = exercise ? formatCorrectAnswer(exercise.correctAnswer) : ''
 
   if (loading) {
     return (
@@ -342,6 +334,14 @@ export const ExercisePlayer: React.FC = () => {
         )}
       </main>
 
+      <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        {status === 'incorrect'
+          ? `Respuesta incorrecta. Solución esperada: ${formattedCorrectAnswer}`
+          : status === 'correct'
+            ? 'Respuesta correcta.'
+            : ''}
+      </div>
+
       <div
         className={`
           w-full border-t-2 transition-all duration-200 py-4 px-4 sm:px-8
@@ -380,9 +380,11 @@ export const ExercisePlayer: React.FC = () => {
               </div>
               <div>
                 <h3 className="font-black text-lg text-coral-dark">Respuesta incorrecta</h3>
-                <p className="text-xs font-bold text-coral-hover">
-                  Solución esperada: <strong className="underline">{formatAnswerForDisplay(exercise.correctAnswer)}</strong>
-                </p>
+                {formattedCorrectAnswer && (
+                  <p className="text-xs font-bold text-coral-hover">
+                    Solución esperada: <strong className="underline">{formattedCorrectAnswer}</strong>
+                  </p>
+                )}
               </div>
             </div>
           )}
