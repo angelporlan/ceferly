@@ -47,7 +47,7 @@ El endpoint autenticado `GET /users/me/numberOfAttemptsToday` ya entrega `attemp
 - **Lint:** ESLint en `dashboardStats.mjs` y `dashboard-stats.test.mjs` pasa. `Dashboard.tsx` conserva dos errores `no-explicit-any` en el mapeo de catálogo anterior, ya incluidos en #98/PR #102; el lint global sigue mostrando 16 errores y 1 aviso de esa deuda.
 - **Smoke UI con API mock local:** sin token aparece enlace de login sin cifras personales; una petición lenta muestra carga; HTTP 503 y payload malformado muestran error; reintento con respuesta válida de cero muestra `0 / 5` y `racha activa de 0 días`.
 - **Revisión visual:** el estado de error mantiene la tarjeta compacta y presenta un botón de reintento accesible.
-- **CI:** pendiente de la PR del ciclo.
+- **CI:** `backend-test` y `frontend-build` pasan en los eventos `push` y `pull_request` de la PR #133.
 
 ## Riesgos y reversión
 

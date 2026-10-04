@@ -11,9 +11,10 @@
 - TDD: el test del parser falló antes de implementarlo; `npm test` pasa 3/3 y `npm run build` pasa.
 - Lint de helper y tests pasa. El lint completo conserva 16 errores y 1 aviso, con dos errores preexistentes en el mapeo de categorías del Dashboard cubiertos por #98/PR #102.
 - Smoke UI local: invitado, carga lenta, error HTTP, payload malformado y reintento con ceros API; la UI no inventa cifras ante datos ausentes.
+- CI de la PR #133: `backend-test` y `frontend-build` verdes en `push` y `pull_request`.
 
 ### Estado
-- En curso en `agent/fix-dashboard-stats-truth`; PR y CI pendientes.
+- Issue #132 enlazado por la PR #133, abierta con checks verdes en `agent/fix-dashboard-stats-truth`.
 
 ## [Ciclo 4] - Documentación alineada con React y Vite (#95)
 
