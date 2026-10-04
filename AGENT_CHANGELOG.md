@@ -1,5 +1,20 @@
 # AGENT CHANGELOG
 
+## [Ciclo 16] - Alinear retornos de Stripe con rutas React (#117)
+
+### Resumen
+- Las sesiones Pro y Premium ahora comparten un constructor puro que devuelve `/payment/success?session_id={CHECKOUT_SESSION_ID}` y `/payment/cancel`, rutas existentes en React.
+- Se añadieron tests unitarios de retorno sin importar ni llamar al SDK de Stripe; el cancel page no hace requests ni modifica el usuario.
+- Se documentó alcance e invariantes en `docs/specs/ciclo16-stripe-return-urls.md`.
+
+### Verificación
+- Test nuevo: 2/2; suite backend: 18/18 contra MySQL temporal con migraciones aplicadas.
+- Frontend: `npm run build` OK; `git diff --check` OK.
+- La primera suite completa corrió antes de aplicar migraciones y falló porque faltaba `levels`; repetida tras migrar, pasó íntegra.
+- Revisión manual: rutas y `session_id` coinciden en el helper y `App.tsx`; `PaymentCancel` no llama al backend.
+
+### Estado
+- Issue #117 enlazado desde la PR #119 en `agent/fix-stripe-return-urls`; PR abierta para revisión.
 ## [Ciclo 19] - Estados reales para la pantalla de categorías (#124)
 
 ### Resumen
