@@ -1,5 +1,21 @@
 # AGENT CHANGELOG
 
+## [Ciclo 30] - Reconciliar contenido UoE ya sembrado (#147)
+
+### Resumen
+- Añadir una migración de datos versionada para aplicar a ejercicios persistidos las correcciones de B1 Part 4 #3 y #5.
+- Condicionar las actualizaciones a los valores antiguos conocidos y conservar IDs e intentos asociados.
+- Spec: `docs/specs/ciclo30-reconcile-seeded-uoe-content.md`.
+
+### Verificación
+- TDD: el test falló antes de añadir la migración porque el archivo versionado aún no existía; después pasó.
+- Backend: 26/26 tests en MySQL temporal aislado, con la migración aplicada.
+- Frontend: 16/16 tests y build de producción OK.
+- QA: el test conserva intentos y ediciones manuales; no hay rutas UI afectadas; `git diff --check` OK.
+
+### Estado
+- En curso en `agent/fix-seeded-uoe-content`; issue #147 reutilizado, relacionado con #143.
+
 ## [Ciclo 13] - Desglose correcto de respuestas en el historial (#111)
 
 ### Resumen
