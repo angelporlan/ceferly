@@ -27,4 +27,4 @@ Rama: `agent/fix-exercises-list-api-state`
 - [x] Añadir primero tests rojos para normalizar `{ exercises, ... }`, vacío e inválido.
 - [x] Separar carga, éxito vacío, éxito con datos y error; cancelar escrituras obsoletas y permitir reintento.
 - [x] Ejecutar tests frontend, lint dirigido, build y smoke de la ruta.
-- [ ] Actualizar changelog, subir commits semánticos y abrir PR `Closes #126`.
+- [x] Actualizar changelog, subir commits semánticos y abrir la PR #127 que cierra #126.
