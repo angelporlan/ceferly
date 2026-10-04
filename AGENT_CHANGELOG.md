@@ -1,5 +1,18 @@
 # AGENT CHANGELOG
 
+## [Ciclo 4] - Documentación alineada con React y Vite (#95)
+
+### Resumen
+Los README describen ahora el frontend implementado con React 19, TypeScript, Vite y Tailwind CSS. Se actualizaron sus rutas, comandos y configuración de API; `GOAL_PROMPT.md` pide mantener la documentación en sincronía con el código.
+
+### Verificación
+- Stack y scripts contrastados con `frontend/package.json` y `frontend/vite.config.ts`.
+- Rutas contrastadas con `frontend/src/App.tsx`.
+- No se ejecutaron tests: el cambio solo modifica documentación.
+
+### Estado
+- Issue #95 enlazado desde la PR #96; `backend-test` y `frontend-build` pasaron.
+
 ## [Ciclo 3] - Catálogo sin subcategorías vacías (#92)
 
 ### Resumen

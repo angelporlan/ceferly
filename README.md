@@ -19,10 +19,11 @@ El proyecto se estructura como una aplicación monorrepositorio dividida en dos 
 *   **Correos Electrónicos**: Integración con **Resend** para el envío de correos de recuperación de contraseña.
 
 ### 2. Frontend (`/frontend`)
-*   **Framework**: **Angular 19** (v19.1.0) utilizando componentes autónomos (*Standalone Components*).
-*   **Estilos**: CSS nativo y diseño responsivo, adaptado a una estética oscura de temática premium con colores verdes neón (`#2ecc71`).
-*   **Animaciones**: **ngx-lottie** y **lottie-web** para animaciones interactivas e indicadores de racha/éxito.
-*   **Pasarela de Pago**: `@stripe/stripe-js` (v8.6.0) para integrar las pantallas de pago de Stripe Checkout de forma transparente.
+*   **Framework**: **React 19** con **TypeScript**, compilado y servido en desarrollo con **Vite** (puerto `4200`).
+*   **Estilos**: **Tailwind CSS 3** y CSS, con la identidad visual verde de Ceferly (`#58CC02`).
+*   **Rutas**: `react-router-dom` (React Router v7).
+*   **Animaciones**: `lottie-web` para las animaciones disponibles.
+*   **Pasarela de Pago**: `@stripe/stripe-js` para las pantallas de pago.
 
 ---
 
@@ -79,34 +80,23 @@ Soporta dos planes de suscripción de pago mensual:
 
 ---
 
-## 💻 Análisis de las Vistas del Frontend
+## 💻 Rutas actuales del Frontend
 
-El enrutador de Angular (`app.routes.ts`) organiza la aplicación de la siguiente forma:
+Las rutas están definidas en `frontend/src/App.tsx` con React Router:
 
-### Zona Pública / Autenticación
-*   `✏️ /register` y `🔑 /login`: Formularios responsivos de registro e inicio de sesión tradicional y con Google Sign-In.
-*   `📧 /forgot-password` y `🔒 /reset-password/:token`: Flujo de recuperación de contraseña con tokens de expiración temporal y envío de correos vía Resend.
+### Acceso y ejercicios
+*   `/login`, `/register` y `/forgot-password`: inicio de sesión, registro y recuperación de contraseña.
+*   `/exercises/:id`: reproductor de ejercicios.
 
-### Panel Principal (`MainLayoutComponent`)
-Contenedor con barra lateral (**Sidebar**) de navegación que incluye:
-*   `🏠 /` (Home): Dashboard principal. Muestra el progreso diario (progreso de la meta con gráfico circular), la racha de días, el saldo de monedas, estadísticas de éxito y un historial de las últimas actividades.
-*   `📚 /categories`: Listado de categorías de estudio (Use of English, Reading, Grammar, etc.).
-*   `🏷️ /category/:slug`: Detalle de una categoría mostrando sus subcategorías disponibles y descripciones.
-*   `📝 /exercises/list/:subcategory`: Listado de los ejercicios disponibles para una subcategoría concreta para que el usuario elija cuál realizar.
-*   `🔥 /streak`: Vista detallada de la racha, días seguidos estudiando y metas de estudio diarias.
-*   `🛒 /shop`: Tienda de avatares interactiva donde comprar seeds de avatar con monedas virtuales acumuladas.
-*   `👑 /roles`: Gestión de suscripciones de usuario para contratar o emular los planes de Stripe Pro/Premium.
-*   `🏆 /rankings`: Clasificaciones globales de usuarios (Más activos / Mejor Promedio).
-*   `👤 /user`: Perfil del usuario con opción de modificar nombre de usuario, contraseña, correo, meta diaria o eliminar la cuenta.
-
-### Vistas de Ejercicios y Resultados
-*   `✍️ /exercise/:subcategory`: Página a pantalla completa para la resolución de un ejercicio. Incrusta dinámicamente un componente dependiendo del formato de la tarea:
-    *   `multiple-choice` / `reading-multiple-choice`: Selección de opción correcta (A, B, C, D).
-    *   `conditionals` / `gap-fill` / `word-formation`: Rellenar huecos escribiendo la palabra correcta en base al contexto o derivándola de una palabra raíz.
-    *   `key-word-transformation`: Completar una frase para que signifique lo mismo que la anterior utilizando obligatoriamente una palabra clave y entre 2 y 5 palabras adicionales.
-    *   `essay`: Caja de texto abierta para redactar un ensayo/email que será calificado directamente por IA.
-    *   `gapped-text` y `multiple-matching`: Ejercicios avanzados de Reading que simulan las partes 6 y 7 del examen de Cambridge.
-*   `📊 /results/:attemptId`: Vista de resultados detallada que divide la pantalla para mostrar las respuestas enviadas por el usuario, las correctas marcadas en verde/rojo y un botón para desplegar la **corrección y explicación de la Inteligencia Artificial**.
+### Aplicación
+*   `/` redirige a `/learn`.
+*   `/learn`: panel de aprendizaje.
+*   `/categories` y `/categories/:subcategoryId/exercises`: categorías y lista de ejercicios de una subcategoría.
+*   `/results`: resultados del ejercicio.
+*   `/shop`: tienda.
+*   `/leaderboard`: clasificación.
+*   `/profile`: perfil.
+*   `/payment/success` y `/payment/cancel`: resultado del flujo de pago.
 
 ---
 
@@ -159,7 +149,7 @@ Todos los endpoints están protegidos por el middleware `authenticate` (JWT) a e
 ## 🚀 Puesta en Marcha Local
 
 ### Requisitos Previos
-*   Node.js (versión 18 o superior).
+*   Node.js 22 (la versión usada por la imagen Docker del frontend).
 *   Una base de datos MySQL activa.
 *   Una cuenta en OpenRouter (o Groq) y Stripe (claves de prueba) si deseas probar las integraciones de IA y pagos.
 
@@ -214,15 +204,13 @@ Todos los endpoints están protegidos por el middleware `authenticate` (JWT) a e
     ```bash
     npm install
     ```
-3.  Verifica la configuración del archivo `/frontend/src/environments/environment.ts` asegurándote de que la URL apunta al backend:
-    ```typescript
-    export const environment = {
-        production: false,
-        apiUrl: 'http://localhost:4000'
-    };
+3.  (Opcional) Configura la URL base de la API en un archivo `frontend/.env`:
+    ```env
+    VITE_API_BASE_URL=http://localhost:4000/api
     ```
-4.  Inicia la aplicación Angular localmente:
+    Si no defines esta variable, el frontend usa `http://localhost:4000/api`.
+4.  Inicia el servidor de desarrollo de Vite:
     ```bash
-    npm run start
+    npm run dev
     ```
 5.  Abre el navegador y accede a `http://localhost:4200/`.
