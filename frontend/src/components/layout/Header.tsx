@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { Flame, Coins, Heart, Sparkles, LogIn } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import {
+  getStreakBadge,
+  mergeUserStats,
+  subscribeToUserStats,
+  type UserStatsUpdate,
+} from '../../services/userStats.mjs'
 import { parseHeaderCounters } from './headerStats.mjs'
 
 interface UserStats {
@@ -30,6 +36,7 @@ export const Header: React.FC = () => {
 
   useEffect(() => {
     let isCurrentRequest = true
+    const eventChangedFields = new Set<keyof UserStats>()
     const token = localStorage.getItem('token')
 
     if (!token) {
@@ -38,11 +45,16 @@ export const Header: React.FC = () => {
       }
     }
 
+    const unsubscribe = subscribeToUserStats((update: UserStatsUpdate) => {
+      Object.keys(update).forEach((key) => eventChangedFields.add(key as keyof UserStats))
+      setStats((current) => mergeUserStats(current, update))
+    })
+
     const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000/api'
     const loadProfile = async () => {
       try {
         const response = await fetch(`${API_BASE}/users/me`, {
-        headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         })
         if (!response.ok) throw new Error('User profile request failed')
 
@@ -52,13 +64,15 @@ export const Header: React.FC = () => {
         if (!isCurrentRequest) return
 
         const level = isRecord(data.level) ? data.level.name : undefined
-        setStats((previous) => ({
-          ...previous,
-          ...counters,
-          level: typeof level === 'string' ? level : previous.level,
-          name: typeof data.name === 'string' ? data.name : previous.name,
-          avatarSeed: typeof data.avatar_seed === 'string' ? data.avatar_seed : previous.avatarSeed,
-        }))
+        const profileUpdate: Partial<UserStats> = {
+          ...(eventChangedFields.has('streak') ? {} : { streak: counters.streak }),
+          ...(eventChangedFields.has('coins') ? {} : { coins: counters.coins }),
+          ...(eventChangedFields.has('hearts') ? {} : { hearts: counters.hearts }),
+          ...(typeof level === 'string' ? { level } : {}),
+          ...(typeof data.name === 'string' ? { name: data.name } : {}),
+          ...(typeof data.avatar_seed === 'string' ? { avatarSeed: data.avatar_seed } : {}),
+        }
+        setStats((previous) => mergeUserStats(previous, profileUpdate))
         setStatsStatus('ready')
       } catch {
         if (isCurrentRequest) setStatsStatus('unavailable')
@@ -69,8 +83,11 @@ export const Header: React.FC = () => {
 
     return () => {
       isCurrentRequest = false
+      unsubscribe()
     }
   }, [])
+
+  const streakBadge = getStreakBadge(stats.streak)
 
   return (
     <header className="h-16 border-b-2 border-ceferlyBorder bg-white flex items-center justify-between px-4 md:px-8 sticky top-0 z-20">
@@ -95,9 +112,19 @@ export const Header: React.FC = () => {
         {statsStatus === 'ready' && (
           <>
             {/* Streak */}
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border-2 border-amber/30 bg-amber-50 shadow-sm cursor-pointer hover:scale-105 transition-transform" title="Racha de días de estudio">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border-2 border-amber/30 bg-amber-50 shadow-sm cursor-pointer hover:scale-105 transition-transform" title={`Racha de ${stats.streak} ${stats.streak === 1 ? 'día' : 'días'}`}>
               <Flame className="w-5 h-5 text-amber fill-amber animate-pulse" />
               <span className="font-black text-amber-dark text-sm">{stats.streak}</span>
+              {streakBadge && (
+                <span
+                  className="rounded-md bg-amber/20 px-1 py-0.5 text-[9px] font-black leading-none text-amber-dark"
+                  role="img"
+                  aria-label={streakBadge.accessibleLabel}
+                  title={streakBadge.accessibleLabel}
+                >
+                  {streakBadge.label}
+                </span>
+              )}
             </div>
 
             {/* Coins / Gems */}

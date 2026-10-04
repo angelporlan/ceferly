@@ -1,5 +1,20 @@
 # AGENT CHANGELOG
 
+## [Ciclo 9] - Recompensas sincronizadas en Header (#104)
+
+### Resumen
+El Header escucha actualizaciones de stats que publican los intentos y las compras de tienda; sus contadores ya no requieren recarga. El player muestra `coinsDelta` real y el Header anuncia hitos de racha de 3, 7 y 30 días con badges accesibles.
+
+### Verificación
+- `frontend npm test`: 5/5, con tests para eventos, merge parcial, límites de badges y feedback de monedas guardadas.
+- `frontend npm run build`: correcto.
+- ESLint focalizado en `Header.tsx`, `ExercisePlayer.tsx` y `Shop.tsx`: correcto.
+- `frontend npm run lint` global sigue con 15 errores y 1 warning del estado base; sigue el issue #98 y su PR #102.
+- QA navegador: `/learn` y `/shop` renderizan y muestran Header/tienda en estado invitado. No había API en `:4000`, así que el intento persistido y la compra autenticada se cubren con lógica unitaria y CI, no con una sesión real local.
+
+### Estado
+- Issue #104 enlazado desde la PR #105, abierta para revisión; `backend-test` y `frontend-build` pasaron para el commit `34f3e7a`.
+- Spec: `docs/specs/ciclo9-live-gamification-header.md`.
 ## [Ciclo 8] - Inicialización única de Google Identity Services (#101)
 
 ### Resumen
