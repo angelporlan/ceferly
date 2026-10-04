@@ -14,7 +14,7 @@
 - Revisión manual: rutas y `session_id` coinciden en el helper y `App.tsx`; `PaymentCancel` no llama al backend.
 
 ### Estado
-- Issue #117 abierto; implementación verificada en `agent/fix-stripe-return-urls`, PR pendiente de creación.
+- Issue #117 enlazado desde la PR #119 en `agent/fix-stripe-return-urls`; PR abierta para revisión.
 
 ## [Ciclo 4] - Documentación alineada con React y Vite (#95)
 
