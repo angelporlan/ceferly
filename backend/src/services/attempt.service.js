@@ -1,5 +1,6 @@
 import { UserExerciseAttempt } from "../models/UserExerciseAttempt.js";
 import { Exercise } from "../models/Exercise.js";
+import { Op } from "sequelize";
 import { applyAttemptRewards, canPlay, MAX_HEARTS } from "./gamification.js";
 import { scoreAttempt } from "./scoring.js";
 
@@ -39,7 +40,22 @@ export async function recordExerciseAttempt({
         total_gaps: scored.totalGaps,
         correct_gaps: scored.correctGaps,
         is_fully_correct: scored.isFullyCorrect,
-        score: scored.score
+        score: scored.score,
+        created_at: now
+    });
+
+    const dayStart = new Date(now);
+    dayStart.setUTCHours(0, 0, 0, 0);
+    const nextDayStart = new Date(dayStart);
+    nextDayStart.setUTCDate(nextDayStart.getUTCDate() + 1);
+    const attemptsToday = await UserExerciseAttempt.count({
+        where: {
+            user_id: user.id,
+            created_at: {
+                [Op.gte]: dayStart,
+                [Op.lt]: nextDayStart
+            }
+        }
     });
 
     const role = typeof user.getActiveRole === "function" ? user.getActiveRole() : (user.subscription_role || "free");
@@ -50,6 +66,8 @@ export async function recordExerciseAttempt({
         lastCompletedDate: user.last_completed_date,
         role,
         isFullyCorrect: scored.isFullyCorrect,
+        attemptsToday,
+        dailyGoal: user.daily_goal ?? 5,
         now
     });
 
