@@ -1,5 +1,21 @@
 # AGENT CHANGELOG
 
+## [Ciclo 26] - Catálogo equilibrado de 144 ejercicios Use of English (#138)
+
+### Resumen
+- Se añadieron 36 ejercicios originales a B1 Preliminary, B2 First y C1 Advanced.
+- El catálogo suma 144 preguntas: 48 por nivel, 36 por parte y 12 en cada combinación nivel/parte.
+- Contrato y plan en `docs/specs/ciclo26-uoe-catalog-144.md`.
+
+### Verificación local
+- TDD: las pruebas nuevas fallaron con el catálogo inicial (`108 !== 144`, 36 en vez de 48 por nivel).
+- `backend npm test`: 19/19; `frontend npm run build`: correcto.
+- `git diff --check`: correcto; tests validan tipos, títulos únicos, respuestas, explicaciones y formato de Part 4.
+- Sin cambios de UI, esquema ni seeder.
+
+### Estado
+- Implementación local lista en `agent/feat-uoe-catalog-144`; issue #138 abierto, PR/CI pendientes.
+
 ## [Ciclo 16] - Alinear retornos de Stripe con rutas React (#117)
 
 ### Resumen
