@@ -27,4 +27,4 @@ Rama: `agent/fix-categories-api-states`
 - [x] Añadir primero tests rojos de normalización para el payload real del backend.
 - [x] Eliminar `FALLBACK_CATEGORIES` e implementar los estados de carga, vacío, error y reintento.
 - [x] Ejecutar tests frontend, lint dirigido, build y smoke de la ruta.
-- [ ] Actualizar el changelog, subir commits semánticos y abrir PR `Closes #124`.
+- [x] Actualizar el changelog, subir commits semánticos y abrir la PR #125 que cierra #124.
