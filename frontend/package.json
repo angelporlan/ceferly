@@ -8,7 +8,7 @@
     "test": "node --test",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "test": "node --test",
+    "test": "node --test test/*.test.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

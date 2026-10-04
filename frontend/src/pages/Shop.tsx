@@ -3,6 +3,7 @@ import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { Badge } from '../components/ui/Badge'
 import { ShoppingBag, Sparkles, Coins, Check, RefreshCw, Heart } from 'lucide-react'
+import { publishUserStats } from '../services/userStats.mjs'
 
 type Profile = {
   username: string
@@ -104,6 +105,10 @@ export function Shop() {
         hearts: data.hearts ?? prev.hearts,
         avatarSeed: data.avatar_seed ?? prev.avatarSeed
       }))
+      publishUserStats({
+        coins: data.coins ?? profile.coins,
+        hearts: data.hearts ?? profile.hearts,
+      })
       setStatus('success')
       setNotice(pack.id === 'heart-refill' ? '¡Vidas recargadas!' : `¡Has desbloqueado ${pack.name}!`)
     } catch {
