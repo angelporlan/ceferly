@@ -15,6 +15,51 @@
 
 ### Estado
 - Issue #124 enlazado desde la PR #125 (`agent/fix-categories-api-states`); PR abierta y checks `backend-test` + `frontend-build` verdes.
+## [Ciclo 20] - Estados de error para la lista de ejercicios (#126)
+
+### Resumen
+- La lista usa el contrato `{ exercises, ... }`, conserva el vacío válido y distingue errores HTTP/red con reintento.
+- Ignora resultados obsoletos al cambiar nivel/subcategoría y limita cada fila a los campos que la vista necesita.
+- Añade tests `node:test` frontend sin dependencias y la ejecución en CI.
+
+### Verificación
+- Frontend: 3/3 tests y build OK; lint dirigido a los archivos cambiados OK.
+- Smoke local con datos ficticios efímeros: lista poblada, vacío válido y error de API con reintento visible.
+- El lint completo sigue fallando con 16 errores y 1 warning en otras rutas, cubiertos por #98/PR #102.
+- El primer test rojo falló porque `exercisesData.mjs` aún no existía, como esperaba TDD.
+
+### Estado
+- Issue #126 enlazado desde la PR #127 (`agent/fix-exercises-list-api-state`); PR abierta y checks `backend-test` + `frontend-build` verdes.
+## [Ciclo 21] - Resultado vacío sin contexto (#128)
+
+### Resumen
+- `/results` valida el estado de navegación antes de mostrar resultado, precisión, recompensas o explicación IA; una ruta directa ofrece volver a aprender o ver categorías.
+- Las recompensas se etiquetan como monedas, según el valor real recibido.
+- Se añadieron tests `node:test` frontend sin dependencias y la ejecución en CI.
+
+### Verificación
+- Frontend: 2/2 tests y build OK; lint dirigido a la página y el helper OK.
+- Smoke visual de `/results` sin estado: mensaje “No hay un resultado disponible” y accesos de navegación, sin éxito ni explicación IA.
+- El lint completo sigue fallando con 16 errores y 1 warning en otros archivos, cubiertos por #98/PR #102.
+- El test rojo inicial confirmó que el validador aún no existía.
+
+### Estado
+- Issue #128 enlazado desde la PR #129 (`agent/fix-results-empty-state`); PR abierta y checks `backend-test` + `frontend-build` verdes.
+## [Ciclo 22] - Progreso real en el Dashboard (#130)
+
+### Resumen
+- El camino de aprendizaje se carga solo desde subcategorías con `totalItems > 0`; ya no conserva demos ni asigna estrellas o estados completados sin datos de progreso.
+- Se añadieron estados de carga, catálogo vacío, error y reintento; el ranking del Dashboard ahora enlaza a la clasificación global por monedas y se retiró el 84% no respaldado.
+- La meta diaria, las reglas de racha y el backend quedan fuera de alcance. Contrato y plan: `docs/specs/ciclo22-dashboard-real-progress.md`.
+
+### Verificación local
+- TDD: el test del normalizador falló antes de implementarlo; `npm test` pasa 3/3 y `npm run build` pasa.
+- Lint dirigido pasa. El lint completo conserva 14 errores y 1 aviso en otros archivos.
+- Smoke UI local: catálogo poblado/vacío, error con reintento y carga; se verificó que solo se enlazan módulos poblados y no aparecen estrellas, liga, puesto ni porcentaje inventados.
+- CI de la PR #131: `backend-test` y `frontend-build` verdes en `push` y `pull_request`.
+
+### Estado
+- Issue #130 enlazado por la PR #131, abierta con checks verdes en `agent/fix-dashboard-real-progress`.
 
 ## [Ciclo 4] - Documentación alineada con React y Vite (#95)
 
