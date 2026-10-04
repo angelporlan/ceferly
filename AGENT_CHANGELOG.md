@@ -1,5 +1,20 @@
 # AGENT CHANGELOG
 
+## [Ciclo 22] - Progreso real en el Dashboard (#130)
+
+### Resumen
+- El camino de aprendizaje se carga solo desde subcategorías con `totalItems > 0`; ya no conserva demos ni asigna estrellas o estados completados sin datos de progreso.
+- Se añadieron estados de carga, catálogo vacío, error y reintento; el ranking del Dashboard ahora enlaza a la clasificación global por monedas y se retiró el 84% no respaldado.
+- La meta diaria, las reglas de racha y el backend quedan fuera de alcance. Contrato y plan: `docs/specs/ciclo22-dashboard-real-progress.md`.
+
+### Verificación local
+- TDD: el test del normalizador falló antes de implementarlo; `npm test` pasa 3/3 y `npm run build` pasa.
+- Lint dirigido pasa. El lint completo conserva 14 errores y 1 aviso en otros archivos.
+- Smoke UI local: catálogo poblado/empty/error+reintento/carga; se verificó que solo se enlazan módulos poblados y no aparecen estrellas, liga, puesto ni porcentaje inventados.
+
+### Estado
+- Issue #130; PR y CI pendientes en `agent/fix-dashboard-real-progress`.
+
 ## [Ciclo 4] - Documentación alineada con React y Vite (#95)
 
 ### Resumen
