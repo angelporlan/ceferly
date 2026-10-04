@@ -13,7 +13,7 @@
 - Smoke visual/accesible con mock local: `/exercises/139` no enseña la solución en idle y, tras una respuesta incorrecta, muestra `1. warmly / in a friendly way · 2. politely` y actualiza el estado accesible; `/results` conserva la respuesta legible en el fallback, sin JSON crudo.
 
 ### Estado
-- Issue #139 enlazado desde la rama `agent/fix-readable-answer-feedback`; PR pendiente.
+- Issue #139 enlazado desde la [PR #145](https://github.com/angelporlan/ceferly/pull/145); checks `backend-test` y `frontend-build` verdes.
 
 ## [Ciclo 10] - Aplicar racha al cumplir la meta diaria (#106)
 
