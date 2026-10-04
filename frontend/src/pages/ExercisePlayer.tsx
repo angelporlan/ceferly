@@ -5,6 +5,11 @@ import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { Badge } from '../components/ui/Badge'
 import { X, Heart, CheckCircle2, AlertCircle, ArrowRight, ShoppingBag } from 'lucide-react'
+import {
+  areNumberedGapAnswersComplete,
+  buildNumberedGapAnswers,
+  getExerciseGapNumbers,
+} from '../lib/exerciseGapAnswers.mjs'
 
 interface ExerciseData {
   id: number
@@ -42,6 +47,7 @@ export const ExercisePlayer: React.FC = () => {
   const [loadError, setLoadError] = useState('')
   const [selectedOption, setSelectedOption] = useState('')
   const [gapInput, setGapInput] = useState('')
+  const [gapAnswers, setGapAnswers] = useState<Record<string, string>>({})
   const [status, setStatus] = useState<'idle' | 'correct' | 'incorrect'>('idle')
   const [hearts, setHearts] = useState(0)
   const [coins, setCoins] = useState(0)
@@ -105,9 +111,15 @@ export const ExercisePlayer: React.FC = () => {
     Promise.all([loadHearts, loadExercise]).finally(() => setLoading(false))
   }, [id])
 
+  const gapNumbers = exercise ? getExerciseGapNumbers(exercise.questionText) : []
+  const hasMultipleGaps = !!exercise && !isChoiceExercise(exercise) && gapNumbers.length > 1
+
   const handleCheckAnswer = async () => {
     if (!exercise || blocked || submitting) return
-    const userAnswer = isChoiceExercise(exercise) ? selectedOption : gapInput.trim()
+    const numberedAnswers = hasMultipleGaps ? buildNumberedGapAnswers(gapNumbers, gapAnswers) : undefined
+    const userAnswer = isChoiceExercise(exercise)
+      ? selectedOption
+      : (numberedAnswers ?? gapInput.trim())
     setSubmitting(true)
 
     try {
@@ -121,7 +133,7 @@ export const ExercisePlayer: React.FC = () => {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ userAnswer, totalGaps: 1 }),
+          body: JSON.stringify({ userAnswer, totalGaps: hasMultipleGaps ? gapNumbers.length : 1 }),
         })
         const payload = await res.json().catch(() => ({}))
         if (res.status === 403) {
@@ -150,8 +162,20 @@ export const ExercisePlayer: React.FC = () => {
           const slashParts = expected.split('/').map((s) => s.trim().toLowerCase())
           isCorrect = slashParts.includes(String(userAnswer).toLowerCase())
         } else if (typeof expected === 'object' && expected !== null) {
-          const values = Object.values(expected as Record<string, unknown>).map((v) => String(v).toLowerCase())
-          isCorrect = values.includes(String(userAnswer).toLowerCase())
+          if (hasMultipleGaps && numberedAnswers) {
+            const expectedByGap = expected as Record<string, unknown>
+            isCorrect = gapNumbers.every((number) => {
+              const expectedValue = expectedByGap[number]
+              const alternatives = (Array.isArray(expectedValue) ? expectedValue : [expectedValue])
+                .flatMap((value) => String(value ?? '').split('/'))
+                .map((value) => value.trim().toLowerCase().replace(/\s+/g, ' '))
+              const submitted = numberedAnswers[number].toLowerCase().replace(/\s+/g, ' ')
+              return alternatives.includes(submitted)
+            })
+          } else {
+            const values = Object.values(expected as Record<string, unknown>).map((v) => String(v).toLowerCase())
+            isCorrect = values.includes(String(userAnswer).toLowerCase())
+          }
         } else {
           isCorrect = String(userAnswer).toLowerCase() === String(expected).toLowerCase()
         }
@@ -165,7 +189,9 @@ export const ExercisePlayer: React.FC = () => {
   const handleContinue = () => {
     if (!exercise) return
     const isCorrect = status === 'correct'
-    const userAnswer = isChoiceExercise(exercise) ? selectedOption : gapInput
+    const userAnswer = isChoiceExercise(exercise)
+      ? selectedOption
+      : (hasMultipleGaps ? buildNumberedGapAnswers(gapNumbers, gapAnswers) : gapInput)
     navigate('/results', {
       state: {
         exerciseId: exercise.id,
@@ -286,16 +312,35 @@ export const ExercisePlayer: React.FC = () => {
             })}
           </div>
         ) : (
-          <div className="flex flex-col gap-3">
-            <input
-              type="text"
-              value={gapInput}
-              onChange={(e) => status === 'idle' && setGapInput(e.target.value)}
-              placeholder="Escribe tu respuesta aquí..."
-              className="input-playful text-lg font-black text-center py-4"
-              disabled={status !== 'idle' || blocked}
-            />
-          </div>
+          hasMultipleGaps ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {gapNumbers.map((number) => (
+                <label key={number} className="flex flex-col gap-2 text-sm font-black text-slateText-main">
+                  <span>Hueco {number}</span>
+                  <input
+                    type="text"
+                    value={gapAnswers[number] ?? ''}
+                    onChange={(event) => status === 'idle' && setGapAnswers((current) => ({ ...current, [number]: event.target.value }))}
+                    placeholder={`Respuesta ${number}...`}
+                    aria-label={`Respuesta para el hueco ${number}`}
+                    className="input-playful text-lg font-black text-center py-4"
+                    disabled={status !== 'idle' || blocked}
+                  />
+                </label>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              <input
+                type="text"
+                value={gapInput}
+                onChange={(e) => status === 'idle' && setGapInput(e.target.value)}
+                placeholder="Escribe tu respuesta aquí..."
+                className="input-playful text-lg font-black text-center py-4"
+                disabled={status !== 'idle' || blocked}
+              />
+            </div>
+          )
         )}
 
         {status !== 'idle' && exercise.explanation_rule && (
@@ -320,7 +365,7 @@ export const ExercisePlayer: React.FC = () => {
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           {status === 'idle' ? (
             <div className="hidden sm:block text-xs font-bold text-slateText-muted">
-              {blocked ? 'Necesitas vidas para comprobar' : 'Selecciona o escribe una respuesta para verificar'}
+              {blocked ? 'Necesitas vidas para comprobar' : (hasMultipleGaps ? 'Completa todos los huecos para verificar' : 'Selecciona o escribe una respuesta para verificar')}
             </div>
           ) : status === 'correct' ? (
             <div className="flex items-center gap-3">
@@ -352,7 +397,11 @@ export const ExercisePlayer: React.FC = () => {
                 variant="mint"
                 size="lg"
                 fullWidth
-                disabled={blocked || submitting || (isChoiceExercise(exercise) ? !selectedOption : !gapInput.trim())}
+                disabled={blocked || submitting || (isChoiceExercise(exercise)
+                  ? !selectedOption
+                  : (hasMultipleGaps
+                    ? !areNumberedGapAnswersComplete(gapNumbers, gapAnswers)
+                    : !gapInput.trim()))}
                 onClick={handleCheckAnswer}
               >
                 {submitting ? 'Guardando...' : 'Comprobar'}

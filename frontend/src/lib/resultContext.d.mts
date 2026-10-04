@@ -4,7 +4,7 @@ export interface ResultContext {
   exerciseTitle?: string;
   isCorrect: boolean;
   correctAnswer?: string;
-  userAnswer?: string;
+  userAnswer?: string | Record<string, string>;
   questionText?: string;
   explanationRule?: string;
   hearts?: number;

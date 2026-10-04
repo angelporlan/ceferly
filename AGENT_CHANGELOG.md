@@ -45,6 +45,23 @@
 
 ### Estado
 - Issue #122 enlazado desde la PR #123 (`agent/feat-accurate-global-ranking`); PR abierta y checks `backend-test` + `frontend-build` verdes.
+## [Ciclo 28] - Puntuar cada hueco en ejercicios compuestos (#140)
+
+### Resumen
+- El reproductor muestra un campo por marcador numerado, exige completarlos y envía las respuestas como objeto indexado; `/results` conserva ese objeto.
+- El scorer compara cada valor con su clave, deriva el total desde la solución y persiste aciertos parciales y porcentaje sin conceder recompensa de respuesta completa.
+- Spec: `docs/specs/ciclo28-multigap-exercise-scoring.md`.
+
+### Verificación
+- Frontend: `npm test` 14/14, ESLint dirigido sin errores y `npm run build` OK.
+- Backend scorer: `node --test test/scoring.test.js` 6/6; TDD confirmó primero los cuatro casos nuevos fallando.
+- Backend: `npm test` — 26/26 con migraciones aplicadas en MySQL desechable aislado; incluye persistencia de respuestas parciales (`2/3`, score `67`).
+- QA con mock HTTP local: dos campos numerados, botón bloqueado hasta completar ambos, POST `{userAnswer:{"1":"finished","2":"wrong"},totalGaps:2}`, feedback de intento no completo y navegación a `/results`.
+- Revisión de catálogo: marcadores visibles coinciden con claves de solución en 26/26 Word Formation, 30/30 Key Word Transformation y 20/20 Conditionals.
+
+### Estado
+- Issue #140 abierto; PR y self-review pendientes de publicación.
+
 ## [Ciclo 10] - Aplicar racha al cumplir la meta diaria (#106)
 
 ### Resumen
