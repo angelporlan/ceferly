@@ -1,5 +1,20 @@
 # AGENT CHANGELOG
 
+## [Ciclo 13] - Desglose correcto de respuestas en el historial (#111)
+
+### Resumen
+- Normaliza valores escalares como una única respuesta para `marked_answers` y `feedback_summary`.
+- Mantiene el orden y la comparación existentes en las respuestas multiparte.
+- Extrae el formateo a `attempt-feedback.js` para reutilizarlo en el endpoint y probarlo de forma aislada.
+
+### Verificación
+- TDD: tests rojos con helper ausente; 4 tests focalizados pasan tras el fix.
+- Backend completo: 20/20 en MySQL temporal; frontend build y `git diff --check`: OK.
+- El test del controlador confirma que `GET /api/attempts/:id` devuelve una sola marca correcta para una respuesta escalar.
+
+### Estado
+- Issue #111 enlazado a la PR #113, abierta desde `agent/fix-scalar-attempt-feedback`.
+- Spec: `docs/specs/ciclo13-scalar-attempt-feedback.md`.
 ## [Ciclo 11] - Editar meta diaria desde Dashboard (#108)
 
 ### Resumen
