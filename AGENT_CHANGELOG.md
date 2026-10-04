@@ -1,5 +1,21 @@
 # AGENT CHANGELOG
 
+## [Ciclo 21] - Resultado vacío sin contexto (#128)
+
+### Resumen
+- `/results` valida el estado de navegación antes de mostrar resultado, precisión, recompensas o explicación IA; una ruta directa ofrece volver a aprender o ver categorías.
+- Las recompensas se etiquetan como monedas, según el valor real recibido.
+- Se añadieron tests `node:test` frontend sin dependencias y la ejecución en CI.
+
+### Verificación
+- Frontend: 2/2 tests y build OK; lint dirigido a la página y el helper OK.
+- Smoke visual de `/results` sin estado: mensaje “No hay un resultado disponible” y accesos de navegación, sin éxito ni explicación IA.
+- El lint completo sigue fallando con 16 errores y 1 warning en otros archivos, cubiertos por #98/PR #102.
+- El test rojo inicial confirmó que el validador aún no existía.
+
+### Estado
+- Issue #128 enlazado desde la rama `agent/fix-results-empty-state`; PR pendiente.
+
 ## [Ciclo 4] - Documentación alineada con React y Vite (#95)
 
 ### Resumen
