@@ -1,5 +1,30 @@
 # AGENT CHANGELOG
 
+## [Ciclo 31] - README con catálogo y racha actuales (#151)
+
+### Resumen
+- Corregir en README la cantidad y distribución actual de ejercicios y la regla de racha ligada a `daily_goal`.
+- Añadir instrucciones breves para diagnosticar el lint global desde archivos enfocados y sincronizar PRs con `main` conservando el changelog; no cambiar el comportamiento del producto.
+- Corregir en AGENTS la descripción de validación de `daily_goal`; abrir #152 para el guard de enteros pendiente en backend.
+- Spec: `docs/specs/ciclo31-readme-current-catalog-and-streak.md`.
+
+### Verificación
+- Línea base inicial (`31ca4b1`): backend 28/28, frontend 19/19 y build correctos.
+- Tras sincronizar `main` (`2277923`): backend 33/33 en MySQL temporal, frontend 22/22 y build correctos.
+- Lint global: continúa con 12 errores y 1 aviso preexistentes en auth/profile/ForgotPassword, cubiertos por #98/PR #102; no cambió el baseline.
+- `git diff origin/main...HEAD --check` y búsqueda de afirmaciones antiguas del conteo/racha y de Angular: OK.
+- La auditoría detectó y separó en #152 la falta de validación de enteros del endpoint; no se modificó código en este ciclo documental.
+- TDD no aplica a este ciclo solo documental.
+- QA UI/API: no aplica; no hay cambios ejecutables.
+
+### Estado
+- PR #153 abierta en `agent/docs-current-catalog-streak`, con self-review publicado; CI verde (2 backend-test y 2 frontend-build).
+
+## Retrospectiva — ciclos 26–30
+
+- Las correcciones de contenido deben verificarse en catálogo y en filas ya sembradas; el seeder `findOrCreate` no reconcilia registros existentes, así que usar migraciones condicionales y probar intentos asociados (#147).
+- Los tests backend necesitan MySQL aislado con Prisma Migrate aplicado; si la conexión falta, el fallo no demuestra una regresión. Registrar ese entorno antes de interpretar el resultado.
+- Las ramas paralelas vuelven a solaparse en la cabecera del changelog. Actualizar `origin/main` y conservar ambas entradas evita PRs en conflicto; esta regla queda en `AGENTS.md`.
 ## [Ciclo 23] - Soluciones compuestas legibles en ExercisePlayer (#139)
 
 ### Resumen
