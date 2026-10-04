@@ -1,5 +1,15 @@
 # AGENT CHANGELOG
 
+## [Ciclo 32] - Validar enteros en `daily_goal` (#152)
+
+### Resumen
+- Rechazar en el endpoint valores no enteros o fuera de rango antes de guardar la preferencia diaria del usuario.
+- Mantener la ruta y autenticación, y verificar la no mutación ante peticiones inválidas.
+- Contrato y plan: `docs/specs/ciclo32-daily-goal-integer-validation.md`.
+
+### Estado
+- Spec completada en `agent/fix-daily-goal-integer-validation`; pruebas de regresión pendientes.
+
 ## [Ciclo 29] - Aplicar el límite de palabras a B1 Part 4 (#143)
 
 ### Resumen
