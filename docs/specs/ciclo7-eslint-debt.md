@@ -35,10 +35,10 @@ El ciclo corrige los tipos, dependencias de hooks y manejo de errores en los arc
 
 ## Evidencia
 
-- Baseline reproducido antes de editar: `npm run lint` falló con 16 errores y 1 warning.
+- Baseline reproducido antes de editar el ciclo: `npm run lint` falló con 16 errores y 1 warning. Tras sincronizar con `main` en `bbdfbd1`, el baseline previo a este cambio era de 10 errores y 0 warnings.
 - `frontend npm run lint`: correcto, sin errores ni warnings; no quedan usos explícitos de `any` en `frontend/src`.
-- `frontend npm run build`: correcto.
-- `backend npm test`: 16/16.
-- El job `frontend-build` de CI ahora ejecuta ESLint antes del build.
-- QA local: login, registro, recuperación de contraseña, dashboard, clasificación y perfil cargan; el fallo de red de recuperación permite reintentar sin exponer si la cuenta existe. Consola del navegador sin errores.
-- El SDK de Google registra un warning al inicializar al visitar login y registro; follow-up abierto en #101.
+- `frontend npm test`: 24/24; `frontend npm run build`: correcto.
+- `backend npm test`: 42/42, con las cuatro migraciones aplicadas en un MySQL desechable.
+- El job `frontend-build` de CI ejecuta tests, ESLint y build.
+- QA local tras sincronizar: `/login`, `/register` y `/forgot-password` cargan y exponen sus controles y enlaces. No se enviaron formularios. La consola muestra `[GSI_LOGGER]: The given origin is not allowed for the given client ID` en `127.0.0.1`; el client ID local no autoriza ese origen. La inicialización duplicada de GSI ya está cubierta por el follow-up #101.
+- El CI de esta revisión queda pendiente de la sincronización publicada de la rama.

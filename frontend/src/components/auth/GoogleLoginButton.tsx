@@ -36,6 +36,15 @@ const getGoogleIdentityApi = (): GoogleIdentityApi | undefined => {
   return (window as GoogleWindow).google?.accounts?.id
 }
 
+type GoogleCredentialHandler = (response: GoogleCredentialResponse) => void | Promise<void>
+
+let activeGoogleCredentialHandler: GoogleCredentialHandler | null = null
+let initializedGoogleClientId: string | null = null
+
+const dispatchGoogleCredential = (response: GoogleCredentialResponse): void => {
+  void activeGoogleCredentialHandler?.(response)
+}
+
 interface GoogleLoginButtonProps {
   onSuccess?: () => void
   onError?: (error: string) => void
@@ -73,14 +82,19 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
   }, [navigate, onError, onSuccess])
 
   useEffect(() => {
+    activeGoogleCredentialHandler = handleCredentialResponse
+
     const initGsi = () => {
       const googleIdentity = getGoogleIdentityApi()
       if (googleIdentity && googleBtnRef.current) {
         try {
-          googleIdentity.initialize({
-            client_id: clientId,
-            callback: handleCredentialResponse,
-          })
+          if (initializedGoogleClientId !== clientId) {
+            googleIdentity.initialize({
+              client_id: clientId,
+              callback: dispatchGoogleCredential,
+            })
+            initializedGoogleClientId = clientId
+          }
 
           googleBtnRef.current.innerHTML = ''
           googleIdentity.renderButton(googleBtnRef.current, {
@@ -102,7 +116,17 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
       initGsi()
     } else {
       const timer = setTimeout(initGsi, 400)
-      return () => clearTimeout(timer)
+      return () => {
+        clearTimeout(timer)
+        if (activeGoogleCredentialHandler === handleCredentialResponse) {
+          activeGoogleCredentialHandler = null
+        }
+      }
+    }
+    return () => {
+      if (activeGoogleCredentialHandler === handleCredentialResponse) {
+        activeGoogleCredentialHandler = null
+      }
     }
   }, [clientId, handleCredentialResponse])
 

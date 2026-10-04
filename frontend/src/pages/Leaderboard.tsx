@@ -1,72 +1,48 @@
 import React, { useEffect, useState } from 'react'
 import { Card } from '../components/ui/Card'
 import { Badge } from '../components/ui/Badge'
-import { Trophy, Flame, Medal } from 'lucide-react'
-
-interface RankingUser {
-  id: number
-  rank: number
-  name: string
-  username: string
-  streak: number
-  score: number
-  isCurrentUser?: boolean
-}
-
-interface RankingItemResponse {
-  id?: number
-  name?: string
-  username?: string
-  streak?: number
-  score?: number
-  coins?: number
-  value?: number
-}
-
-interface RankingResponse {
-  data?: RankingItemResponse[]
-}
+import { Button } from '../components/ui/Button'
+import { Coins, Trophy, Flame, Medal } from 'lucide-react'
+import { normalizeRankingPayload, type RankingRow } from '../lib/leaderboardData.mjs'
 
 export const Leaderboard: React.FC = () => {
-  const [rankings, setRankings] = useState<RankingUser[]>([])
-  const [empty, setEmpty] = useState(false)
+  const [rankings, setRankings] = useState<RankingRow[]>([])
+  const [requestState, setRequestState] = useState<'loading' | 'ready' | 'error'>('loading')
+  const [retryCount, setRetryCount] = useState(0)
 
   useEffect(() => {
+    let cancelled = false
     const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000/api'
     const token = localStorage.getItem('token')
 
     fetch(`${API_BASE}/users/rankings?type=coins`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data: RankingItemResponse[] | RankingResponse | null) => {
-        const list = Array.isArray(data) ? data : (data?.data || [])
-        if (Array.isArray(list) && list.length > 0) {
-          setRankings(
-            list.map((item, idx) => ({
-              id: item.id ?? idx + 1,
-              rank: idx + 1,
-              name: item.name || item.username || `Estudiante ${idx + 1}`,
-              username: item.username || `student-${idx + 1}`,
-              streak: item.streak ?? 0,
-              score: item.score ?? item.coins ?? item.value ?? 0,
-            }))
-          )
-          setEmpty(false)
-        } else {
-          setRankings([])
-          setEmpty(true)
-        }
+      .then((res) => {
+        if (!res.ok) throw new Error('Ranking request failed')
+        return res.json()
+      })
+      .then((payload: unknown) => {
+        if (cancelled) return
+        setRankings(normalizeRankingPayload(payload))
+        setRequestState('ready')
       })
       .catch(() => {
-        setRankings([])
-        setEmpty(true)
+        if (!cancelled) setRequestState('error')
       })
-  }, [])
+    return () => {
+      cancelled = true
+    }
+  }, [retryCount])
+
+  const retry = () => {
+    setRequestState('loading')
+    setRetryCount((count) => count + 1)
+  }
 
   return (
     <div className="flex flex-col gap-6 max-w-3xl mx-auto">
-      {/* League Banner */}
+      {/* Global ranking banner */}
       <div className="card-playful p-6 bg-gradient-to-r from-amber-50 via-white to-sky-50 border-amber/30 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <div className="w-16 h-16 rounded-2xl bg-amber text-white flex items-center justify-center shadow-btn-amber">
@@ -74,35 +50,46 @@ export const Leaderboard: React.FC = () => {
           </div>
           <div className="text-center sm:text-left">
             <span className="text-xs font-black uppercase tracking-wider text-amber-dark">
-              División Competitiva
+              Clasificación global
             </span>
             <h1 className="text-2xl sm:text-3xl font-black text-slateText-main">
-              Liga Zafiro
+              Ranking de monedas
             </h1>
             <p className="text-xs font-bold text-slateText-muted mt-0.5">
-              Los 5 primeros ascienden a la Liga Rubí al final de la semana
+              Más monedas, mejor posición. La racha desempata los empates.
             </p>
           </div>
         </div>
-        <Badge variant="amber">Termina en 2 días</Badge>
+        <Badge variant="amber" icon={<Coins className="w-3.5 h-3.5" />}>Monedas</Badge>
       </div>
 
-      {/* Rankings List */}
-      {empty && (
-        <Card className="p-6 text-sm font-bold text-slateText-muted">
-          Todavía no hay ranking. Completa ejercicios para aparecer aquí con tus monedas reales.
+      {requestState === 'loading' && (
+        <Card role="status" aria-live="polite" className="text-sm font-bold text-slateText-muted">
+          Cargando clasificación…
         </Card>
       )}
 
-      <Card className="p-0 overflow-hidden divide-y-2 divide-ceferlyBorder">
-        {rankings.map((user) => {
-          return (
+      {requestState === 'error' && (
+        <Card role="alert" className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <p className="text-sm font-bold text-slateText-muted">
+            No se pudo cargar la clasificación. Comprueba tu conexión e inténtalo de nuevo.
+          </p>
+          <Button variant="secondary" size="sm" onClick={retry}>Reintentar</Button>
+        </Card>
+      )}
+
+      {requestState === 'ready' && rankings.length === 0 && (
+        <Card className="text-sm font-bold text-slateText-muted">
+          Todavía no hay alumnos en la clasificación. Completa ejercicios para sumar monedas y aparecer aquí.
+        </Card>
+      )}
+
+      {requestState === 'ready' && rankings.length > 0 && (
+        <Card className="p-0 overflow-hidden divide-y-2 divide-ceferlyBorder">
+          {rankings.map((user) => (
             <div
               key={user.id}
-              className={`
-                flex items-center justify-between p-4 px-6 transition-colors
-                ${user.isCurrentUser ? 'bg-mint-50/70 border-l-4 border-mint font-black' : 'hover:bg-slate-50'}
-              `}
+              className="flex items-center justify-between p-4 px-6 transition-colors hover:bg-slate-50"
             >
               {/* Rank position and user info */}
               <div className="flex items-center gap-4">
@@ -120,7 +107,7 @@ export const Leaderboard: React.FC = () => {
 
                 {/* Avatar circle */}
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-black text-sm ${
-                  user.isCurrentUser ? 'bg-mint shadow-sm' : 'bg-slate-400'
+                  user.rank === 1 ? 'bg-mint shadow-sm' : 'bg-slate-400'
                 }`}>
                   {user.name.charAt(0).toUpperCase()}
                 </div>
@@ -130,9 +117,6 @@ export const Leaderboard: React.FC = () => {
                     <span className="text-sm font-black text-slateText-main">
                       {user.name}
                     </span>
-                    {user.isCurrentUser && (
-                      <Badge variant="mint" className="text-[10px] py-0 px-1.5">TÚ</Badge>
-                    )}
                   </div>
                   <span className="text-xs font-bold text-slateText-muted">@{user.username}</span>
                 </div>
@@ -145,15 +129,16 @@ export const Leaderboard: React.FC = () => {
                   <span className="text-xs font-bold text-amber-dark">{user.streak} d</span>
                 </div>
 
-                <div className="text-right min-w-[70px]">
-                  <span className="text-base font-black text-slateText-main">{user.score}</span>
-                  <span className="text-xs font-bold text-slateText-muted ml-1">XP</span>
+                <div className="flex items-center gap-1 text-right min-w-[90px]">
+                  <Coins className="w-4 h-4 text-amber" aria-hidden="true" />
+                  <span className="text-base font-black text-slateText-main">{user.coins}</span>
+                  <span className="text-xs font-bold text-slateText-muted">monedas</span>
                 </div>
               </div>
             </div>
-          )
-        })}
-      </Card>
+          ))}
+        </Card>
+      )}
     </div>
   )
 }
