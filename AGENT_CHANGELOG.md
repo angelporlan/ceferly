@@ -1,5 +1,21 @@
 # AGENT CHANGELOG
 
+## [Ciclo 33] - Reconciliar guía de `daily_goal` tras el merge (#155)
+
+### Resumen
+- Actualizar `AGENTS.md` con la validación estricta de enteros JSON que ya está integrada en `main` mediante PR #154.
+- Registrar el merge de las PRs #153 y #154 y el cierre de sus issues #151 y #152 en los ciclos correspondientes.
+- Sincronizar la verificación final de la spec del ciclo 32 y documentar este ajuste en `docs/specs/ciclo33-daily-goal-doc-state.md`.
+
+### Verificación
+- Línea base de `main` (`24ceedd`): backend 41/41 con MySQL aislado y cuatro migraciones; frontend 28/28 y build correctos. La rama se sincronizó después con `main` en `7b88567`.
+- `npm run lint` conserva 12 errores y 1 aviso preexistentes, seguidos por #98/PR #102.
+- Revisión documental y `git diff --check`; sin cambios ejecutables.
+
+### Estado
+- PR #156 abierta desde `agent/docs-daily-goal-merge-record` con `Closes #155`; diff revisado y self-review publicado.
+- `backend-test` y `frontend-build` pasaron en GitHub Actions; el lint global conserva el baseline documentado en #98/PR #102.
+
 ## [Ciclo 25] - Recompensa única y meta diaria para Writing (#134)
 
 ### Resumen
@@ -46,7 +62,7 @@ GSI se inicializa una sola vez por client ID y usa un dispatcher hacia el handle
 
 ### Estado
 - Issue #101 reutilizado; warning reproducido antes del cambio en QA del ciclo anterior.
-- Issue #101 enlazado desde PR #103, abierta con `needs-human-review` por afectar el flujo de login.
+- PR #103 pasó a `main` en `7b88567`, enlazada a #101 y etiquetada `needs-human-review` por afectar el flujo de login.
 ## [Ciclo 12] - E2E HTTP del intento de práctica (#110)
 
 ### Resumen
@@ -61,10 +77,11 @@ GSI se inicializa una sola vez por client ID y usa un dispatcher hacia el handle
 - La validación del historial detectó el desglose incorrecto de respuestas escalares; seguimiento registrado en #111.
 
 ### Estado
-- Issue #110 enlazado a la PR #112, abierta desde `agent/test-practice-attempt-e2e`.
+- PR #112 se integró en `main` mediante `cff16db`, enlazada a #110.
 - La filtración de claves de respuesta sigue en la PR #100; este E2E no las usa para generar la respuesta.
 - Spec: `docs/specs/ciclo12-practice-attempt-e2e.md`.
 ## [Ciclo 15] - README y GOAL_PROMPT alineados con el código (#116)
+
 ## [Ciclo 17] - E2E integrado desde registro hasta explicación (#120)
 
 ### Resumen
@@ -79,7 +96,7 @@ GSI se inicializa una sola vez por client ID y usa un dispatcher hacia el handle
 - Sin cambios de interfaz ni llamadas reales a IA/Stripe.
 
 ### Estado
-- Issue #120 enlazado desde la PR #121 en `agent/test-full-learning-explanation-e2e`; PR abierta para revisión.
+- PR #121 se integró en `main` mediante `24ceedd`, enlazada a #120.
 ## [Ciclo 32] - Validar enteros en `daily_goal` (#152)
 
 ### Resumen
@@ -88,9 +105,9 @@ GSI se inicializa una sola vez por client ID y usa un dispatcher hacia el handle
 - Contrato y plan: `docs/specs/ciclo32-daily-goal-integer-validation.md`.
 
 ### Estado
-- Fix y regresión en `agent/fix-daily-goal-integer-validation`; TDD rojo confirmó que el string `"5"` se guardaba como 5 y que un body ausente daba 500.
-- Verificación local tras sincronizar `main` hasta `abac93d`: backend 40/40 con las 4 migraciones Prisma en MySQL desechable (`127.0.0.1:3322`).
-- PR #154 abierta con `needs-human-review` y self-review; CI verde para el HEAD anterior a la sincronización actual.
+- TDD rojo confirmó que el string `"5"` se guardaba como 5 y que un body ausente daba 500; el endpoint ahora rechaza ambos casos con 400.
+- PR #154 pasó `backend-test` y `frontend-build` y se integró en `main` con el merge commit `ad0cfb1`; issue #152 cerrado.
+- La PR llevó `needs-human-review`. La verificación de la base actual (`24ceedd`) registra backend 41/41 con cuatro migraciones, frontend 28/28 y build correctos; lint global conserva 12 errores y 1 aviso preexistentes (#98/PR #102).
 
 ## [Ciclo 31] - README con catálogo y racha actuales (#151)
 
@@ -110,7 +127,8 @@ GSI se inicializa una sola vez por client ID y usa un dispatcher hacia el handle
 - QA UI/API: no aplica; no hay cambios ejecutables.
 
 ### Estado
-- PR #153 abierta en `agent/docs-current-catalog-streak`, con self-review publicado; CI verde (2 backend-test y 2 frontend-build).
+- PR #153 pasó sus checks y se integró en `main` con el merge commit `3061eff`; issue #151 cerrado.
+- La validación entera pendiente en el momento de este ciclo se completó después en el ciclo 32 mediante PR #154 (#152).
 
 ## Retrospectiva — ciclos 26–30
 
