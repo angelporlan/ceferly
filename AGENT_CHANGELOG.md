@@ -16,7 +16,7 @@
 - Review independiente: aprobado; la unicidad C1 se confirma editorialmente y la respuesta B2 completa el enunciado con cinco palabras.
 
 ### Estado
-- Issue #142 en `agent/fix-cambridge-uoe-editorial`; PR en preparación.
+- Issue #142 enlazado desde la PR #146 en `agent/fix-cambridge-uoe-editorial`; CI `backend-test` y `frontend-build` verdes.
 - Follow-up #143: respuestas de una palabra en B1 Part 4 #3 y #5.
 
 ## [Ciclo 10] - Aplicar racha al cumplir la meta diaria (#106)
