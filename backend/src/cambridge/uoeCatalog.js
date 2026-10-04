@@ -98,9 +98,9 @@ export const CAMBRIDGE_UOE_EXERCISES = [
 
     kwt("B1", 1, "A trip to Rome", "The last time I visited Rome was in 2020.", "BEEN", "I ______ Rome since 2020.", "have not been to / haven't been to", "Present perfect with since + last time: have not been to + place since + point in time."),
     kwt("B1", 2, "A noisy party", "The music was so loud that we couldn't talk.", "SUCH", "It was ______ that we couldn't talk.", "such loud music", "so + adjective + that ⇔ such + adjective + noun + that."),
-    kwt("B1", 3, "Photography club", "Marta is interested in photography.", "INTEREST", "Photography ______ Marta.", "is of interest to / interests", "be interested in ⇔ be of interest to / the verb interest."),
+    kwt("B1", 3, "Photography club", "Marta is interested in photography.", "INTEREST", "Photography ______ Marta.", "is of interest to", "be interested in ⇔ be of interest to; the four-word answer keeps the supplied keyword."),
     kwt("B1", 4, "Football practice", "Luis is a good footballer.", "AT", "Luis is ______ football.", "good at", "be good at + noun/-ing is the B1 ability collocation."),
-    kwt("B1", 5, "Cancelled match", "They cancelled the match because of the rain.", "BECAUSE", "They cancelled the match ______ it was raining.", "because", "because of + noun ⇔ because + clause."),
+    kwt("B1", 5, "Cancelled match", "They cancelled the match because of the rain.", "BECAUSE", "The match ______ the rain.", "was cancelled because of", "Use the passive was cancelled and because of + noun; the four-word transformation keeps the original meaning."),
     kwt("B1", 6, "A heavy box", "The box was so heavy that she couldn't lift it.", "TOO", "The box was ______ lift.", "too heavy to", "so + adj + that + can't ⇔ too + adj + to-infinitive."),
     kwt("B1", 7, "Tea or coffee", "I like tea more than coffee.", "PREFER", "I ______ coffee.", "prefer tea to", "like A more than B ⇔ prefer A to B."),
     kwt("B1", 8, "A past habit", "I played the piano every day when I was a child.", "USED", "I ______ the piano every day when I was a child.", "used to play", "past habit ⇔ used to + infinitive."),
