@@ -13,8 +13,9 @@ Se resolvieron los 16 errores y el warning de `npm run lint` con tipos explícit
 - Al alternar login/registro el SDK de Google emite un warning de inicialización repetida; seguimiento abierto en #101.
 
 ### Estado
-- Issue #98 reutilizado; PR pendiente de crear desde `agent/fix-eslint-debt`.
+- Issue #98 enlazado desde PR #102, marcada `needs-human-review` por tocar superficies de acceso/login.
 - La baseline del lint se reprodujo antes de implementar: 16 errores y 1 warning.
+- Follow-up #101 abierto por el warning de inicialización repetida de Google Identity Services.
 
 ## [Ciclo 4] - Documentación alineada con React y Vite (#95)
 
