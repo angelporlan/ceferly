@@ -14,7 +14,7 @@
 - No se ejecutaron tests ni build: ciclo solo documental, sin cambios de código ejecutable.
 
 ### Estado
-- Issue #116 enlazado desde la PR #118 en `agent/docs-align-readme`; CI en curso.
+- Issue #116 enlazado desde la PR #118 en `agent/docs-align-readme`; PR abierta para revisión.
 
 ## [Ciclo 4] - Documentación alineada con React y Vite (#95)
 
