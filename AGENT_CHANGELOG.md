@@ -1,5 +1,23 @@
 # AGENT CHANGELOG
 
+## [Ciclo 12] - E2E HTTP del intento de práctica (#110)
+
+### Resumen
+- Separa `app.js` del bootstrap para montar Express en pruebas sin ejecutar migraciones ni seeds de desarrollo.
+- Añade un E2E HTTP de registro → catálogo → intento → historial, con fixture determinista, aserciones de persistencia/recompensas y limpieza.
+- El cliente de Stripe se crea al usar pagos, así importar las rutas en pruebas no requiere claves ni llamadas externas.
+
+### Verificación
+- TDD: la prueba falló al faltar `app.js`; pasó tras extraer la app.
+- MySQL temporal con migraciones: E2E 1/1; backend completo 17/17.
+- `frontend npm run build`: OK; `git diff --check`: OK.
+- La validación del historial detectó el desglose incorrecto de respuestas escalares; seguimiento registrado en #111.
+
+### Estado
+- Issue #110 enlazado a la PR #112, abierta desde `agent/test-practice-attempt-e2e`.
+- La filtración de claves de respuesta sigue en la PR #100; este E2E no las usa para generar la respuesta.
+- Spec: `docs/specs/ciclo12-practice-attempt-e2e.md`.
+## [Ciclo 15] - README y GOAL_PROMPT alineados con el código (#116)
 ## [Ciclo 17] - E2E integrado desde registro hasta explicación (#120)
 
 ### Resumen
