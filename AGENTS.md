@@ -85,3 +85,7 @@ Prelación: contenido <100 ejercicios → E2E → IA → gamificación → tests
 ## Arranque
 
 `gh issue list`, `gh pr list`, `AGENT_CHANGELOG.md`. Si no hay issue abierto de la siguiente prioridad, créalo. Luego rama + TDD + commits + PR + self-review.
+
+## Gotchas del repo
+
+- `backend/src/server.js` aplica migraciones y seeds de desarrollo al arrancar fuera de producción. Los tests HTTP deben importar `backend/src/app.js`, que monta las rutas sin iniciar el servidor ni ejecutar seeds.

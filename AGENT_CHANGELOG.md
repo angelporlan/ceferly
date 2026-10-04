@@ -1,5 +1,10 @@
 # AGENT CHANGELOG
 
+## [Ciclo 12] - E2E HTTP del intento de práctica (#110)
+
+### Estado
+- Planificando en `agent/test-practice-attempt-e2e`; issue #110 abierto.
+
 ## [Ciclo 4] - Documentación alineada con React y Vite (#95)
 
 ### Resumen

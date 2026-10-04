@@ -2,7 +2,20 @@ import Stripe from "stripe";
 import { User } from "../models/User.js";
 import "dotenv/config";
 
-const stripe = new Stripe(process.env.ENV === "PROD" ? process.env.STRIPE_SECRET_KEY_PROD : process.env.STRIPE_SECRET_KEY_TEST);
+let stripeClient;
+const getStripeClient = () => {
+    if (stripeClient) return stripeClient;
+
+    const secretKey = process.env.ENV === "PROD"
+        ? process.env.STRIPE_SECRET_KEY_PROD
+        : process.env.STRIPE_SECRET_KEY_TEST;
+    if (!secretKey) {
+        throw new Error("Stripe is not configured");
+    }
+
+    stripeClient = new Stripe(secretKey);
+    return stripeClient;
+};
 
 const getFrontUrl = () => {
     const rawUrl = process.env.ENV === "TEST" ? process.env.URL_FRONT_TEST : process.env.URL_PROD;
@@ -22,7 +35,7 @@ console.log("Stripe Redirect URL Base:", FRONT_URL);
 console.log("Backend URL Base:", BACKEND_URL);
 
 export const createSessionPremium = async (req, res) => {
-    const session = await stripe.checkout.sessions.create({
+    const session = await getStripeClient().checkout.sessions.create({
         payment_method_types: ["card"],
         line_items: [
             {
@@ -50,7 +63,7 @@ export const createSessionPremium = async (req, res) => {
 };
 
 export const createSessionPro = async (req, res) => {
-    const session = await stripe.checkout.sessions.create({
+    const session = await getStripeClient().checkout.sessions.create({
         payment_method_types: ["card"],
         line_items: [
             {
@@ -88,7 +101,7 @@ export const verifySession = async (req, res) => {
 
     try {
         console.log("Retrieving session from Stripe:", sessionId);
-        const session = await stripe.checkout.sessions.retrieve(sessionId);
+        const session = await getStripeClient().checkout.sessions.retrieve(sessionId);
         console.log("Session retrieved:", { payment_status: session.payment_status, metadata: session.metadata });
 
         if (session.payment_status !== "paid") {
