@@ -15,6 +15,7 @@
 
 ### Estado
 - Issue #147 enlazado desde la PR #150 en `agent/fix-seeded-uoe-content`; relacionado con #143.
+
 ## [Ciclo 27] - Correcciones editoriales de Use of English (#142)
 
 
@@ -53,6 +54,7 @@
 
 ### Estado
 - Issue #138 enlazado por la PR #141, abierta en `agent/feat-uoe-catalog-144` con checks verdes.
+
 ## [Ciclo 13] - Desglose correcto de respuestas en el historial (#111)
 
 ### Resumen
