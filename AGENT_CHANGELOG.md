@@ -19,6 +19,36 @@
 - Issue #142 enlazado desde la PR #146 en `agent/fix-cambridge-uoe-editorial`; CI `backend-test` y `frontend-build` verdes.
 - Follow-up #143: respuestas de una palabra en B1 Part 4 #3 y #5.
 
+## [Ciclo 11] - Editar meta diaria desde Dashboard (#108)
+
+### Resumen
+- La tarjeta de meta diaria permite ajustar de 1 a 100 ejercicios y actualiza el progreso tras confirmar el servidor.
+- Los errores de validación, red o servidor conservan la última meta confirmada y anuncian el estado con feedback accesible.
+- Las personas visitantes ven el acceso al inicio de sesión en vez de un control que no podrían guardar.
+
+### Verificación
+- `frontend npm test`: 2/2.
+- `frontend npm run build`: OK; `npx eslint src/pages/Dashboard.tsx`: OK; `git diff --check`: OK.
+- QA UI: `/learn` cargó como visitante y mostró la meta, el progreso y el enlace de inicio de sesión.
+- El guardado autenticado requiere backend y sesión; no se verificó en navegador en esta sesión.
+
+### Estado
+- Issue #108 enlazado a la PR #109, abierta con la etiqueta `needs-human-review`.
+- Spec: `docs/specs/ciclo11-daily-goal-settings.md`.
+## [Ciclo 18] - Clasificación global coherente con el API (#122)
+
+### Resumen
+- La vista de ranking ahora refleja la clasificación global por monedas y la racha como desempate; elimina la liga, los ascensos, la cuenta atrás y la etiqueta XP que no respaldaba el backend.
+- Normaliza la respuesta paginada `{ data, meta }`, muestra monedas y distingue carga, vacío, error y reintento.
+- Añade `node:test` frontend sin dependencias nuevas y un gotcha accionable en `AGENTS.md`.
+
+### Verificación
+- Frontend: 3/3 tests y build OK; smoke visual local con ranking poblado, vacío y error visible.
+- `git diff --check` OK. `npm run lint` sigue con 15 errores en otras pantallas/componentes, registrados en #98/PR #102; esta pantalla ya no aporta el `any` que causaba uno de los errores.
+- Primer test rojo esperado antes de crear el normalizador: módulo aún inexistente.
+
+### Estado
+- Issue #122 enlazado desde la PR #123 (`agent/feat-accurate-global-ranking`); PR abierta y checks `backend-test` + `frontend-build` verdes.
 ## [Ciclo 10] - Aplicar racha al cumplir la meta diaria (#106)
 
 ### Resumen
