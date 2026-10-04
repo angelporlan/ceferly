@@ -1,6 +1,6 @@
 # Ciclo 22 — Progreso real en el Dashboard
 
-Issue: [#130](https://github.com/angelporlan/ceferly/issues/130)  
+Issue: [#130](https://github.com/angelporlan/ceferly/issues/130)
 Rama: `agent/fix-dashboard-real-progress`
 
 ## Problema y objetivo

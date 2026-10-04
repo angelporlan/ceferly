@@ -10,7 +10,7 @@
 ### Verificación local
 - TDD: el test del normalizador falló antes de implementarlo; `npm test` pasa 3/3 y `npm run build` pasa.
 - Lint dirigido pasa. El lint completo conserva 14 errores y 1 aviso en otros archivos.
-- Smoke UI local: catálogo poblado/empty/error+reintento/carga; se verificó que solo se enlazan módulos poblados y no aparecen estrellas, liga, puesto ni porcentaje inventados.
+- Smoke UI local: catálogo poblado/vacío, error con reintento y carga; se verificó que solo se enlazan módulos poblados y no aparecen estrellas, liga, puesto ni porcentaje inventados.
 
 ### Estado
 - Issue #130; PR y CI pendientes en `agent/fix-dashboard-real-progress`.
