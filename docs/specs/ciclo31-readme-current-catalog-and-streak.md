@@ -2,7 +2,7 @@
 
 Issue: #151
 Rama: `agent/docs-current-catalog-streak`
-Base auditada: `origin/main` en `31ca4b1`.
+Base auditada al inicio: `origin/main` en `31ca4b1`. Verificación final contra `origin/main` en `2277923`.
 
 ## Problema y alcance
 
@@ -49,7 +49,7 @@ El cambio actualiza esas dos descripciones y añade notas de trabajo para el lin
 
 ## Verificación final
 
-- Tras sincronizar `main` hasta `5f705a8`: backend 31/31 tests con migraciones aplicadas a MySQL desechable; frontend 22/22 tests y `npm run build` correctos.
+- Tras sincronizar `main` hasta `2277923`: backend 33/33 tests con migraciones aplicadas a MySQL desechable; frontend 22/22 tests y `npm run build` correctos.
 - `npm run lint` conserva los mismos 12 errores y 1 aviso de la línea base; los cambios de este ciclo son Markdown.
 - Búsquedas de afirmaciones antiguas del catálogo/racha y `Angular`: sin resultados. `git diff origin/main...HEAD --check`: correcto.
 - QA UI/API no aplica y TDD no aplica: no se cambió código ejecutable.
