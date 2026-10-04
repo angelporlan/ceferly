@@ -11,7 +11,7 @@ Los README describen ahora el frontend implementado con React 19, TypeScript, Vi
 - No se ejecutaron tests: el cambio solo modifica documentación.
 
 ### Estado
-- Issue #95 abierto; PR pendiente.
+- Issue #95 enlazado desde la PR #96; la PR está abierta y CI en curso.
 
 ## [Ciclo 3] - Catálogo sin subcategorías vacías (#92)
 
