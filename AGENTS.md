@@ -59,6 +59,9 @@ Stack real:
 - Docker Compose. MySQL suele estar en 3313.
 - UI Duolingo: verde `#58CC02`. No romper el look.
 - El ranking actual es global por monedas (racha desempata); no anuncies XP, ligas ni temporadas que la API no implemente.
+- El catálogo solo se renderiza desde `/api/categories`; no uses nodos demo ante errores o respuestas vacías.
+- Las listas cargadas desde API distinguen éxito vacío de error; nunca conviertas un fallo HTTP/red en “sin resultados”.
+- `/results` requiere `exerciseId` y `isCorrect` booleano en el estado de navegación; no asumas un aprobado por defecto.
 
 ## Pipeline por ciclo
 
