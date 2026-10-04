@@ -14,7 +14,7 @@
 - El primer test rojo falló porque `exercisesData.mjs` aún no existía, como esperaba TDD.
 
 ### Estado
-- Issue #126 enlazado desde la PR #127 (`agent/fix-exercises-list-api-state`); PR abierta, CI en curso.
+- Issue #126 enlazado desde la PR #127 (`agent/fix-exercises-list-api-state`); PR abierta y checks `backend-test` + `frontend-build` verdes.
 
 ## [Ciclo 4] - Documentación alineada con React y Vite (#95)
 
