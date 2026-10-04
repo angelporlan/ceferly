@@ -41,4 +41,4 @@ El ciclo corrige los tipos, dependencias de hooks y manejo de errores en los arc
 - `backend npm test`: 42/42, con las cuatro migraciones aplicadas en un MySQL desechable.
 - El job `frontend-build` de CI ejecuta tests, ESLint y build.
 - QA local tras sincronizar: `/login`, `/register` y `/forgot-password` cargan y exponen sus controles y enlaces. No se enviaron formularios. La consola muestra `[GSI_LOGGER]: The given origin is not allowed for the given client ID` en `127.0.0.1`; el client ID local no autoriza ese origen. La inicialización duplicada de GSI ya está cubierta por el follow-up #101.
-- Después se integró `main` en `fc368fe` (PRs #137 y #156); sus cambios no alteran el frontend de este ciclo. El CI del HEAD actualizado queda pendiente.
+- Después se integró `main` en `fc368fe` (PRs #137 y #156); sus cambios no alteran el frontend de este ciclo. En el HEAD `cb2f4fa`, `backend-test` y `frontend-build` pasaron; `frontend-build` ejecuta tests, lint y build.
