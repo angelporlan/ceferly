@@ -51,7 +51,7 @@ El Dashboard debe ofrecer práctica solo para módulos que `/api/categories` con
 - **Lint:** ESLint dirigido a `Dashboard.tsx`, `dashboardCatalog.mjs` y el test — pasa. `npm run lint` completo conserva 14 errores y 1 aviso preexistentes en GoogleLoginButton, Header, ForgotPassword, Leaderboard, Login, Profile, Register y `auth.service.ts`.
 - **Smoke UI con API mock local:** catálogo poblado muestra solo Conditionals y Word formation (se excluye la subcategoría con 0 ejercicios); catálogo vacío muestra estado vacío y acceso a categorías; HTTP 503 muestra error y Reintentar, que recupera los módulos al volver la API; petición lenta muestra el estado de carga.
 - **Revisión visual:** el camino usa módulos de práctica sin estrellas ni estado de finalización; las tarjetas muestran recomendación neutral y clasificación global por monedas, sin cifras, liga o puesto inventados.
-- **CI:** pendiente de la PR del ciclo.
+- **CI:** `backend-test` y `frontend-build` pasan en los eventos `push` y `pull_request` de la PR #131.
 
 ## Riesgos y reversión
 

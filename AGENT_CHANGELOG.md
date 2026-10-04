@@ -11,9 +11,10 @@
 - TDD: el test del normalizador falló antes de implementarlo; `npm test` pasa 3/3 y `npm run build` pasa.
 - Lint dirigido pasa. El lint completo conserva 14 errores y 1 aviso en otros archivos.
 - Smoke UI local: catálogo poblado/vacío, error con reintento y carga; se verificó que solo se enlazan módulos poblados y no aparecen estrellas, liga, puesto ni porcentaje inventados.
+- CI de la PR #131: `backend-test` y `frontend-build` verdes en `push` y `pull_request`.
 
 ### Estado
-- Issue #130; PR y CI pendientes en `agent/fix-dashboard-real-progress`.
+- Issue #130 enlazado por la PR #131, abierta con checks verdes en `agent/fix-dashboard-real-progress`.
 
 ## [Ciclo 4] - Documentación alineada con React y Vite (#95)
 
