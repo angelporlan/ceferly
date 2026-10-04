@@ -9,8 +9,24 @@
 
 ### Estado
 - Fix y regresión en `agent/fix-daily-goal-integer-validation`; TDD rojo confirmó que el string `"5"` se guardaba como 5 y que un body ausente daba 500.
-- Verificación local: test HTTP focalizado y backend 39/39 con las 3 migraciones Prisma en MySQL desechable (`127.0.0.1:3322`).
-- PR #154 abierta con `needs-human-review` y self-review; CI verde (2 backend-test y 2 frontend-build).
+- Verificación local tras sincronizar `main` hasta `abac93d`: backend 40/40 con las 4 migraciones Prisma en MySQL desechable (`127.0.0.1:3322`).
+- PR #154 abierta con `needs-human-review` y self-review; falta CI para el HEAD sincronizado.
+
+## [Ciclo 30] - Reconciliar contenido UoE ya sembrado (#147)
+
+### Resumen
+- Añadir una migración de datos versionada para aplicar a ejercicios persistidos las correcciones de B1 Part 4 #3 y #5.
+- Condicionar las actualizaciones a los valores antiguos conocidos y conservar IDs e intentos asociados.
+- Spec: `docs/specs/ciclo30-reconcile-seeded-uoe-content.md`.
+
+### Verificación
+- TDD: el test falló antes de añadir la migración porque el archivo versionado aún no existía; después pasó.
+- Backend: 29/29 tests en MySQL temporal aislado, con `origin/main` actualizado y todas las migraciones aplicadas.
+- Frontend: 16/16 tests y build de producción OK.
+- QA: el test conserva intentos y ediciones manuales; no hay rutas UI afectadas; `git diff --check` OK.
+
+### Estado
+- Issue #147 enlazado desde la PR #150 en `agent/fix-seeded-uoe-content`; relacionado con #143.
 
 ## [Ciclo 29] - Aplicar el límite de palabras a B1 Part 4 (#143)
 
