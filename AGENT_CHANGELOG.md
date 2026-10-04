@@ -5,12 +5,44 @@
 ### Resumen
 - Rechazar en el endpoint valores no enteros o fuera de rango antes de guardar la preferencia diaria del usuario.
 - Mantener la ruta y autenticación, y verificar la no mutación ante peticiones inválidas.
+- Alinear el gotcha de `AGENTS.md` con la validación ahora implementada.
 - Contrato y plan: `docs/specs/ciclo32-daily-goal-integer-validation.md`.
 
-### Estado
+### Verificación
 - Fix y regresión en `agent/fix-daily-goal-integer-validation`; TDD rojo confirmó que el string `"5"` se guardaba como 5 y que un body ausente daba 500.
-- Verificación local tras sincronizar `main` hasta `abac93d`: backend 40/40 con las 4 migraciones Prisma en MySQL desechable (`127.0.0.1:3322`).
-- PR #154 abierta con `needs-human-review` y self-review; CI verde para el HEAD anterior a la sincronización actual.
+- Tras sincronizar `main` hasta `3061eff`: backend 40/40 con las 4 migraciones Prisma en MySQL desechable (`127.0.0.1:3322`).
+- Frontend base: tests 28/28 y build correcto; el cambio no toca frontend.
+- `npm run lint` sigue con 12 errores y 1 aviso previos en auth/profile/ForgotPassword; seguimiento existente #98/PR #102.
+- `git diff --check` correcto.
+
+### Estado
+- PR #154 abierta con `needs-human-review` y self-review; CI del HEAD previo fue verde y la sincronización actual requiere revalidación.
+
+## [Ciclo 31] - README con catálogo y racha actuales (#151)
+
+### Resumen
+- Corregir en README la cantidad y distribución actual de ejercicios y la regla de racha ligada a `daily_goal`.
+- Añadir instrucciones breves para diagnosticar el lint global desde archivos enfocados y sincronizar PRs con `main` conservando el changelog; no cambiar el comportamiento del producto.
+- Corregir en AGENTS la descripción de validación de `daily_goal`; abrir #152 para el guard de enteros pendiente en backend.
+- Spec: `docs/specs/ciclo31-readme-current-catalog-and-streak.md`.
+
+### Verificación
+- Línea base inicial (`31ca4b1`): backend 28/28, frontend 19/19 y build correctos.
+- Tras sincronizar `main` (`2277923`): backend 33/33 en MySQL temporal, frontend 22/22 y build correctos.
+- Lint global: continúa con 12 errores y 1 aviso preexistentes en auth/profile/ForgotPassword, cubiertos por #98/PR #102; no cambió el baseline.
+- `git diff origin/main...HEAD --check` y búsqueda de afirmaciones antiguas del conteo/racha y de Angular: OK.
+- La auditoría detectó y separó en #152 la falta de validación de enteros del endpoint; no se modificó código en este ciclo documental.
+- TDD no aplica a este ciclo solo documental.
+- QA UI/API: no aplica; no hay cambios ejecutables.
+
+### Estado
+- PR #153 integrada en `main` como `3061eff`; issue #151 cerrado automáticamente.
+
+## Retrospectiva — ciclos 26–30
+
+- Las correcciones de contenido deben verificarse en catálogo y en filas ya sembradas; el seeder `findOrCreate` no reconcilia registros existentes, así que usar migraciones condicionales y probar intentos asociados (#147).
+- Los tests backend necesitan MySQL aislado con Prisma Migrate aplicado; si la conexión falta, el fallo no demuestra una regresión. Registrar ese entorno antes de interpretar el resultado.
+- Las ramas paralelas vuelven a solaparse en la cabecera del changelog. Actualizar `origin/main` y conservar ambas entradas evita PRs en conflicto; esta regla queda en `AGENTS.md`.
 
 ## [Ciclo 23] - Soluciones compuestas legibles en ExercisePlayer (#139)
 

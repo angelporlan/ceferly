@@ -3,13 +3,15 @@
 Issue: #152
 Rama: `agent/fix-daily-goal-integer-validation`
 Base: `origin/main` en `e64bcee`.
-Sincronización final: `origin/main` en `0bb3c3e` (PR #145).
+Sincronización final: `origin/main` en `3061eff` (PR #153).
 
 ## Problema y alcance
 
 `PUT /users/me/daily-goal` comprueba que el valor esté entre 1 y 100, pero JavaScript compara decimales y coerciona strings numéricos. El modelo MySQL usa una columna entera, por lo que una entrada como `1.5` podría terminar guardada truncada o producir un resultado distinto del valor enviado. Además, la ruta requiere autenticación y la preferencia pertenece al usuario.
 
 El ciclo restringe el endpoint a valores JSON de tipo number que sean enteros entre 1 y 100 inclusive. Las entradas inválidas responden 400 y no cambian el valor persistido. La ruta, autenticación y respuesta exitosa existente permanecen iguales.
+
+También se actualiza el gotcha de `AGENTS.md` que la PR #153 dejó apuntando al hardening pendiente, para que describa la regla ya implementada.
 
 ## Requisitos e invariantes
 
@@ -18,6 +20,7 @@ El ciclo restringe el endpoint a valores JSON de tipo number que sean enteros en
 - **REQ-003**: Una petición rechazada no debe guardar ni alterar `daily_goal`.
 - **REQ-004**: Una petición válida conserva el estado 200 y la forma de respuesta exitosa actual.
 - **REQ-005**: Mantener `/users/me/daily-goal` y su middleware de autenticación sin cambios.
+- **REQ-006**: `AGENTS.md` MUST describir el guard entero implementado y no remitir a #152 como pendiente.
 - **INV-001**: No cambiar esquema, frontend, racha ni otras preferencias del usuario.
 - **INV-002**: No convertir/coaccionar tipos de entrada.
 
@@ -30,6 +33,7 @@ El ciclo restringe el endpoint a valores JSON de tipo number que sean enteros en
 - [x] Los tests de endpoint pasan con migraciones en MySQL desechable; la suite backend completa pasa 40/40 tras sincronizar `main`.
 - [x] El diff no contiene cambios de UI, esquema ni rutas/autorización.
 - [x] La PR lleva la etiqueta `needs-human-review` porque cambia datos persistidos de usuario.
+- [x] El gotcha de `AGENTS.md` coincide con la validación backend actual.
 
 ## Plan
 
@@ -38,13 +42,14 @@ El ciclo restringe el endpoint a valores JSON de tipo number que sean enteros en
 3. [x] Añadir validación estricta sin coerción y conservar la respuesta exitosa.
 4. [x] Ejecutar test focalizado y suite backend (40/40) con migraciones en MySQL aislado; revisar el flujo HTTP.
 5. [x] Crear PR vinculada a #152, etiquetar `needs-human-review` y publicar self-review.
-6. [x] Esperar CI verde para el HEAD `e596483`: backend-test y frontend-build. La sincronización posterior con `0bb3c3e` dispara una nueva validación.
+6. [ ] Esperar CI verde para el HEAD sincronizado con `3061eff`.
 
 ## Verificación final
 
 - Antes del fix, el test HTTP confirmó que `daily_goal: "5"` persistía como 5 y que un body ausente respondía 500.
-- Después del fix y de sincronizar `origin/main` hasta `abac93d`, el test de endpoint y la suite backend completa pasan: 40/40, con las cuatro migraciones Prisma aplicadas en MySQL desechable. El cambio posterior de `0bb3c3e` es de frontend.
-- CI de PR #154 para el HEAD anterior a la sincronización con `0bb3c3e`: backend-test y frontend-build verdes; la nueva base dispara otro ciclo de CI.
+- Después del fix y de sincronizar `origin/main` hasta `3061eff`, el test de endpoint y la suite backend completa pasan: 40/40, con las cuatro migraciones Prisma aplicadas en MySQL desechable.
+- Frontend base: `npm test` 28/28 y `npm run build` correctos. Lint global conserva 12 errores y 1 aviso preexistentes, cubiertos por #98/PR #102.
+- CI de PR #154 fue verde antes de integrar `main` hasta `3061eff`; se revalida la rama sincronizada.
 - La PR está etiquetada `needs-human-review`; no se cambian esquema, UI, ruta ni middleware.
 
 ## Riesgos
