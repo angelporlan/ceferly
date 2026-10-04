@@ -14,6 +14,17 @@ export interface UserProfile {
   level?: { id: number; name: string }
 }
 
+export interface GoogleLoginUser {
+  id: number
+  email: string
+  name: string
+}
+
+export interface GoogleLoginResponse {
+  token: string
+  user?: GoogleLoginUser
+}
+
 export const authService = {
   getToken: (): string | null => {
     return localStorage.getItem('token')
@@ -48,7 +59,7 @@ export const authService = {
     return data
   },
 
-  googleLogin: async (credential: string, email?: string, name?: string): Promise<{ token: string; user?: any }> => {
+  googleLogin: async (credential: string, email?: string, name?: string): Promise<GoogleLoginResponse> => {
     const res = await fetch(`${API_BASE}/auth/google`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -58,7 +69,7 @@ export const authService = {
       const err = await res.json().catch(() => ({}))
       throw new Error(err.message || 'Error al iniciar sesión con Google')
     }
-    const data = await res.json()
+    const data: GoogleLoginResponse = await res.json()
     if (data.token) {
       localStorage.setItem('token', data.token)
     }

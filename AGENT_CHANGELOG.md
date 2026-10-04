@@ -1,5 +1,23 @@
 # AGENT CHANGELOG
 
+## [Ciclo 7] - Deuda de ESLint (#98)
+
+### Resumen
+- Sustituir los errores explícitos de `any` en las respuestas de autenticación por tipos y manejo seguro con `unknown`.
+- Mostrar un estado de error reintentable si falla la petición de recuperación de contraseña, sin confirmar si existe la cuenta.
+- Añadir ESLint al job frontend de CI y conservar las mejoras de UI que `main` ya incorporó.
+
+### Verificación
+- Línea base original del ciclo: 16 errores y 1 warning; antes de sincronizar, `main` en `bbdfbd1` daba 10 errores y 0 warnings.
+- En `bbdfbd1`: frontend 24/24, backend 42/42 en MySQL temporal con las cuatro migraciones, lint sin errores/avisos y build correcto.
+- En el HEAD `cb2f4fa`, `backend-test` y `frontend-build` pasaron; este último ejecuta `npm test`, `npm run lint` y `npm run build`.
+- QA invitado: `/login`, `/register` y `/forgot-password` renderizan. No se enviaron formularios. GSI rechaza el origen local `127.0.0.1`, no autorizado para el client ID configurado.
+
+### Estado
+- PR #102 sigue abierta, enlazada a #98 y marcada `needs-human-review` porque modifica pantallas de acceso.
+- La rama está sincronizada con `main` en `fc368fe`; se resolvió la colisión del changelog conservando los ciclos 33 y 25.
+- Spec: `docs/specs/ciclo7-eslint-debt.md`.
+
 ## [Ciclo 33] - Reconciliar guía de `daily_goal` tras el merge (#155)
 
 ### Resumen

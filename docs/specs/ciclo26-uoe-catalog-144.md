@@ -1,6 +1,6 @@
 # Ciclo 26: catálogo equilibrado de 144 ejercicios Use of English
 
-Issue: #138  
+Issue: #138
 Rama: `agent/feat-uoe-catalog-144`
 
 ## Objetivo

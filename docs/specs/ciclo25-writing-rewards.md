@@ -1,6 +1,6 @@
 # Ciclo 25: recompensa única y meta diaria para Writing
 
-Issue: #134  
+Issue: #134
 Rama: `agent/fix-writing-reward-dedupe`
 
 ## Objetivo

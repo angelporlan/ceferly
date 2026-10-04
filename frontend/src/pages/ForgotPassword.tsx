@@ -9,9 +9,11 @@ export const ForgotPassword: React.FC = () => {
   const [email, setEmail] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [requestError, setRequestError] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setRequestError('')
     setLoading(true)
     const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000/api'
 
@@ -21,10 +23,12 @@ export const ForgotPassword: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
       })
-    } catch {}
-
-    setSubmitted(true)
-    setLoading(false)
+      setSubmitted(true)
+    } catch {
+      setRequestError('No se pudo enviar la solicitud. Comprueba tu conexión e inténtalo de nuevo.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -52,6 +56,11 @@ export const ForgotPassword: React.FC = () => {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="flex flex-col gap-4 text-left">
+            {requestError && (
+              <div role="alert" className="p-3 rounded-xl bg-coral-50 border border-coral/30 text-xs font-bold text-coral text-center">
+                {requestError}
+              </div>
+            )}
             <Input
               label="Correo Electrónico"
               type="email"
