@@ -16,6 +16,21 @@
 
 ### Estado
 - Issue #114 enlazado desde la PR #115 en `agent/test-ai-explanation-e2e`; `backend-test` y `frontend-build` pasaron en GitHub.
+## [Ciclo 15] - README y GOAL_PROMPT alineados con el código (#116)
+
+### Resumen
+- README describe el catálogo real como 108 ejercicios originales estilo Cambridge: 36 por nivel B1/B2/C1 y 27 por cada parte 1–4.
+- Alinea Stripe, política de autenticación por ruta, migraciones/seeds de desarrollo y las reglas reales de IA, racha, recompensas, tienda y rankings.
+- `GOAL_PROMPT.md` establece que código, manifests y configuración son la fuente de verdad; los README deben actualizarse si divergen.
+- `frontend/README.md` ya coincidía con el manifest React 19/Vite/Tailwind y no necesitó cambios.
+
+### Verificación
+- Contraste manual con `frontend/package.json`, `vite.config.ts`, `tailwind.config.js`, routers/controllers, `server.js`, configuración Sequelize y `contentCatalog.js` (conteo: 108/36/27).
+- `git diff --check` OK; búsqueda de `Angular` en ambos README y `GOAL_PROMPT.md` sin coincidencias.
+- No se ejecutaron tests ni build: ciclo solo documental, sin cambios de código ejecutable.
+
+### Estado
+- Issue #116 enlazado desde la PR #118 en `agent/docs-align-readme`; PR abierta para revisión.
 ## [Ciclo 16] - Alinear retornos de Stripe con rutas React (#117)
 
 ### Resumen
