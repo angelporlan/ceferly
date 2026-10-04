@@ -125,6 +125,44 @@ test("recordExerciseAttempt persists an attempt and updates coins/streak/hearts"
     assert.equal(user.hearts, beforeHearts - 1);
 });
 
+test("recordExerciseAttempt persists numbered answers and partial gap counts", async (t) => {
+    let user;
+    let exercise;
+    try {
+        ({ user, exercise } = await createFixtures());
+    } catch (error) {
+        t.diagnostic(`DB unavailable: ${error.message}`);
+        throw error;
+    }
+
+    t.after(async () => {
+        if (user) {
+            await UserExerciseAttempt.destroy({ where: { user_id: user.id } });
+            await user.destroy();
+        }
+        if (exercise) await exercise.destroy();
+    });
+
+    exercise.question_text = "She (1)…………… the task, (2)…………… the report, and then (3)…………… away.";
+    exercise.correct_answer = { 1: "finished", 2: "walked", 3: "home" };
+    await exercise.save();
+
+    const result = await recordExerciseAttempt({
+        user,
+        exerciseId: exercise.id,
+        userAnswer: { 1: "finished", 2: "wrong", 3: "home" },
+        totalGaps: 1,
+        now: new Date("2026-09-08T10:00:00.000Z")
+    });
+    const stored = await UserExerciseAttempt.findByPk(result.attempt.id);
+
+    assert.deepEqual(stored.user_answer, { 1: "finished", 2: "wrong", 3: "home" });
+    assert.equal(stored.total_gaps, 3);
+    assert.equal(stored.correct_gaps, 2);
+    assert.equal(stored.score, 67);
+    assert.equal(stored.is_fully_correct, false);
+});
+
 test("recordExerciseAttempt persists streak only after the daily goal", async (t) => {
     let user;
     let exercise;

@@ -35,7 +35,42 @@ export const answersMatch = (userAnswer, correctAnswer) => {
     return expected.includes(actual);
 };
 
+const getNumberedAnswerKeys = (correctAnswer) => {
+    if (correctAnswer === null || typeof correctAnswer !== "object" || Array.isArray(correctAnswer)) {
+        return [];
+    }
+
+    const keys = Object.keys(correctAnswer);
+    if (!keys.length || !keys.every((key) => /^\d+$/.test(key))) {
+        return [];
+    }
+
+    return keys.sort((left, right) => Number(left) - Number(right));
+};
+
+const scoreNumberedAnswers = (userAnswer, correctAnswer, keys) => {
+    const answers = userAnswer !== null && typeof userAnswer === "object" && !Array.isArray(userAnswer)
+        ? userAnswer
+        : (keys.length === 1 ? { [keys[0]]: userAnswer } : {});
+    const correctGaps = keys.reduce((count, key) => (
+        answersMatch(answers[key], correctAnswer[key]) ? count + 1 : count
+    ), 0);
+    const totalGaps = keys.length;
+
+    return {
+        isFullyCorrect: correctGaps === totalGaps,
+        totalGaps,
+        correctGaps,
+        score: Math.round((correctGaps / totalGaps) * 100)
+    };
+};
+
 export const scoreAttempt = ({ userAnswer, correctAnswer, totalGaps = 1 } = {}) => {
+    const numberedKeys = getNumberedAnswerKeys(correctAnswer);
+    if (numberedKeys.length) {
+        return scoreNumberedAnswers(userAnswer, correctAnswer, numberedKeys);
+    }
+
     const isFullyCorrect = answersMatch(userAnswer, correctAnswer);
     const resolvedTotalGaps = Number(totalGaps) > 0 ? Number(totalGaps) : 1;
     const correctGaps = isFullyCorrect ? resolvedTotalGaps : 0;
