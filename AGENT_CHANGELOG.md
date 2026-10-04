@@ -1,5 +1,20 @@
 # AGENT CHANGELOG
 
+## [Ciclo 23] - Soluciones compuestas legibles en ExercisePlayer (#139)
+
+### Resumen
+- El feedback tras un intento incorrecto presenta mapas de respuestas numeradas en orden, mantiene legibles las respuestas escalares/alternativas y se anuncia a lectores de pantalla.
+- Se especificó el comportamiento en `docs/specs/ciclo23-readable-answer-feedback.md`; el cambio no modifica scoring ni API.
+- Se abrió el issue #140 para el bug separado de entrada y scoring de ejercicios con varios huecos.
+
+### Verificación
+- TDD: `npm test` falló antes de crear el formateador; después pasa 14/14.
+- `npm run build` pasa; ESLint dirigido a `ExercisePlayer.tsx`, `answerDisplay.mjs` y `answerDisplay.test.mjs` pasa sin avisos; `git diff --check` pasa.
+- Smoke visual/accesible con mock local: `/exercises/139` no enseña la solución en idle y, tras una respuesta incorrecta, muestra `1. warmly / in a friendly way · 2. politely` y actualiza el estado accesible; `/results` conserva la respuesta legible en el fallback, sin JSON crudo.
+
+### Estado
+- Issue #139 enlazado desde la rama `agent/fix-readable-answer-feedback`; PR pendiente.
+
 ## [Ciclo 10] - Aplicar racha al cumplir la meta diaria (#106)
 
 ### Resumen
@@ -37,6 +52,7 @@ La racha solo avanza cuando el número de intentos persistidos del día UTC alca
 
 ### Estado
 - Issue #114 enlazado desde la PR #115 en `agent/test-ai-explanation-e2e`; `backend-test` y `frontend-build` pasaron en GitHub.
+
 ## [Ciclo 15] - README y GOAL_PROMPT alineados con el código (#116)
 
 ### Resumen

@@ -4,6 +4,7 @@ import { ProgressBar } from '../components/ui/ProgressBar'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { Badge } from '../components/ui/Badge'
+import { formatCorrectAnswer } from '../lib/answerDisplay.mjs'
 import { X, Heart, CheckCircle2, AlertCircle, ArrowRight, ShoppingBag } from 'lucide-react'
 
 interface ExerciseData {
@@ -172,7 +173,7 @@ export const ExercisePlayer: React.FC = () => {
         attemptId,
         exerciseTitle: exercise.title,
         isCorrect,
-        correctAnswer: typeof exercise.correctAnswer === 'object' ? JSON.stringify(exercise.correctAnswer) : exercise.correctAnswer,
+        correctAnswer: formattedCorrectAnswer,
         userAnswer,
         questionText: exercise.questionText,
         explanationRule: exercise.explanation_rule,
@@ -182,6 +183,8 @@ export const ExercisePlayer: React.FC = () => {
       },
     })
   }
+
+  const formattedCorrectAnswer = exercise ? formatCorrectAnswer(exercise.correctAnswer) : ''
 
   if (loading) {
     return (
@@ -305,6 +308,14 @@ export const ExercisePlayer: React.FC = () => {
         )}
       </main>
 
+      <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        {status === 'incorrect'
+          ? `Respuesta incorrecta. Solución esperada: ${formattedCorrectAnswer}`
+          : status === 'correct'
+            ? 'Respuesta correcta.'
+            : ''}
+      </div>
+
       <div
         className={`
           w-full border-t-2 transition-all duration-200 py-4 px-4 sm:px-8
@@ -339,9 +350,11 @@ export const ExercisePlayer: React.FC = () => {
               </div>
               <div>
                 <h3 className="font-black text-lg text-coral-dark">Respuesta incorrecta</h3>
-                <p className="text-xs font-bold text-coral-hover">
-                  Solución esperada: <strong className="underline">{String(exercise.correctAnswer)}</strong>
-                </p>
+                {formattedCorrectAnswer && (
+                  <p className="text-xs font-bold text-coral-hover">
+                    Solución esperada: <strong className="underline">{formattedCorrectAnswer}</strong>
+                  </p>
+                )}
               </div>
             </div>
           )}
