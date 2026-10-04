@@ -25,6 +25,21 @@
 - Las correcciones de contenido deben verificarse en catálogo y en filas ya sembradas; el seeder `findOrCreate` no reconcilia registros existentes, así que usar migraciones condicionales y probar intentos asociados (#147).
 - Los tests backend necesitan MySQL aislado con Prisma Migrate aplicado; si la conexión falta, el fallo no demuestra una regresión. Registrar ese entorno antes de interpretar el resultado.
 - Las ramas paralelas vuelven a solaparse en la cabecera del changelog. Actualizar `origin/main` y conservar ambas entradas evita PRs en conflicto; esta regla queda en `AGENTS.md`.
+## [Ciclo 30] - Reconciliar contenido UoE ya sembrado (#147)
+
+### Resumen
+- Añadir una migración de datos versionada para aplicar a ejercicios persistidos las correcciones de B1 Part 4 #3 y #5.
+- Condicionar las actualizaciones a los valores antiguos conocidos y conservar IDs e intentos asociados.
+- Spec: `docs/specs/ciclo30-reconcile-seeded-uoe-content.md`.
+
+### Verificación
+- TDD: el test falló antes de añadir la migración porque el archivo versionado aún no existía; después pasó.
+- Backend: 29/29 tests en MySQL temporal aislado, con `origin/main` actualizado y todas las migraciones aplicadas.
+- Frontend: 16/16 tests y build de producción OK.
+- QA: el test conserva intentos y ediciones manuales; no hay rutas UI afectadas; `git diff --check` OK.
+
+### Estado
+- Issue #147 enlazado desde la PR #150 en `agent/fix-seeded-uoe-content`; relacionado con #143.
 
 ## [Ciclo 29] - Aplicar el límite de palabras a B1 Part 4 (#143)
 
@@ -177,6 +192,23 @@ Las rutas GET de ejercicios ya no serializan `correct_answer` ni `correctAnswer`
 
 ### Estado
 - Issue #122 enlazado desde la PR #123 (`agent/feat-accurate-global-ranking`); PR abierta y checks `backend-test` + `frontend-build` verdes.
+## [Ciclo 28] - Puntuar cada hueco en ejercicios compuestos (#140)
+
+### Resumen
+- El reproductor muestra un campo por marcador numerado, exige completarlos y envía las respuestas como objeto indexado; `/results` conserva ese objeto.
+- El scorer compara cada valor con su clave, deriva el total desde la solución y persiste aciertos parciales y porcentaje sin conceder recompensa de respuesta completa.
+- Spec: `docs/specs/ciclo28-multigap-exercise-scoring.md`.
+
+### Verificación
+- Frontend: `npm test` 14/14, ESLint dirigido sin errores y `npm run build` OK.
+- Backend scorer: `node --test test/scoring.test.js` 6/6; TDD confirmó primero los cuatro casos nuevos fallando.
+- Backend: `npm test` — 26/26 con migraciones aplicadas en MySQL desechable aislado; incluye persistencia de respuestas parciales (`2/3`, score `67`).
+- QA con mock HTTP local: dos campos numerados, botón bloqueado hasta completar ambos, POST `{userAnswer:{"1":"finished","2":"wrong"},totalGaps:2}`, feedback de intento no completo y navegación a `/results`.
+- Revisión de catálogo: marcadores visibles coinciden con claves de solución en 26/26 Word Formation, 30/30 Key Word Transformation y 20/20 Conditionals.
+
+### Estado
+- Issue #140 enlazado por la PR #149 (`agent/fix-multigap-exercise-scoring`), abierta para revisión; `backend-test` y `frontend-build` verdes y self-review publicado.
+
 ## [Ciclo 10] - Aplicar racha al cumplir la meta diaria (#106)
 
 
