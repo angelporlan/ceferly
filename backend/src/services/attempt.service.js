@@ -1,10 +1,10 @@
-import { Op } from "sequelize";
+import { Op, Transaction } from "sequelize";
 import { sequelize } from "../config/db.js";
 import { User } from "../models/User.js";
 import { UserExerciseAttempt } from "../models/UserExerciseAttempt.js";
 import { Exercise } from "../models/Exercise.js";
 import { applyAttemptRewards, canPlay, MAX_HEARTS } from "./gamification.js";
-import { scoreAttempt } from "./scoring.js";
+import { isWritingExerciseType, scoreAttempt, scoreWritingSubmission } from "./scoring.js";
 
 export const NO_HEARTS_CODE = "NO_HEARTS";
 export const EXERCISE_NOT_FOUND_CODE = "EXERCISE_NOT_FOUND";
@@ -27,9 +27,9 @@ export async function recordExerciseAttempt({
     totalGaps,
     now = new Date()
 }) {
-    const result = await sequelize.transaction(async (transaction) => {
-        // Serializing a user's attempts makes the persisted attempt history a safe
-        // idempotency record even when two Writing submissions arrive together.
+    const result = await sequelize.transaction({
+        isolationLevel: Transaction.ISOLATION_LEVELS.READ_COMMITTED
+    }, async (transaction) => {
         const currentUser = await User.findByPk(user.id, {
             transaction,
             lock: transaction.LOCK.UPDATE
@@ -48,29 +48,28 @@ export async function recordExerciseAttempt({
             throw error;
         }
 
-        const writing = isWritingExercise(exercise.type);
-        if (!writing && !canPlay(currentUser.hearts ?? MAX_HEARTS)) {
+        const isWriting = isWritingExerciseType(exercise.type);
+        if (!isWriting && !canPlay(currentUser.hearts ?? MAX_HEARTS)) {
             const error = new Error("No hearts remaining");
             error.code = NO_HEARTS_CODE;
             throw error;
         }
 
-        const previousWritingAttempt = writing
+        const previousWritingAttempt = isWriting
             ? await UserExerciseAttempt.findOne({
-                where: {
-                    user_id: currentUser.id,
-                    exercise_id: exercise.id
-                },
+                where: { user_id: currentUser.id, exercise_id: exercise.id },
                 attributes: ["id"],
                 transaction
             })
             : null;
 
-        const scored = scoreAttempt({
-            userAnswer,
-            correctAnswer: exercise.correct_answer,
-            totalGaps
-        });
+        const scored = isWriting
+            ? scoreWritingSubmission(userAnswer)
+            : scoreAttempt({
+                userAnswer,
+                correctAnswer: exercise.correct_answer,
+                totalGaps
+            });
 
         const attempt = await UserExerciseAttempt.create({
             user_id: currentUser.id,
@@ -80,6 +79,7 @@ export async function recordExerciseAttempt({
             correct_gaps: scored.correctGaps,
             is_fully_correct: scored.isFullyCorrect,
             score: scored.score,
+            grading_status: scored.gradingStatus || "graded",
             created_at: now
         }, { transaction });
 
@@ -87,10 +87,7 @@ export async function recordExerciseAttempt({
         const attemptsToday = await UserExerciseAttempt.count({
             where: {
                 user_id: currentUser.id,
-                created_at: {
-                    [Op.gte]: start,
-                    [Op.lt]: end
-                }
+                created_at: { [Op.gte]: start, [Op.lt]: end }
             },
             transaction
         });
@@ -105,8 +102,8 @@ export async function recordExerciseAttempt({
             lastCompletedDate: currentUser.last_completed_date,
             role,
             isFullyCorrect: scored.isFullyCorrect,
-            isCompletionOnly: writing,
-            grantCoins: !writing || !previousWritingAttempt,
+            isCompletionOnly: isWriting,
+            grantCoins: !isWriting || !previousWritingAttempt,
             attemptsToday,
             dailyGoal: currentUser.daily_goal ?? 5,
             now
@@ -121,7 +118,6 @@ export async function recordExerciseAttempt({
         return { attempt, rewards, scored, exercise, currentUser };
     });
 
-    // Keep the request-scoped instance in sync for callers that inspect it later.
     Object.assign(user, {
         coins: result.currentUser.coins,
         hearts: result.currentUser.hearts,

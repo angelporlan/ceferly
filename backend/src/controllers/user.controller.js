@@ -52,11 +52,11 @@ export const getUserProgress = async (req, res) => {
         });
 
         const totalCorrectGaps = await UserExerciseAttempt.sum('correct_gaps', {
-            where: { user_id: userId }
+            where: { user_id: userId, grading_status: "graded" }
         });
 
         const totalTotalGaps = await UserExerciseAttempt.sum('total_gaps', {
-            where: { user_id: userId }
+            where: { user_id: userId, grading_status: "graded" }
         });
 
         const globalScore = totalTotalGaps
@@ -71,7 +71,7 @@ export const getUserProgress = async (req, res) => {
         });
 
         const progressByCategory = await UserExerciseAttempt.findAll({
-            where: { user_id: userId },
+            where: { user_id: userId, grading_status: "graded" },
             attributes: [
                 [Sequelize.fn("COUNT", Sequelize.col("UserExerciseAttempt.id")), "attempts"],
                 [Sequelize.fn("SUM", Sequelize.col("correct_gaps")), "correct"]
@@ -93,7 +93,7 @@ export const getUserProgress = async (req, res) => {
         });
 
         const progressByLevel = await UserExerciseAttempt.findAll({
-            where: { user_id: userId },
+            where: { user_id: userId, grading_status: "graded" },
             attributes: [
                 [Sequelize.fn("COUNT", Sequelize.col("UserExerciseAttempt.id")), "attempts"],
                 [Sequelize.fn("SUM", Sequelize.col("correct_gaps")), "correct"]
@@ -429,11 +429,13 @@ export const getGlobalRankings = async (req, res) => {
 
         } else if (type === 'highestAverage') {
             totalCount = await UserExerciseAttempt.count({
+                where: { grading_status: "graded" },
                 distinct: true,
                 col: 'user_id'
             });
 
             const highestAvg = await UserExerciseAttempt.findAll({
+                where: { grading_status: "graded" },
                 attributes: [
                     'user_id',
                     [Sequelize.fn('AVG', Sequelize.col('score')), 'average']

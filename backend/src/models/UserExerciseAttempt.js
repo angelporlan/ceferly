@@ -18,6 +18,11 @@ export const UserExerciseAttempt = sequelize.define("UserExerciseAttempt", {
         type: DataTypes.BOOLEAN,
         allowNull: false
     },
+    grading_status: {
+        type: DataTypes.STRING(24),
+        allowNull: false,
+        defaultValue: "graded"
+    },
     score: {
         type: DataTypes.FLOAT,
         allowNull: false

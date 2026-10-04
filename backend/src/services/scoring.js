@@ -24,6 +24,33 @@ const splitAcceptable = (value) => {
         .filter(Boolean);
 };
 
+export const MAX_WRITING_CHARACTERS = 5000;
+
+export const isWritingExerciseType = (type) =>
+    ["essay", "writing"].includes(String(type || "").trim().toLowerCase());
+
+export const scoreWritingSubmission = (userAnswer) => {
+    if (typeof userAnswer !== "string" || !userAnswer.trim()) {
+        const error = new Error("Writing answer is required");
+        error.code = "EMPTY_WRITING_ANSWER";
+        throw error;
+    }
+
+    if (userAnswer.length > MAX_WRITING_CHARACTERS) {
+        const error = new Error("Writing answer is too long");
+        error.code = "WRITING_ANSWER_TOO_LONG";
+        throw error;
+    }
+
+    return {
+        isFullyCorrect: false,
+        totalGaps: 0,
+        correctGaps: 0,
+        score: 0,
+        gradingStatus: "pending_feedback"
+    };
+};
+
 export const answersMatch = (userAnswer, correctAnswer) => {
     const expected = splitAcceptable(correctAnswer);
     const actual = normalizeToken(userAnswer);

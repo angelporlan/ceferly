@@ -81,7 +81,7 @@ export const getExercises = async (req, res) => {
                 model: UserExerciseAttempt,
                 where: { user_id: req.user.id },
                 required: false,
-                attributes: ['score', 'is_fully_correct', 'created_at']
+                attributes: ['score', 'is_fully_correct', 'grading_status', 'created_at']
             }]
             : [];
 
@@ -136,7 +136,8 @@ export const getExercises = async (req, res) => {
                 content: exJson.content,
                 level: level ? { id: level.id, name: level.name } : null,
                 isCompleted: !!latestAttempt,
-                score: latestAttempt ? latestAttempt.score : null
+                score: latestAttempt?.grading_status === 'graded' ? latestAttempt.score : null,
+                gradingStatus: latestAttempt?.grading_status ?? null
             };
         });
 

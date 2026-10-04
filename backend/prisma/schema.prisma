@@ -92,6 +92,7 @@ model UserExerciseAttempt {
   totalGaps      Int      @map("total_gaps")
   correctGaps    Int      @map("correct_gaps")
   isFullyCorrect Boolean  @map("is_fully_correct")
+  gradingStatus  String   @default("graded") @db.VarChar(24) @map("grading_status")
   score          Float
   createdAt      DateTime @default(now()) @map("created_at")
   userId         Int      @map("user_id")

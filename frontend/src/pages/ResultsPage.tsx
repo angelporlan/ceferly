@@ -9,11 +9,29 @@ import { hasValidResultContext } from '../lib/resultContext.mjs'
 export const ResultsPage: React.FC = () => {
   const location = useLocation()
   const navigate = useNavigate()
-  const [aiExplanation, setAiExplanation] = useState<string | null>(null)
-  const [loadingAi, setLoadingAi] = useState(false)
   const routeState: unknown = location.state
-  const state = hasValidResultContext(routeState) ? routeState : null
+  const state = (hasValidResultContext(routeState) ? routeState : null) as {
+    exerciseId?: number
+    attemptId?: number
+    exerciseTitle?: string
+    exerciseType?: string
+    isWriting?: boolean
+    gradingStatus?: string
+    isCorrect?: boolean
+    correctAnswer?: string
+    userAnswer?: string
+    questionText?: string
+    explanationRule?: string
+    hearts?: number
+    coins?: number
+    streak?: number
+  } | null
 
+  const isWriting = state?.isWriting ?? ['essay', 'writing'].includes(state?.exerciseType?.toLowerCase() ?? '')
+  const [gradingStatus, setGradingStatus] = useState(state?.gradingStatus ?? 'graded')
+  const [aiExplanation, setAiExplanation] = useState<string | null>(null)
+  const [aiError, setAiError] = useState<string | null>(null)
+  const [loadingAi, setLoadingAi] = useState(false)
   if (!state) {
     return (
       <div className="max-w-xl mx-auto flex flex-col items-center justify-center py-8 gap-6 text-center">
@@ -35,14 +53,37 @@ export const ResultsPage: React.FC = () => {
     )
   }
 
-  const isCorrect = state.isCorrect
+  const isCorrect = isWriting ? false : (state.isCorrect ?? true)
+  const isPositiveResult = isWriting || isCorrect
 
   const handleGetAiExplanation = async () => {
     setLoadingAi(true)
+    setAiError(null)
     const token = localStorage.getItem('token')
     const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000/api'
 
     try {
+      if (isWriting) {
+        if (!state?.attemptId || !token) {
+          throw new Error('No encontramos el intento guardado. Inicia sesión y envía el texto de nuevo.')
+        }
+
+        const writingResponse = await fetch(`${API_BASE}/attempts/${state.attemptId}/explain`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        const writingData = await writingResponse.json().catch(() => ({}))
+        if (!writingResponse.ok) {
+          throw new Error(writingData.message || 'No se pudo generar el feedback. Inténtalo de nuevo.')
+        }
+        setAiExplanation(writingData.explanation || 'El feedback quedó guardado.')
+        setGradingStatus('feedback_available')
+        return
+      }
+
       let res: Response | null = null
 
       if (state.attemptId && token) {
@@ -85,10 +126,14 @@ export const ResultsPage: React.FC = () => {
           `En el examen de Cambridge B2/C1, esta estructura requiere "${state.correctAnswer}". Recuerda que en este contexto el tiempo verbal o la colocación sigue las reglas oficiales de concordancia.`
         )
       }
-    } catch {
-      setAiExplanation(
-        `En el examen de Cambridge B2/C1, esta estructura requiere "${state.correctAnswer}". Recuerda que en este contexto el tiempo verbal o la colocación sigue las reglas oficiales de concordancia.`
-      )
+    } catch (error) {
+      if (isWriting) {
+        setAiError(error instanceof Error ? error.message : 'No se pudo generar el feedback.')
+      } else {
+        setAiExplanation(
+          `En el examen de Cambridge B2/C1, esta estructura requiere "${state.correctAnswer}". Recuerda que en este contexto el tiempo verbal o la colocación sigue las reglas oficiales de concordancia.`
+        )
+      }
     } finally {
       setLoadingAi(false)
     }
@@ -101,10 +146,10 @@ export const ResultsPage: React.FC = () => {
         <div
           className={`
             w-28 h-28 rounded-3xl flex items-center justify-center shadow-lg
-            ${isCorrect ? 'bg-mint text-white shadow-btn-mint' : 'bg-amber text-white shadow-btn-amber'}
+            ${isPositiveResult ? 'bg-mint text-white shadow-btn-mint' : 'bg-amber text-white shadow-btn-amber'}
           `}
         >
-          {isCorrect ? (
+          {isPositiveResult ? (
             <Trophy className="w-16 h-16" />
           ) : (
             <Sparkles className="w-16 h-16" />
@@ -117,10 +162,12 @@ export const ResultsPage: React.FC = () => {
 
       <div>
         <h1 className="text-3xl font-black text-slateText-main">
-          {isCorrect ? '¡Lección Completada!' : '¡Buen intento! Sigue así'}
+          {isWriting ? '¡Texto guardado!' : isCorrect ? '¡Lección Completada!' : '¡Buen intento! Sigue así'}
         </h1>
         <p className="text-sm font-bold text-slateText-muted mt-1">
-          {isCorrect
+          {isWriting
+            ? 'Tu respuesta está guardada. El tutor puede darte feedback sobre el contenido y el uso del inglés.'
+            : isCorrect
             ? 'Has demostrado dominio de esta estructura del examen Cambridge.'
             : 'Cada error es una oportunidad para consolidar tu aprendizaje.'}
         </p>
@@ -129,8 +176,10 @@ export const ResultsPage: React.FC = () => {
       {/* Rewards Summary Grid */}
       <div className="grid grid-cols-3 gap-3 w-full">
         <Card className="p-4 flex flex-col items-center gap-1 border-mint/40 bg-mint-50/50">
-          <span className="text-[10px] font-black uppercase text-mint-dark">Precisión</span>
-          <span className="text-2xl font-black text-mint">{isCorrect ? '100%' : '50%'}</span>
+          <span className="text-[10px] font-black uppercase text-mint-dark">{isWriting ? 'Evaluación' : 'Precisión'}</span>
+          <span className={isWriting ? 'text-sm font-black text-mint' : 'text-2xl font-black text-mint'}>
+            {isWriting ? gradingStatus === 'feedback_available' ? 'Sin nota numérica' : 'Pendiente de feedback' : isCorrect ? '100%' : '50%'}
+          </span>
         </Card>
 
         <Card className="p-4 flex flex-col items-center gap-1 border-amber/40 bg-amber-50/50">
@@ -143,6 +192,15 @@ export const ResultsPage: React.FC = () => {
           <span className="text-2xl font-black text-sky">{state?.streak ?? 0} d</span>
         </Card>
       </div>
+
+      {isWriting && state?.userAnswer && (
+        <Card className="w-full p-5 text-left border-mint/30 bg-white">
+          <h2 className="font-black text-sm text-slateText-main mb-2">Tu texto</h2>
+          <p className="text-sm font-medium text-slateText-main leading-relaxed whitespace-pre-wrap break-words">
+            {state.userAnswer}
+          </p>
+        </Card>
+      )}
 
       {state?.explanationRule && (
         <Card className="w-full p-5 text-left border-mint/30 bg-mint-50/40">
@@ -160,7 +218,9 @@ export const ResultsPage: React.FC = () => {
             </div>
             <div>
               <h3 className="font-black text-sm text-slateText-main">Tutor Inteligente IA</h3>
-              <span className="text-[10px] font-bold text-amethyst-dark">Análisis pedagógico instantáneo</span>
+              <span className="text-[10px] font-bold text-amethyst-dark">
+                {isWriting && gradingStatus === 'feedback_available' ? 'Feedback guardado en tu intento' : 'Análisis pedagógico instantáneo'}
+              </span>
             </div>
           </div>
           <Badge variant="amethyst">Ceferly AI</Badge>
@@ -171,6 +231,8 @@ export const ResultsPage: React.FC = () => {
             {aiExplanation}
           </div>
         ) : (
+          <>
+          {aiError && <p role="alert" className="text-xs font-bold text-coral-dark">{aiError}</p>}
           <Button
             variant="amethyst"
             size="sm"
@@ -178,8 +240,9 @@ export const ResultsPage: React.FC = () => {
             disabled={loadingAi}
             leftIcon={loadingAi ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Bot className="w-4 h-4" />}
           >
-            {loadingAi ? 'Analizando con IA...' : 'Explicar por qué esta es la respuesta'}
+            {loadingAi ? 'Analizando con IA...' : isWriting ? 'Recibir feedback de escritura' : 'Explicar por qué esta es la respuesta'}
           </Button>
+          </>
         )}
       </Card>
 

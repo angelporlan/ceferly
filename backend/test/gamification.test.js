@@ -48,6 +48,45 @@ test("correct answers keep hearts and raise coins and daily streak", () => {
     assert.equal(after.streak, 3);
 });
 
+test("writing completion earns role coins and streak without spending a heart", () => {
+    const after = applyAttemptRewards({
+        coins: 4,
+        hearts: 3,
+        streak: 2,
+        lastCompletedDate: "2026-09-07",
+        role: "pro",
+        isFullyCorrect: false,
+        isCompletionOnly: true,
+        attemptsToday: 1,
+        dailyGoal: 1,
+        now: new Date("2026-09-08T12:00:00.000Z")
+    });
+
+    assert.equal(after.hearts, 3);
+    assert.equal(after.coins, 19);
+    assert.equal(after.coinsDelta, 15);
+    assert.equal(after.streak, 3);
+});
+
+test("writing retries keep completion behavior without granting coins again", () => {
+    const after = applyAttemptRewards({
+        coins: 19,
+        hearts: 0,
+        streak: 3,
+        lastCompletedDate: "2026-09-08",
+        role: "pro",
+        isFullyCorrect: false,
+        isCompletionOnly: true,
+        grantCoins: false,
+        now: new Date("2026-09-08T12:30:00.000Z")
+    });
+
+    assert.equal(after.hearts, 0);
+    assert.equal(after.coins, 19);
+    assert.equal(after.coinsDelta, 0);
+    assert.equal(after.streak, 3);
+});
+
 test("daily streak advances only once after the configured goal is reached", () => {
     const base = {
         coins: 10,

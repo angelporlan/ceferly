@@ -9,14 +9,40 @@
 
 ### Verificación
 - Línea base original del ciclo: 16 errores y 1 warning; antes de sincronizar, `main` en `bbdfbd1` daba 10 errores y 0 warnings.
-- En `bbdfbd1`: frontend 24/24, backend 42/42 en MySQL temporal con las cuatro migraciones, lint sin errores/avisos y build correcto.
-- En el HEAD `cb2f4fa`, `backend-test` y `frontend-build` pasaron; este último ejecuta `npm test`, `npm run lint` y `npm run build`.
+- En el HEAD final `fcb8039`, `backend-test` y `frontend-build` pasaron en `push` y `pull_request` (4/4); frontend-build ejecuta tests, lint y build.
 - QA invitado: `/login`, `/register` y `/forgot-password` renderizan. No se enviaron formularios. GSI rechaza el origen local `127.0.0.1`, no autorizado para el client ID configurado.
 
 ### Estado
-- PR #102 sigue abierta, enlazada a #98 y marcada `needs-human-review` porque modifica pantallas de acceso.
-- La rama está sincronizada con `main` en `fc368fe`; se resolvió la colisión del changelog conservando los ciclos 33 y 25.
+- PR #102 integrada en `main`; issue #98 cerrado. Follow-up de inicialización de Google resuelto por la PR #103.
 - Spec: `docs/specs/ciclo7-eslint-debt.md`.
+
+## [Ciclo 5] - Essays guardados y feedback cualitativo (#94)
+
+### Resumen
+El player admite respuestas largas para `essay` y `writing`, persiste el texto original y ofrece feedback cualitativo asociado al intento. Los intentos pendientes no se califican por coincidencia literal, no consumen vidas y no alteran promedios de precisión.
+
+### Cambios realizados
+- Añadido textarea con contador de palabras y límite de 5.000 caracteres.
+- Añadido `grading_status` con migración aditiva y backfill de intentos Writing existentes.
+- Guardado autenticado del texto y flujo de feedback cacheado en `AttemptExplanation`.
+- Feedback de Writing centrado en respuesta a la consigna, claridad, organización, gramática y vocabulario; no genera nota Cambridge oficial.
+- Resultados muestran el texto entregado y el estado de evaluación sin precisión ficticia.
+- Writing cuenta para la práctica, racha y recompensa de finalización sin gastar vidas.
+- Añadidas pruebas de scoring, persistencia, recompensas, prompt y feedback.
+
+### Verificación
+- Backend: `npm test` 21/21 después de aplicar migraciones en una instancia MySQL temporal y aislada.
+- Frontend: `npm run build` correcto.
+- ESLint focalizado en `ExercisePlayer.tsx` y `ResultsPage.tsx` correcto; `git diff --check` limpio.
+- QA visual: se envió un essay B2 de 174 palabras, se mostró como pendiente, se guardó y se solicitó feedback; las vidas siguieron en 5.
+- La prueba manual usó un usuario sintético y una base temporal. Al no configurar `OPENROUTER_API_KEY`, se verificó el fallback local; la llamada a un proveedor real no se probó.
+- La primera ejecución de tests de persistencia no conectó porque MySQL no estaba levantado; se repitió en la base temporal y pasó. El lint completo sigue reportando 16 errores y 1 warning previos en archivos fuera de este ciclo; seguimiento en #98.
+
+### Seguimientos
+- #97: ocultar claves de respuesta antes del intento.
+- #98: resolver errores existentes de ESLint; issue cerrado al integrar la PR #102.
+
+## [Ciclo 3] - Catálogo sin subcategorías vacías (#92)
 
 ## [Ciclo 33] - Reconciliar guía de `daily_goal` tras el merge (#155)
 
@@ -31,7 +57,7 @@
 - Revisión documental y `git diff --check`; sin cambios ejecutables.
 
 ### Estado
-- PR #156 abierta desde `agent/docs-daily-goal-merge-record` con `Closes #155`; diff revisado y self-review publicado.
+- PR #156 integrada en `main`; issue #155 cerrado.
 - `backend-test` y `frontend-build` pasaron en GitHub Actions; el lint global conserva el baseline documentado en #98/PR #102.
 
 ## [Ciclo 25] - Recompensa única y meta diaria para Writing (#134)
@@ -49,7 +75,7 @@
 - CI de la PR #137: `backend-test` y `frontend-build` verdes.
 
 ### Estado
-- Issue #134 enlazado por la PR #137, abierta en `agent/fix-writing-reward-dedupe` con checks verdes.
+- PR #137 integrada en `main`; issue #134 cerrado.
 
 ## [Ciclo 21] - Resultado vacío sin contexto (#128)
 ## [Ciclo 9] - Recompensas sincronizadas en Header (#104)

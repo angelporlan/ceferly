@@ -41,6 +41,9 @@ const isChoiceExercise = (exercise: ExerciseData) => {
   return type.includes('multiple_choice') || (Array.isArray(exercise.options) && exercise.options.length >= 2)
 }
 
+const isWritingExercise = (exercise: ExerciseData) =>
+  ['essay', 'writing'].includes(String(exercise.type || '').trim().toLowerCase())
+
 export const ExercisePlayer: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -50,8 +53,9 @@ export const ExercisePlayer: React.FC = () => {
   const [loadError, setLoadError] = useState('')
   const [selectedOption, setSelectedOption] = useState('')
   const [gapInput, setGapInput] = useState('')
+  const [writingText, setWritingText] = useState('')
   const [gapAnswers, setGapAnswers] = useState<Record<string, string>>({})
-  const [status, setStatus] = useState<'idle' | 'correct' | 'incorrect'>('idle')
+  const [status, setStatus] = useState<'idle' | 'correct' | 'incorrect' | 'submitted'>('idle')
   const [hearts, setHearts] = useState(0)
   const [coins, setCoins] = useState(0)
   const [streak, setStreak] = useState(0)
@@ -119,17 +123,22 @@ export const ExercisePlayer: React.FC = () => {
   const hasMultipleGaps = !!exercise && !isChoiceExercise(exercise) && gapNumbers.length > 1
 
   const handleCheckAnswer = async () => {
-    if (!exercise || blocked || submitting) return
+    if (!exercise) return
+    const isWriting = isWritingExercise(exercise)
+    if ((blocked && !isWriting) || submitting) return
     const numberedAnswers = hasMultipleGaps ? buildNumberedGapAnswers(gapNumbers, gapAnswers) : undefined
     const userAnswer = isChoiceExercise(exercise)
       ? selectedOption
-      : (numberedAnswers ?? gapInput.trim())
+      : isWriting
+        ? writingText
+        : (numberedAnswers ?? gapInput.trim())
     const token = localStorage.getItem('token')
     if (!token) {
-      setSubmissionError('Inicia sesión para comprobar tu respuesta y guardar tu progreso.')
+      setSubmissionError(isWriting
+        ? 'Inicia sesión para guardar tu texto y pedir feedback.'
+        : 'Inicia sesión para comprobar tu respuesta y guardar tu progreso.')
       return
     }
-
     setSubmissionError('')
     setSubmitting(true)
 
@@ -150,7 +159,9 @@ export const ExercisePlayer: React.FC = () => {
         return
       }
       if (!res.ok) {
-        throw new Error(payload.message || 'No se pudo comprobar la respuesta. Inténtalo de nuevo.')
+        throw new Error(payload.message || (isWriting
+          ? 'No se pudo guardar el texto. Inténtalo de nuevo.'
+          : 'No se pudo comprobar la respuesta. Inténtalo de nuevo.'))
       }
       if (typeof payload.scored?.isFullyCorrect !== 'boolean') {
         throw new Error('El servidor no devolvió el resultado del intento.')
@@ -171,10 +182,19 @@ export const ExercisePlayer: React.FC = () => {
           streak: payload.rewards.streak,
         })
       }
+      if (isWriting) {
+        if (!payload.attempt?.id) {
+          throw new Error('La API no confirmó que el texto se haya guardado. Inténtalo de nuevo.')
+        }
+        setStatus('submitted')
+        return
+      }
       setExercise((current) => current ? { ...current, correctAnswer: payload.correctAnswer } : current)
       setStatus(payload.scored.isFullyCorrect ? 'correct' : 'incorrect')
     } catch (error) {
-      setSubmissionError(error instanceof Error ? error.message : 'No se pudo comprobar la respuesta.')
+      setSubmissionError(error instanceof Error
+        ? error.message
+        : isWriting ? 'No se pudo guardar el texto.' : 'No se pudo comprobar la respuesta.')
     } finally {
       setSubmitting(false)
     }
@@ -183,16 +203,22 @@ export const ExercisePlayer: React.FC = () => {
   const handleContinue = () => {
     if (!exercise) return
     const isCorrect = status === 'correct'
+    const isWriting = isWritingExercise(exercise)
     const userAnswer = isChoiceExercise(exercise)
       ? selectedOption
-      : (hasMultipleGaps ? buildNumberedGapAnswers(gapNumbers, gapAnswers) : gapInput)
+      : isWriting
+        ? writingText
+        : (hasMultipleGaps ? buildNumberedGapAnswers(gapNumbers, gapAnswers) : gapInput)
     navigate('/results', {
       state: {
         exerciseId: exercise.id,
         attemptId,
         exerciseTitle: exercise.title,
+        exerciseType: exercise.type,
+        isWriting,
+        gradingStatus: isWriting ? 'pending_feedback' : 'graded',
         isCorrect,
-        correctAnswer: formattedCorrectAnswer,
+        correctAnswer: isWriting ? undefined : formattedCorrectAnswer,
         userAnswer,
         questionText: exercise.questionText,
         explanationRule: exercise.explanation_rule,
@@ -231,6 +257,10 @@ export const ExercisePlayer: React.FC = () => {
     )
   }
 
+  const isWriting = isWritingExercise(exercise)
+  const blockedForExercise = blocked && !isWriting
+  const wordCount = writingText.trim() ? writingText.trim().split(/\s+/).length : 0
+
   return (
     <div className="min-h-screen bg-canvas flex flex-col justify-between">
       <header className="h-16 max-w-4xl w-full mx-auto px-4 flex items-center justify-between gap-4">
@@ -252,7 +282,7 @@ export const ExercisePlayer: React.FC = () => {
       </header>
 
       <main className="flex-1 max-w-2xl w-full mx-auto px-4 py-8 flex flex-col justify-center">
-        {blocked && (
+        {blockedForExercise && (
           <Card className="p-6 mb-6 border-coral/40 bg-coral-50 text-center">
             <h2 className="font-black text-lg text-coral-dark mb-2">Sin vidas</h2>
             <p className="text-sm font-bold text-slateText-muted mb-4">
@@ -300,7 +330,7 @@ export const ExercisePlayer: React.FC = () => {
                   key={option}
                   interactive
                   selected={isSelected}
-                  onClick={() => status === 'idle' && !blocked && setSelectedOption(option)}
+                  onClick={() => status === 'idle' && !blockedForExercise && setSelectedOption(option)}
                   className={`
                     p-5 text-center font-black text-base cursor-pointer select-none transition-all
                     ${isSelected ? '!border-mint !bg-mint-50 shadow-[0_4px_0_#58CC02]' : ''}
@@ -312,6 +342,26 @@ export const ExercisePlayer: React.FC = () => {
                 </Card>
               )
             })}
+          </div>
+        ) : isWriting ? (
+          <div className="flex flex-col gap-2">
+            <label htmlFor="writing-answer" className="text-sm font-black text-slateText-main">
+              Tu respuesta
+            </label>
+            <textarea
+              id="writing-answer"
+              value={writingText}
+              onChange={(e) => status === 'idle' && setWritingText(e.target.value)}
+              placeholder="Escribe aquí tu respuesta en inglés..."
+              rows={10}
+              maxLength={5000}
+              className="input-playful !text-left resize-y min-h-56 p-4 text-base font-medium leading-relaxed"
+              disabled={status !== 'idle'}
+              aria-describedby="writing-word-count"
+            />
+            <p id="writing-word-count" className="text-right text-xs font-bold text-slateText-muted">
+              {wordCount} palabras · {writingText.length}/5000 caracteres
+            </p>
           </div>
         ) : (
           hasMultipleGaps ? (
@@ -345,7 +395,7 @@ export const ExercisePlayer: React.FC = () => {
           )
         )}
 
-        {status !== 'idle' && exercise.explanation_rule && (
+        {status !== 'idle' && !isWriting && exercise.explanation_rule && (
           <Card className="p-4 mt-6 bg-sky-50 border-sky/30 text-sm font-bold text-slateText-main">
             {exercise.explanation_rule}
           </Card>
@@ -368,6 +418,8 @@ export const ExercisePlayer: React.FC = () => {
               ? 'bg-mint-50 border-mint/40 text-mint-dark'
               : status === 'incorrect'
               ? 'bg-coral-50 border-coral/40 text-coral-dark'
+              : status === 'submitted'
+              ? 'bg-mint-50 border-mint/40 text-mint-dark'
               : 'bg-white border-ceferlyBorder'
           }
         `}
@@ -379,7 +431,7 @@ export const ExercisePlayer: React.FC = () => {
                 <span role="alert" className="text-coral-dark">
                   {submissionError}{!localStorage.getItem('token') ? <> <Link to="/login" className="underline">Iniciar sesión</Link></> : null}
                 </span>
-              ) : blocked ? 'Necesitas vidas para comprobar' : (hasMultipleGaps ? 'Completa todos los huecos para verificar' : 'Selecciona o escribe una respuesta para verificar')}
+              ) : blockedForExercise ? 'Necesitas vidas para comprobar' : isWriting ? 'Tu texto se guardará para recibir feedback' : hasMultipleGaps ? 'Completa todos los huecos para verificar' : 'Selecciona o escribe una respuesta para verificar'}
             </div>
           ) : status === 'correct' ? (
             <div className="flex items-center gap-3">
@@ -389,6 +441,16 @@ export const ExercisePlayer: React.FC = () => {
               <div>
                 <h3 className="font-black text-lg text-mint-dark">¡Excelente trabajo!</h3>
                 <p className="text-xs font-bold text-mint-hover">{rewardMessage}</p>
+              </div>
+            </div>
+          ) : status === 'submitted' ? (
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-mint text-white flex items-center justify-center shadow-md">
+                <CheckCircle2 className="w-7 h-7 stroke-[2.5]" />
+              </div>
+              <div>
+                <h3 className="font-black text-lg text-mint-dark">Texto guardado</h3>
+                <p className="text-xs font-bold text-mint-hover">No consume una vida. Pide feedback en la siguiente pantalla.</p>
               </div>
             </div>
           ) : (
@@ -414,18 +476,20 @@ export const ExercisePlayer: React.FC = () => {
                 variant="mint"
                 size="lg"
                 fullWidth
-                disabled={blocked || submitting || (isChoiceExercise(exercise)
+                disabled={blockedForExercise || submitting || (isChoiceExercise(exercise)
                   ? !selectedOption
-                  : (hasMultipleGaps
-                    ? !areNumberedGapAnswersComplete(gapNumbers, gapAnswers)
-                    : !gapInput.trim()))}
+                  : (isWriting
+                    ? !writingText.trim()
+                    : (hasMultipleGaps
+                      ? !areNumberedGapAnswersComplete(gapNumbers, gapAnswers)
+                      : !gapInput.trim())))}
                 onClick={handleCheckAnswer}
               >
-                {submitting ? 'Guardando...' : 'Comprobar'}
+                {submitting ? 'Guardando...' : isWriting ? 'Guardar texto' : 'Comprobar'}
               </Button>
             ) : (
               <Button
-                variant={status === 'correct' ? 'mint' : 'coral'}
+                variant={status === 'correct' || status === 'submitted' ? 'mint' : 'coral'}
                 size="lg"
                 fullWidth
                 onClick={handleContinue}
