@@ -66,6 +66,9 @@ export const CAMBRIDGE_UOE_EXERCISES = [
     mc("B1", 7, "Buying a ticket", "I didn't have ______ money to buy a first-class ticket.", ["enough", "too", "much too", "plenty"], "enough", "enough comes after the adjective but before the noun: enough money."),
     mc("B1", 8, "A long day", "She was ______ tired that she fell asleep on the sofa.", ["so", "such", "too", "enough"], "so", "so + adjective + that expresses result; such is used before a noun phrase."),
     mc("B1", 9, "Drinks at a café", "I prefer tea ______ coffee in the afternoon.", ["to", "than", "from", "that"], "to", "prefer A to B is the standard B1 comparative preference pattern."),
+    mc("B1", 10, "A dentist's appointment", "I need to ______ an appointment with the dentist for next week.", ["make", "do", "take", "put"], "make", "make an appointment is the standard collocation; the other verbs do not fit this expression."),
+    mc("B1", 11, "A summer exhibition", "The exhibition is open ______ the public until the end of August.", ["to", "for", "at", "with"], "to", "open to the public is the fixed expression used when an event can be visited by everyone."),
+    mc("B1", 12, "A school final", "We were delighted ______ our team had reached the final.", ["that", "what", "which", "whether"], "that", "that introduces the content clause after delighted; what and which need a different clause structure."),
 
     oc("B1", 1, "A city break", "I have never ______ to Lisbon, but I would love to go next spring.", "been", "Present perfect with never uses been to for life experience of visiting a place."),
     oc("B1", 2, "The neighbour", "That's the woman ______ helped me carry the shopping upstairs.", "who", "who is the subject relative pronoun for people in defining relative clauses."),
@@ -76,6 +79,9 @@ export const CAMBRIDGE_UOE_EXERCISES = [
     oc("B1", 7, "Late for class", "He missed the start of the lesson ______ the bus was delayed.", "because", "because + clause gives a reason; because of needs a noun."),
     oc("B1", 8, "A quiet street", "______ is a small bakery on the corner of my street.", "There", "There is/are introduces existence; they is a pronoun referring to people/things already known."),
     oc("B1", 9, "Homework night", "I usually do my homework on my ______ after dinner.", "own", "on my own means alone / without help."),
+    oc("B1", 10, "A long wait", "We have been waiting ______ the bus stop for nearly half an hour.", "at", "at the bus stop identifies the place where someone waits."),
+    oc("B1", 11, "Weekend plans", "If I ______ enough time this weekend, I will help you paint the kitchen.", "have", "The first conditional uses present simple in the if-clause, even when it refers to the future."),
+    oc("B1", 12, "A delayed train", "The train was cancelled due ______ a fault on the line.", "to", "due to + noun phrase gives the reason for something."),
 
     wf("B1", 1, "A wedding speech", "Everyone noticed the ______ in her voice when she spoke. HAPPY", "HAPPY", "happiness", "The adjective happy forms the abstract noun happiness with -ness."),
     wf("B1", 2, "A job interview", "The candidate gave a very ______ presentation. SUCCESS", "SUCCESS", "successful", "success (noun) → successful (adjective) with -ful."),
@@ -86,6 +92,9 @@ export const CAMBRIDGE_UOE_EXERCISES = [
     wf("B1", 7, "Lab instructions", "Please read the instructions ______. CARE", "CARE", "carefully", "Adverbs of manner are often formed with -ly: carefully."),
     wf("B1", 8, "After the factory closed", "Many people in the town were ______ last year. EMPLOY", "EMPLOY", "unemployed", "The negative adjective unemployed uses un- + past participle."),
     wf("B1", 9, "A shop window", "The new phones look very ______. ATTRACT", "ATTRACT", "attractive", "attract → attractive (adjective with -ive)."),
+    wf("B1", 10, "Handling glass", "Please handle the glass ______, as it is very fragile. CARE", "CARE", "carefully", "care → careful → carefully; the sentence needs an adverb modifying handle."),
+    wf("B1", 11, "A windy night", "The ______ of the wind caused several trees to fall. STRONG", "STRONG", "strength", "strong changes to the noun strength, with a spelling change before -th."),
+    wf("B1", 12, "A warm welcome", "They greeted us with great ______. WARM", "WARM", "warmth", "warm forms the noun warmth, naming the friendly quality of their welcome."),
 
     kwt("B1", 1, "A trip to Rome", "The last time I visited Rome was in 2020.", "BEEN", "I ______ Rome since 2020.", "have not been to / haven't been to", "Present perfect with since + last time: have not been to + place since + point in time."),
     kwt("B1", 2, "A noisy party", "The music was so loud that we couldn't talk.", "SUCH", "It was ______ that we couldn't talk.", "such loud music", "so + adjective + that ⇔ such + adjective + noun + that."),
@@ -96,6 +105,9 @@ export const CAMBRIDGE_UOE_EXERCISES = [
     kwt("B1", 7, "Tea or coffee", "I like tea more than coffee.", "PREFER", "I ______ coffee.", "prefer tea to", "like A more than B ⇔ prefer A to B."),
     kwt("B1", 8, "A past habit", "I played the piano every day when I was a child.", "USED", "I ______ the piano every day when I was a child.", "used to play", "past habit ⇔ used to + infinitive."),
     kwt("B1", 9, "Holiday plans", "I am excited about the holiday.", "FORWARD", "I am looking ______ the holiday.", "forward to", "be excited about ⇔ look forward to."),
+    kwt("B1", 10, "A library comparison", "The new library is less modern than the one in the city centre.", "AS", "The new library is ______ the one in the city centre.", "not as modern as", "less + adjective + than ⇔ not as + adjective + as."),
+    kwt("B1", 11, "Learning English", "I started learning English three years ago.", "FOR", "I ______ three years.", "have been learning English for", "A continuing activity that started in the past uses present perfect continuous + for + duration."),
+    kwt("B1", 12, "A polite request", "Could you close the window, please?", "MIND", "Would you ______ the window, please?", "mind closing", "Could you ...? ⇔ Would you mind + gerund for a polite request."),
 
     mc("B2", 1, "A research grant", "The committee finally ______ to fund the climate project after a long debate.", ["agreed", "accepted", "admitted", "allowed"], "agreed", "agree to + infinitive is the correct collocation for reaching a decision; accept typically takes a noun."),
     mc("B2", 2, "Urban wildlife", "Foxes have ______ in adapting to life in large cities.", ["succeeded", "managed", "achieved", "resulted"], "succeeded", "succeed in + -ing; manage takes to-infinitive, achieve takes a noun."),
@@ -106,6 +118,9 @@ export const CAMBRIDGE_UOE_EXERCISES = [
     mc("B2", 7, "Energy policy", "The government should ______ more attention to renewable energy.", ["pay", "give", "make", "take"], "pay", "pay attention to is a fixed collocation."),
     mc("B2", 8, "A museum visit", "Visitors are asked to ______ from touching the sculptures.", ["refrain", "prevent", "avoid", "stop"], "refrain", "refrain from + -ing is formal prohibition; prevent needs an object."),
     mc("B2", 9, "Climate article", "The article ______ a number of practical ways to cut household waste.", ["outlines", "tells", "says", "speaks"], "outlines", "outline + noun means summarise the main points; tell/say need different patterns."),
+    mc("B2", 10, "Food waste campaign", "The charity hopes to ______ awareness of food waste in local schools.", ["raise", "rise", "lift", "grow"], "raise", "raise awareness is the standard collocation; rise is intransitive and cannot take awareness as its object."),
+    mc("B2", 11, "An incident report", "The committee asked the witnesses to ______ a detailed account of the incident.", ["give", "do", "make", "set"], "give", "give an account is the natural collocation for describing what happened."),
+    mc("B2", 12, "New regulations", "The new rules came into ______ at the start of September.", ["effect", "affect", "affection", "effective"], "effect", "come into effect means begin to operate; effect is the noun required after into."),
 
     oc("B2", 1, "Remote work", "A growing number of companies now allow staff to work ______ home at least twice a week.", "from", "work from home is the standard prepositional collocation."),
     oc("B2", 2, "A book review", "The novel, ______ was published last year, has already won two prizes.", "which", "Non-defining relative clauses for things use which, set off by commas."),
@@ -116,6 +131,9 @@ export const CAMBRIDGE_UOE_EXERCISES = [
     oc("B2", 7, "A formal letter", "I am writing ______ response to your advertisement for a volunteer guide.", "in", "in response to is the standard formal letter opener."),
     oc("B2", 8, "Time clauses", "I will send the files as soon as I ______ them.", "receive / have received", "After as soon as, a present (simple or perfect) refers to the future; will is not used."),
     oc("B2", 9, "Comparatives", "The more you practise, the ______ confident you will feel in the speaking test.", "more", "The more ..., the more + adjective is a parallel comparative pattern."),
+    oc("B2", 10, "A capable solver", "She is capable ______ solving even the most complicated puzzles.", "of", "capable of is followed by a noun or gerund."),
+    oc("B2", 11, "An apology", "Not only ______ he apologise for being late, but he also offered to pay for the meal.", "did", "Not only at the start of a clause triggers subject-auxiliary inversion."),
+    oc("B2", 12, "A library opening", "The new library is expected to open ______ September.", "in", "Use in with months when saying when an event is expected to happen."),
 
     wf("B2", 1, "A science feature", "There is growing ______ that diet affects concentration. AWARE", "AWARE", "awareness", "aware → awareness (abstract noun with -ness)."),
     wf("B2", 2, "City planning", "The ______ of the old market disappointed local traders. CLOSE", "CLOSE", "closure", "close → closure (noun of event/process)."),
@@ -126,6 +144,9 @@ export const CAMBRIDGE_UOE_EXERCISES = [
     wf("B2", 7, "A travel blog", "The island is ______ for its volcanic beaches. FAME", "FAME", "famous", "fame → famous (adjective)."),
     wf("B2", 8, "Public health", "______ eating is essential for long-term health. HEALTH", "HEALTH", "Healthy", "health → healthy (adjective before a noun)."),
     wf("B2", 9, "A complaint letter", "I find the delay completely ______. ACCEPT", "ACCEPT", "unacceptable", "accept → acceptable → unacceptable with un-."),
+    wf("B2", 10, "Checking information", "We need to check the ______ of the information before publishing it. ACCURATE", "ACCURATE", "accuracy", "accurate changes to the noun accuracy, naming how correct information is."),
+    wf("B2", 11, "A software update", "The new software makes data entry almost ______. EFFORT", "EFFORT", "effortless", "effort → effortless; the negative suffix -less means requiring almost no effort."),
+    wf("B2", 12, "A celebrated film", "The film received international ______ shortly after its release. RECOGNISE", "RECOGNISE", "recognition", "recognise changes to the noun recognition, meaning public acknowledgement."),
 
     kwt("B2", 1, "A cancelled flight", "They continued the meeting although the director was absent.", "DESPITE", "They continued the meeting ______ the director.", "despite the absence of / despite the director being absent", "although + clause ⇔ despite + noun / -ing."),
     kwt("B2", 2, "Reported advice", "\"You should revise the phrasal verbs,\" the teacher told us.", "ADVISED", "The teacher ______ the phrasal verbs.", "advised us to revise", "should ⇔ advise someone to + infinitive."),
@@ -136,6 +157,9 @@ export const CAMBRIDGE_UOE_EXERCISES = [
     kwt("B2", 7, "A better option", "I would rather stay in than go to the party.", "PREFER", "I ______ to the party.", "would prefer to stay in than go / prefer staying in to going", "would rather + infinitive ⇔ would prefer to / prefer -ing to -ing."),
     kwt("B2", 8, "A warning", "Take a map because you might get lost.", "CASE", "Take a map ______ lost.", "in case you get", "in case + present refers to a possible future problem."),
     kwt("B2", 9, "A known author", "People believe that she wrote the article.", "BELIEVED", "She ______ the article.", "is believed to have written", "Passive reporting: is believed to have + past participle for a past action."),
+    kwt("B2", 10, "A rainy walk", "Although it was raining, we went for a walk.", "SPITE", "We went for a walk ______ the rain.", "in spite of", "although + clause ⇔ in spite of + noun phrase."),
+    kwt("B2", 11, "A restaurant booking", "It was unnecessary for Maya to book a table.", "HAVE", "Maya ______ a table.", "didn't have to book", "It was unnecessary ⇔ did not have to + infinitive."),
+    kwt("B2", 12, "A family visit", "I last saw my cousins in April.", "SEEN", "I ______ my cousins since April.", "have not seen", "last did something in the past ⇔ present perfect negative + since."),
 
     mc("C1", 1, "A policy paper", "The minister's remarks were widely ______ as an attempt to shift the blame.", ["interpreted", "translated", "regarded", "supposed"], "interpreted", "be interpreted as = understood to mean; regarded as needs a noun complement more than a clause of purpose."),
     mc("C1", 2, "Academic style", "The study ______ into question several long-held assumptions about memory.", ["calls", "puts", "brings", "takes"], "calls", "call into question is the academic collocation meaning challenge."),
@@ -146,6 +170,9 @@ export const CAMBRIDGE_UOE_EXERCISES = [
     mc("C1", 7, "A legal ruling", "The court ______ the earlier decision and ordered a retrial.", ["overturned", "overtook", "overruled out", "overdrawn"], "overturned", "overturn a decision/verdict is the legal collocation."),
     mc("C1", 8, "Media analysis", "The documentary ______ light on working conditions in the supply chain.", ["shed", "gave", "made", "opened"], "shed", "shed light on = make something easier to understand."),
     mc("C1", 9, "A debate closing", "______ of the benefits, the scheme remains controversial.", ["Irrespective", "Regarding", "Concerning", "Considering"], "Irrespective", "irrespective of + noun means without considering; regarding/concerning mean about."),
+    mc("C1", 10, "An interrupted meeting", "No sooner ______ her opening remarks than a fire alarm interrupted the meeting.", ["had she finished", "she had finished", "did she finished", "she finished"], "had she finished", "no sooner at the start of a clause requires inversion: had + subject + past participle."),
+    mc("C1", 11, "A contested proposal", "The proposal is ______ to a number of serious objections.", ["subject", "prone", "bound", "likely"], "subject", "be subject to objections means be open to them; the other adjectives do not take this meaning with to here."),
+    mc("C1", 12, "Research privacy", "The data were withheld, ostensibly ______ the participants' privacy.", ["in the interests of", "on behalf of", "in place of", "by means of"], "in the interests of", "in the interests of protecting someone means for their benefit; the other phrases express different relationships."),
 
     oc("C1", 1, "A conference abstract", "Little ______ the researchers know how influential the paper would become.", "did", "Negative adverbial little + inversion: Little did + subject + verb."),
     oc("C1", 2, "Urban design", "The square was redesigned ______ as to encourage people to linger.", "so", "so as to + infinitive expresses purpose in more formal written English."),
@@ -156,6 +183,9 @@ export const CAMBRIDGE_UOE_EXERCISES = [
     oc("C1", 7, "A travel essay", "The village is accessible only ______ foot or by boat.", "on", "on foot is the fixed prepositional phrase."),
     oc("C1", 8, "Historical comment", "It was not ______ the 1990s that the archive was opened to the public.", "until", "it was not until + time + that is a cleft time structure."),
     oc("C1", 9, "A science column", "The two theories are not necessarily ______ odds with one another.", "at", "at odds with = in conflict with."),
+    oc("C1", 10, "A missing cost", "The report failed to take ______ account the cost of maintaining the equipment.", "into", "take something into account is the fixed phrase meaning consider it."),
+    oc("C1", 11, "A demanding course", "So demanding ______ the course that several students chose to defer.", "was", "So + adjective at the start of a clause requires inversion: so demanding was the course."),
+    oc("C1", 12, "An unconvincing argument", "There is little point ______ trying to persuade her without further evidence.", "in", "there is little point in + gerund means the action is unlikely to be useful."),
 
     wf("C1", 1, "A sociology essay", "Social ______ has increased in several post-industrial cities. EQUAL", "EQUAL", "inequality", "equal → inequality (negative abstract noun)."),
     wf("C1", 2, "An architecture review", "The extension is a bold ______ from the original design. DEPART", "DEPART", "departure", "depart → departure (noun of change/direction)."),
@@ -166,6 +196,9 @@ export const CAMBRIDGE_UOE_EXERCISES = [
     wf("C1", 7, "A museum text", "The restoration was carried out with great ______. PRECISE", "PRECISE", "precision", "precise → precision (noun)."),
     wf("C1", 8, "A leadership profile", "Her ______ to detail is legendary among colleagues. ATTEND", "ATTEND", "attention", "attend → attention in the collocation attention to detail."),
     wf("C1", 9, "A climate briefing", "Such claims are scientifically ______. DEFEND", "DEFEND", "indefensible", "defend → defensible → indefensible with in-."),
+    wf("C1", 10, "A clear proposal", "The committee praised the ______ with which the proposal had been presented. CLEAR", "CLEAR", "clarity", "clear changes to the noun clarity, describing how easy the proposal was to understand."),
+    wf("C1", 11, "A changing account", "The witness was judged ______ after giving three conflicting accounts. RELY", "RELY", "unreliable", "rely → reliable → unreliable; the negative adjective describes an account that cannot be trusted."),
+    wf("C1", 12, "Natural resources", "The scheme aims to encourage the ______ use of natural resources. SUSTAIN", "SUSTAIN", "sustainable", "sustain forms sustainable, the adjective describing use that can continue without exhausting resources."),
 
     kwt("C1", 1, "A late arrival", "As soon as she finished the report, she emailed it.", "SOONER", "No ______ the report than she emailed it.", "sooner had she finished", "as soon as + past ⇔ no sooner had + past participle + than."),
     kwt("C1", 2, "A safety notice", "Staff are not allowed to enter the archive without permission.", "ACCOUNT", "On ______ enter the archive without permission.", "no account should staff / no account must staff", "on no account + inversion for prohibition."),
@@ -175,5 +208,8 @@ export const CAMBRIDGE_UOE_EXERCISES = [
     kwt("C1", 6, "A preference", "I would rather not comment on the case.", "PREFER", "I ______ comment on the case.", "would prefer not to", "would rather not + infinitive ⇔ would prefer not to + infinitive."),
     kwt("C1", 7, "A missed chance", "If I had seen the email, I would have replied.", "HAD", "______ the email, I would have replied.", "Had I seen", "Inverted third conditional: Had + subject + past participle."),
     kwt("C1", 8, "A surprising win", "Nobody expected the team to win.", "CAME", "The team's win ______ everyone.", "came as a surprise to", "come as a surprise to someone."),
-    kwt("C1", 9, "A legal warning", "They made me sign the form.", "WAS", "I ______ the form.", "was made to sign", "make + object + infinitive ⇔ passive be made to + infinitive.")
+    kwt("C1", 9, "A legal warning", "They made me sign the form.", "WAS", "I ______ the form.", "was made to sign", "make + object + infinitive ⇔ passive be made to + infinitive."),
+    kwt("C1", 10, "A confidential password", "You should never reveal the password to anyone.", "UNDER", "______ should you reveal the password to anyone.", "under no circumstances", "Never ⇔ under no circumstances + inversion with should for a strong prohibition."),
+    kwt("C1", 11, "A published report", "The team did not notice the error until after publishing the report.", "DID", "Only after publishing the report ______ notice the error.", "did the team", "Only after at the start of a clause requires subject-auxiliary inversion."),
+    kwt("C1", 12, "A true story", "People say the novel was inspired by a true story.", "SAID", "The novel ______ inspired by a true story.", "is said to have been", "Passive reporting of a past state uses is said to have been + past participle.")
 ];
