@@ -1,5 +1,17 @@
 # AGENT CHANGELOG
 
+## [Ciclo 29] - Aplicar el límite de palabras a B1 Part 4 (#143)
+
+### Resumen
+- Corregir B1 Part 4 #3 y #5: cada respuesta aceptada tiene entre 2 y 5 palabras y conserva la keyword.
+- En #5, usar una transformación pasiva natural de cuatro palabras con BECAUSE.
+- Contrato y plan: `docs/specs/ciclo29-b1-part4-word-limit.md`.
+
+### Estado
+- Implementación y regresiones completadas en `agent/fix-b1-part4-word-limit`; issue #143 reutilizado.
+- TDD: la prueba falló primero por `interests` y `because` de una palabra; tras corregir el catálogo, la suite backend pasa 23/23 y el build frontend pasa.
+- QA detectó que el seeder no reconcilia filas ya persistidas; follow-up #147 abierto para actualizar contenido existente de forma segura.
+
 ## [Ciclo 18] - Clasificación global coherente con el API (#122)
 
 ### Resumen
