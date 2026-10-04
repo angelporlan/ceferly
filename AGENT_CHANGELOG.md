@@ -15,7 +15,7 @@
 - El primer intento de suite backend fue bloqueado por `EPERM` al conectar con MySQL desde el sandbox; al repetirlo contra MySQL temporal, la suite pasó.
 
 ### Estado
-- Issue #114 abierto; PR pendiente de creación en `agent/test-ai-explanation-e2e`.
+- Issue #114 enlazado desde la PR #115 en `agent/test-ai-explanation-e2e`; CI en curso.
 
 ## [Ciclo 4] - Documentación alineada con React y Vite (#95)
 
