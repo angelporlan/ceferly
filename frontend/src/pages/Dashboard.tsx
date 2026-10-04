@@ -6,6 +6,30 @@ import { Badge } from '../components/ui/Badge'
 import { ProgressBar } from '../components/ui/ProgressBar'
 import { Flame, Trophy, Sparkles, BookOpen, ChevronRight } from 'lucide-react'
 import { mapDashboardCatalog, type DashboardCatalogItem } from './dashboardCatalog.mjs'
+import { parseDailyGoal } from '../utils/dailyGoal.mjs'
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000/api'
+
+interface DailyGoalFeedback {
+  message: string
+  kind: 'success' | 'error'
+}
+
+interface UserSummaryResponse {
+  streak?: number
+  daily_goal?: number
+}
+
+interface AttemptsTodayResponse {
+  attemptsToday?: number
+  numberOfAttempts?: number
+}
+
+interface LevelResponse {
+  name: string
+  exam?: string
+  totalExercises?: number
+}
 
 type CatalogState =
   | { status: 'loading' }
@@ -18,7 +42,12 @@ export const Dashboard: React.FC = () => {
   const [streak, setStreak] = useState(0)
   const [attemptsToday, setAttemptsToday] = useState(0)
   const [dailyGoal, setDailyGoal] = useState(5)
+  const [dailyGoalDraft, setDailyGoalDraft] = useState('5')
+  const [isEditingDailyGoal, setIsEditingDailyGoal] = useState(false)
+  const [isSavingDailyGoal, setIsSavingDailyGoal] = useState(false)
+  const [dailyGoalFeedback, setDailyGoalFeedback] = useState<DailyGoalFeedback | null>(null)
   const [selectedLevel, setSelectedLevel] = useState(localStorage.getItem('ceferly-level') || 'B2')
+  const isAuthenticated = Boolean(localStorage.getItem('token'))
   const [levels, setLevels] = useState<{ name: string; exam?: string; totalExercises?: number }[]>([
     { name: 'B1' },
     { name: 'B2' },
@@ -62,9 +91,9 @@ export const Dashboard: React.FC = () => {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     })
       .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
+      .then((data: LevelResponse[] | null) => {
         if (Array.isArray(data) && data.length > 0) {
-          setLevels(data.filter((level: { name: string }) => ['B1', 'B2', 'C1'].includes(level.name)))
+          setLevels(data.filter((level) => ['B1', 'B2', 'C1'].includes(level.name)))
         }
       })
       .catch(() => {})
@@ -75,7 +104,7 @@ export const Dashboard: React.FC = () => {
         headers: { Authorization: `Bearer ${token}` },
       })
         .then((res) => (res.ok ? res.json() : null))
-        .then((userData) => {
+        .then((userData: UserSummaryResponse | null) => {
           if (userData) {
             setStreak(userData.streak ?? 0)
             setDailyGoal(userData.daily_goal ?? 5)
@@ -87,7 +116,8 @@ export const Dashboard: React.FC = () => {
         headers: { Authorization: `Bearer ${token}` },
       })
         .then((res) => (res.ok ? res.json() : null))
-        .then((attemptData) => {
+        .then((attemptData: AttemptsTodayResponse | null) => {
+          if (!attemptData) return
           const todayCount = attemptData.attemptsToday ?? attemptData.numberOfAttempts
           if (todayCount !== undefined) {
             setAttemptsToday(todayCount)
@@ -97,6 +127,55 @@ export const Dashboard: React.FC = () => {
     }
   }, [])
 
+  const startEditingDailyGoal = () => {
+    setDailyGoalDraft(String(dailyGoal))
+    setDailyGoalFeedback(null)
+    setIsEditingDailyGoal(true)
+  }
+
+  const handleSaveDailyGoal = async () => {
+    const requestedGoal = parseDailyGoal(dailyGoalDraft)
+    if (requestedGoal === null) {
+      setDailyGoalFeedback({ message: 'Introduce un número entero entre 1 y 100.', kind: 'error' })
+      return
+    }
+
+    const token = localStorage.getItem('token')
+    if (!token) {
+      setDailyGoalFeedback({ message: 'Inicia sesión para guardar tu meta diaria.', kind: 'error' })
+      return
+    }
+
+    setIsSavingDailyGoal(true)
+    setDailyGoalFeedback(null)
+    try {
+            const response = await fetch(`${API_BASE_URL}/users/me/daily-goal`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ daily_goal: requestedGoal }),
+      })
+      const data: { daily_goal?: unknown } = await response.json().catch(() => ({}))
+      if (!response.ok) throw new Error('No se pudo guardar la meta diaria.')
+
+      const savedGoal = parseDailyGoal(data.daily_goal)
+      if (savedGoal === null) throw new Error('El servidor devolvió una meta inválida.')
+
+      setDailyGoal(savedGoal)
+      setDailyGoalDraft(String(savedGoal))
+      setIsEditingDailyGoal(false)
+      setDailyGoalFeedback({ message: 'Meta diaria guardada.', kind: 'success' })
+    } catch {
+      setDailyGoalFeedback({
+        message: 'No se pudo guardar la meta diaria. Inténtalo de nuevo.',
+        kind: 'error',
+      })
+    } finally {
+      setIsSavingDailyGoal(false)
+    }
+  }
   const skillNodes = catalogState.status === 'ready' ? catalogState.nodes : []
 
   return (
@@ -230,6 +309,70 @@ export const Dashboard: React.FC = () => {
               : `Completa ${Math.max(0, dailyGoal - attemptsToday)} ejercicios más hoy para mantener tu racha al máximo.`}
           </p>
           <ProgressBar value={attemptsToday} max={dailyGoal} color="mint" showLabel />
+          {isEditingDailyGoal ? (
+            <form
+              className="flex flex-col gap-3 border-t border-ceferlyBorder pt-3"
+              onSubmit={(event) => {
+                event.preventDefault()
+                void handleSaveDailyGoal()
+              }}
+            >
+              <label className="flex flex-col gap-1 text-xs font-bold text-slateText-muted">
+                Ejercicios por día
+                <input
+                  aria-label="Meta diaria en ejercicios"
+                  className="input-playful py-2 text-sm"
+                  type="number"
+                  min={1}
+                  max={100}
+                  step={1}
+                  required
+                  value={dailyGoalDraft}
+                  disabled={isSavingDailyGoal}
+                  onChange={(event) => setDailyGoalDraft(event.target.value)}
+                />
+              </label>
+              <p className="text-[11px] font-semibold text-slateText-muted">Elige entre 1 y 100 ejercicios diarios.</p>
+              <div className="flex gap-2">
+                <Button type="submit" size="sm" disabled={isSavingDailyGoal}>
+                  {isSavingDailyGoal ? 'Guardando…' : 'Guardar'}
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  disabled={isSavingDailyGoal}
+                  onClick={() => {
+                    setIsEditingDailyGoal(false)
+                    setDailyGoalFeedback(null)
+                  }}
+                >
+                  Cancelar
+                </Button>
+              </div>
+            </form>
+          ) : (
+            <div className="flex justify-end">
+              {isAuthenticated ? (
+                <Button variant="ghost" size="sm" onClick={startEditingDailyGoal}>
+                  Editar meta
+                </Button>
+              ) : (
+                <Link to="/login" className="text-xs font-black text-mint-dark underline underline-offset-2">
+                  Inicia sesión para ajustar tu meta
+                </Link>
+              )}
+            </div>
+          )}
+          {dailyGoalFeedback && (
+            <p
+              className={`text-xs font-bold ${dailyGoalFeedback.kind === 'error' ? 'text-coral-dark' : 'text-mint-dark'}`}
+              role={dailyGoalFeedback.kind === 'error' ? 'alert' : 'status'}
+              aria-live="polite"
+            >
+              {dailyGoalFeedback.message}
+            </p>
+          )}
         </Card>
 
         {/* Streak Challenge Card */}

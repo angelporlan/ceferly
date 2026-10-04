@@ -1,6 +1,6 @@
 # Ciclo 29: límite de palabras en B1 Part 4
 
-Issue: #143  
+Issue: #143
 Rama: `agent/fix-b1-part4-word-limit`
 
 ## Problema y alcance
@@ -36,8 +36,9 @@ Para el #5 se cambiará el enunciado con hueco a una transformación pasiva equi
 - #3 ahora acepta únicamente `is of interest to`.
 - #5 ahora pide `The match ______ the rain.` y acepta `was cancelled because of`, que conserva el significado y BECAUSE.
 - TDD: `node --test test/uoeCatalogPart4.test.js` falló inicialmente por las alternativas de una palabra y pasa 2/2 después del cambio.
-- `backend npm test`: 23/23 con esquema migrado en un contenedor MySQL temporal sin volumen persistente.
-- `frontend npm run build`: correcto; `node --check backend/src/cambridge/uoeCatalog.js` y `git diff --check`: correctos.
+- `backend npm test`: 27/27 después de integrar `main`, con esquema migrado en un contenedor MySQL temporal sin volumen persistente.
+- `frontend npm test`: 16/16; `frontend npm run build`: correcto.
+- `node --check backend/src/cambridge/uoeCatalog.js` y `git diff origin/main...HEAD --check`: correctos.
 - QA editorial: la frase #3 usa la equivalencia `be interested in` / `be of interest to`; la #5 conserva el significado con la pasiva `was cancelled because of the rain`.
 
 ## Follow-up detectado
