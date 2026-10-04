@@ -33,8 +33,8 @@ El ciclo restringe el endpoint a valores JSON de tipo number que sean enteros en
 ## Plan
 
 1. [x] Confirmar contrato, controlador, ruta autenticada y harness HTTP/MySQL existente.
-2. [ ] Añadir regresiones de endpoint para límites, tipos, persistencia y autenticación; comprobar que fallan antes del fix.
-3. [ ] Añadir validación estricta sin coerción y conservar la respuesta exitosa.
+2. [x] Añadir regresiones de endpoint para límites, tipos, persistencia y autenticación; comprobar que fallan antes del fix (un string numérico se guardó como 5; body ausente respondió 500).
+3. [x] Añadir validación estricta sin coerción y conservar la respuesta exitosa.
 4. [ ] Ejecutar tests focalizados y suite backend con MySQL aislado; revisar el diff y el flujo HTTP.
 5. [ ] Crear PR vinculada a #152, etiquetar `needs-human-review`, hacer self-review y dejarla abierta con CI verde.
 

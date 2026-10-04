@@ -8,7 +8,7 @@
 - Contrato y plan: `docs/specs/ciclo32-daily-goal-integer-validation.md`.
 
 ### Estado
-- Spec completada en `agent/fix-daily-goal-integer-validation`; pruebas de regresión pendientes.
+- Spec y regresiones test-first listas en `agent/fix-daily-goal-integer-validation`; el caso rojo demostró que el string `"5"` se guardaba como 5. Fix implementado; verificación completa pendiente.
 
 ## [Ciclo 29] - Aplicar el límite de palabras a B1 Part 4 (#143)
 

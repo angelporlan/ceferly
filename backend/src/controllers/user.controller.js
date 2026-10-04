@@ -311,10 +311,10 @@ export const getNumberOfAttemptsToday = async (req, res) => {
 export const updateDailyGoal = async (req, res) => {
     try {
         const user = req.user;
-        const { daily_goal } = req.body;
+        const daily_goal = req.body?.daily_goal;
 
-        if (daily_goal === undefined || daily_goal < 1 || daily_goal > 100) {
-            return res.status(400).json({ message: "Daily goal must be between 1 and 100" });
+        if (!Number.isInteger(daily_goal) || daily_goal < 1 || daily_goal > 100) {
+            return res.status(400).json({ message: "Daily goal must be an integer between 1 and 100" });
         }
 
         user.daily_goal = daily_goal;
