@@ -1,17 +1,8 @@
-import express from "express";
-import cors from "cors";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { sequelize } from "./config/db.js";
-import "./models/index.js";
 import "dotenv/config";
-
-import exerciseAttemptRoutes from "./routes/exerciseAttempt.routes.js";
-import authRoutes from "./routes/auth.routes.js";
-import exerciseRoutes from "./routes/exercise.routes.js";
-import userRoutes from "./routes/user.routes.js";
-import aiRoutes from "./routes/ai.routes.js";
-import paymentsRoutes from "./routes/payments.routes.js";
+import { app } from "./app.js";
 
 import { seedLevels } from "./seeds/seedLevels.js";
 import { seedCategories } from "./seeds/seedCategories.js";
@@ -21,28 +12,7 @@ import { seedUsers } from "./seeds/seedUsers.js";
 import { seedUserExerciseAttempts } from "./seeds/seedUserExerciseAttempts.js";
 import { seedCambridgeUseOfEnglish } from "./seeds/seedCambridgeUseOfEnglish.js";
 
-const app = express();
 const execFileAsync = promisify(execFile);
-
-app.use(cors());
-app.use(express.json());
-
-app.use('/public', express.static('public'));
-
-app.get("/", (req, res) => {
-    res.send("API funcionando correctamente");
-});
-
-app.get("/api/health", (req, res) => {
-    res.json({ ok: true, service: "ceferly-api" });
-});
-
-app.use("/api", exerciseAttemptRoutes);
-app.use("/api", authRoutes);
-app.use("/api", exerciseRoutes);
-app.use("/api", userRoutes);
-app.use("/api", aiRoutes);
-app.use("/api", paymentsRoutes);
 
 (async () => {
     try {
