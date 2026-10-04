@@ -37,6 +37,6 @@ Rama: `agent/fix-seeded-uoe-content`
 
 - TDD rojo: el test de integración falló al inicio porque aún no existía la migración indicada.
 - TDD verde: el test aplica la migración dos veces en la misma transacción y confirma contenido, IDs, intentos y una fila editada manualmente que debe quedar intacta.
-- Backend completo: 26/26 tests contra MySQL temporal aislado con migraciones aplicadas.
+- Backend completo: 29/29 tests contra MySQL temporal aislado, con `origin/main` actualizado y todas las migraciones aplicadas.
 - Frontend: 16/16 tests y `npm run build` correctos.
 - QA UI: no aplica; este ciclo solo cambia persistencia y documentación.
