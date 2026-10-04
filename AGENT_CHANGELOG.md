@@ -60,7 +60,7 @@
 - Revisión de catálogo: marcadores visibles coinciden con claves de solución en 26/26 Word Formation, 30/30 Key Word Transformation y 20/20 Conditionals.
 
 ### Estado
-- Issue #140 abierto; PR y self-review pendientes de publicación.
+- Issue #140 enlazado por la PR #149 (`agent/fix-multigap-exercise-scoring`), abierta para revisión; `backend-test` y `frontend-build` verdes y self-review publicado.
 
 ## [Ciclo 10] - Aplicar racha al cumplir la meta diaria (#106)
 
