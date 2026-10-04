@@ -12,7 +12,7 @@ La racha solo avanza cuando el número de intentos persistidos del día UTC alca
 - Tests cubren intentos bajo la meta, alcanzar meta, intentos extra, continuidad al día siguiente y reinicio tras un día omitido.
 
 ### Estado
-- Issue #106; PR y CI pendientes.
+- Issue #106 enlazado desde la PR #107, abierta y marcada `needs-human-review`; `backend-test` y `frontend-build` pasaron para el commit `e2c3800`.
 - Spec: `docs/specs/ciclo10-streak-daily-goal.md`.
 
 ## Retrospectiva — ciclos 6–10
