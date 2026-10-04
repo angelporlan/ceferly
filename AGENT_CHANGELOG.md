@@ -9,7 +9,7 @@
 - Contrato y plan: `docs/specs/ciclo27-composite-answer-display.md`.
 
 ### Estado
-- Implementación y QA completados en `agent/fix-composite-answer-display-139`; PR #144 abierta y vinculada al issue #139, pendiente CI.
+- Implementación y QA completados en `agent/fix-composite-answer-display-139`; PR #144 abierta con `Closes #139` (el issue se cerrará al merge).
 - Verificación: `npm test` (15/15), `npm run build`, ESLint dirigido, `git diff --check` y QA visual/accesible del feedback incorrecto con tres huecos.
 
 ## [Ciclo 10] - Aplicar racha al cumplir la meta diaria (#106)
