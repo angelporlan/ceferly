@@ -1,5 +1,27 @@
 # AGENT CHANGELOG
 
+## [Ciclo 10] - Aplicar racha al cumplir la meta diaria (#106)
+
+### Resumen
+La racha solo avanza cuando el número de intentos persistidos del día UTC alcanza `daily_goal`. Los intentos por debajo de la meta conservan la racha y fecha anterior; los intentos siguientes no vuelven a incrementarla. Se eliminó el helper de controlador que no tenía callers.
+
+### Verificación
+- TDD: el test de umbral falló antes del cambio (`3 !== 2`) y pasó después.
+- `backend npm test`: 18/18 con MySQL temporal en `127.0.0.1:3313`, migraciones aplicadas.
+- `frontend npm run build`: correcto.
+- Tests cubren intentos bajo la meta, alcanzar meta, intentos extra, continuidad al día siguiente y reinicio tras un día omitido.
+
+### Estado
+- Issue #106; PR y CI pendientes.
+- Spec: `docs/specs/ciclo10-streak-daily-goal.md`.
+
+## Retrospectiva — ciclos 6–10
+
+- Las recompensas y el scoring deben conservar al servidor como fuente de verdad; el Header solo proyecta la respuesta persistida.
+- Auth y datos persistidos llevan revisión humana; las PR quedan abiertas mientras el trabajo independiente continúa desde `main`.
+- El lint global se debe medir al inicio del ciclo y mantenerse separado de cambios de producto; el issue #98 sigue ese backlog.
+- Las reglas visibles en Dashboard (como completar `daily_goal`) deben corresponder a la regla de negocio persistida y tener tests de umbral.
+
 ## [Ciclo 4] - Documentación alineada con React y Vite (#95)
 
 ### Resumen
