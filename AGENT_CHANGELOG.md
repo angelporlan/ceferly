@@ -10,7 +10,7 @@
 ### Estado
 - Fix y regresión en `agent/fix-daily-goal-integer-validation`; TDD rojo confirmó que el string `"5"` se guardaba como 5 y que un body ausente daba 500.
 - Verificación local tras sincronizar `main` hasta `abac93d`: backend 40/40 con las 4 migraciones Prisma en MySQL desechable (`127.0.0.1:3322`).
-- PR #154 abierta con `needs-human-review` y self-review; falta CI para el HEAD sincronizado.
+- PR #154 abierta con `needs-human-review` y self-review; CI verde para el HEAD sincronizado (2 backend-test y 2 frontend-build).
 
 ## [Ciclo 30] - Reconciliar contenido UoE ya sembrado (#147)
 

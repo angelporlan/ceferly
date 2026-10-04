@@ -38,13 +38,13 @@ El ciclo restringe el endpoint a valores JSON de tipo number que sean enteros en
 3. [x] Añadir validación estricta sin coerción y conservar la respuesta exitosa.
 4. [x] Ejecutar test focalizado y suite backend (40/40) con migraciones en MySQL aislado; revisar el flujo HTTP.
 5. [x] Crear PR vinculada a #152, etiquetar `needs-human-review` y publicar self-review.
-6. [ ] Esperar CI verde para el HEAD sincronizado.
+6. [x] Esperar CI verde para el HEAD sincronizado: 2 backend-test y 2 frontend-build.
 
 ## Verificación final
 
 - Antes del fix, el test HTTP confirmó que `daily_goal: "5"` persistía como 5 y que un body ausente respondía 500.
 - Después del fix y de sincronizar `origin/main` hasta `abac93d`, el test de endpoint y la suite backend completa pasan: 40/40, con las cuatro migraciones Prisma aplicadas en MySQL desechable.
-- Las dos ejecuciones previas de backend-test y frontend-build pasaron; CI debe repetirse para el HEAD sincronizado.
+- CI de PR #154 tras sincronizar main: 2 ejecuciones de backend-test y 2 de frontend-build, todas verdes.
 - La PR está etiquetada `needs-human-review`; no se cambian esquema, UI, ruta ni middleware.
 
 ## Riesgos
