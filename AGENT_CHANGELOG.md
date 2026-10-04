@@ -8,13 +8,46 @@
 - Sincronizar la verificación final de la spec del ciclo 32 y documentar este ajuste en `docs/specs/ciclo33-daily-goal-doc-state.md`.
 
 ### Verificación
-- Línea base de `main` (`24ceedd`): backend 41/41 con MySQL aislado y cuatro migraciones; frontend 28/28 y build correctos.
+- Línea base de `main` (`24ceedd`): backend 41/41 con MySQL aislado y cuatro migraciones; frontend 28/28 y build correctos. La rama se sincronizó después con `main` en `7b88567`.
 - `npm run lint` conserva 12 errores y 1 aviso preexistentes, seguidos por #98/PR #102.
 - Revisión documental y `git diff --check`; sin cambios ejecutables.
 
 ### Estado
 - PR #156 abierta desde `agent/docs-daily-goal-merge-record` con `Closes #155`; diff revisado y self-review publicado.
 - `backend-test` y `frontend-build` pasaron en GitHub Actions; el lint global conserva el baseline documentado en #98/PR #102.
+
+## [Ciclo 8] - Inicialización única de Google Identity Services (#101)
+
+### Resumen
+GSI se inicializa una sola vez por client ID y usa un dispatcher hacia el handler de la pantalla montada. Login y registro siguen renderizando el botón y conservan el fallback.
+
+### Verificación
+- `frontend npm run build`: correcto.
+- `backend npm test`: 16/16.
+- QA: se alternó cuatro veces entre login y registro; no reapareció el warning de inicialización múltiple y la consola del navegador no registró warnings ni errores.
+- `frontend npm run lint`: 14 errores preexistentes de tipos en el estado de `main`, sin warnings; el issue #98 los corrige en la PR #102.
+
+### Estado
+- Issue #101 reutilizado; warning reproducido antes del cambio en QA del ciclo anterior.
+- PR #103 pasó a `main` en `7b88567`, enlazada a #101 y etiquetada `needs-human-review` por afectar el flujo de login.
+## [Ciclo 12] - E2E HTTP del intento de práctica (#110)
+
+### Resumen
+- Separa `app.js` del bootstrap para montar Express en pruebas sin ejecutar migraciones ni seeds de desarrollo.
+- Añade un E2E HTTP de registro → catálogo → intento → historial, con fixture determinista, aserciones de persistencia/recompensas y limpieza.
+- El cliente de Stripe se crea al usar pagos, así importar las rutas en pruebas no requiere claves ni llamadas externas.
+
+### Verificación
+- TDD: la prueba falló al faltar `app.js`; pasó tras extraer la app.
+- MySQL temporal con migraciones: E2E 1/1; backend completo 17/17.
+- `frontend npm run build`: OK; `git diff --check`: OK.
+- La validación del historial detectó el desglose incorrecto de respuestas escalares; seguimiento registrado en #111.
+
+### Estado
+- PR #112 se integró en `main` mediante `cff16db`, enlazada a #110.
+- La filtración de claves de respuesta sigue en la PR #100; este E2E no las usa para generar la respuesta.
+- Spec: `docs/specs/ciclo12-practice-attempt-e2e.md`.
+## [Ciclo 15] - README y GOAL_PROMPT alineados con el código (#116)
 
 ## [Ciclo 17] - E2E integrado desde registro hasta explicación (#120)
 
@@ -30,7 +63,7 @@
 - Sin cambios de interfaz ni llamadas reales a IA/Stripe.
 
 ### Estado
-- Issue #120 enlazado desde la PR #121 en `agent/test-full-learning-explanation-e2e`; PR abierta para revisión.
+- PR #121 se integró en `main` mediante `24ceedd`, enlazada a #120.
 ## [Ciclo 32] - Validar enteros en `daily_goal` (#152)
 
 ### Resumen

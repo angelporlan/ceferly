@@ -2,7 +2,7 @@
 
 Issue: #155
 Rama: `agent/docs-daily-goal-merge-record`
-Base: `origin/main` en `24ceedd` (PR #121).
+Base al crear la rama: `origin/main` en `24ceedd` (PR #121). Sincronización posterior: `origin/main` en `7b88567` (PR #103), para resolver la actualización de la PR.
 
 ## Problema y alcance
 
@@ -34,6 +34,7 @@ Este ciclo reconcilia esos documentos con el estado verificado de `main`. No mod
 3. [x] Buscar afirmaciones desactualizadas y revisar el diff documental.
 4. [x] Hacer commit y push, crear PR #156 con `Closes #155`, revisar el diff y publicar self-review.
 5. [x] Confirmar `backend-test` y `frontend-build` verdes en GitHub Actions.
+6. [x] Sincronizar `origin/main` en `7b88567`, conservar la nueva nota de `app.js` y las entradas de ciclos 8, 12 y 15, y resolver el conflicto de la PR.
 
 ## Verificación
 
