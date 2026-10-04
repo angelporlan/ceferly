@@ -25,6 +25,36 @@
 - Los tests backend necesitan MySQL aislado con Prisma Migrate aplicado; si la conexión falta, el fallo no demuestra una regresión. Registrar ese entorno antes de interpretar el resultado.
 - Las ramas paralelas vuelven a solaparse en la cabecera del changelog. Actualizar `origin/main` y conservar ambas entradas evita PRs en conflicto; esta regla queda en `AGENTS.md`.
 
+## [Ciclo 23] - Métricas personales confirmadas en Dashboard (#132)
+
+### Resumen
+- La meta diaria y la racha ahora usan los datos válidos de `/users/me/numberOfAttemptsToday`; se eliminan defaults personales inventados y se conservan ceros confirmados por la API.
+- Sin sesión se ofrece iniciar sesión; carga, error, payload inválido y reintento tienen estados explícitos.
+- Contrato y plan: `docs/specs/ciclo23-dashboard-stats-truth.md`; no cambian backend, edición de meta ni reglas de racha.
+
+### Verificación local
+- TDD: el test del parser falló antes de implementarlo; `npm test` pasa 3/3 y `npm run build` pasa.
+- Lint de helper y tests pasa. El lint completo conserva 16 errores y 1 aviso, con dos errores preexistentes en el mapeo de categorías del Dashboard cubiertos por #98/PR #102.
+- Smoke UI local: invitado, carga lenta, error HTTP, payload malformado y reintento con ceros API; la UI no inventa cifras ante datos ausentes.
+- CI de la PR #133: `backend-test` y `frontend-build` verdes en `push` y `pull_request`.
+
+### Estado
+- Issue #132 enlazado por la PR #133, abierta con checks verdes en `agent/fix-dashboard-stats-truth`.
+## [Ciclo 6] - Claves de respuesta ocultas hasta el intento (#97)
+
+### Resumen
+Las rutas GET de ejercicios ya no serializan `correct_answer` ni `correctAnswer`. El reproductor usa el scoring autenticado del servidor y muestra la solución tras guardar el intento; a visitantes sin sesión les ofrece iniciar sesión.
+
+### Verificación
+- Backend: suite completa 19/19; regresiones para listado, detalle y ejercicio aleatorio.
+- Frontend: `npm run build` y ESLint focalizado de `ExercisePlayer.tsx` OK.
+- API real: list/detail/random respondieron 200 sin claves; el POST sin sesión respondió 401.
+- QA UI: invitado recibe el enlace de acceso sin ver solución; sesión autenticada ve la solución tras enviar, conserva vidas/racha y llega a `/results`; consola del navegador sin errores.
+- El lint completo conserva errores previos en archivos fuera del cambio; seguimiento existente en issue #98.
+
+### Estado
+- Issue #97 enlazado desde PR #100; checks de backend y frontend verdes. PR abierta con `needs-human-review` porque comprobar una respuesta ahora requiere sesión.
+- No se hicieron cambios de esquema. La corrección previa de README Angular → React quedó integrada en `main` mediante PR #96.
 ## [Ciclo 24] - Contadores de Header con datos autenticados (#135)
 
 ### Resumen
