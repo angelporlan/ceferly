@@ -30,6 +30,7 @@ Ampliar el catálogo original de Use of English para B1 Preliminary, B2 First y 
 - `git diff --check`: correcto.
 - El test nuevo verifica respuestas válidas para opción múltiple, palabra clave de Part 4, respuestas de 2–5 palabras, explicaciones y títulos únicos.
 - No se tocaron rutas UI ni la función de seeding; el catálogo se verifica sin base de datos.
+- CI de la PR #141: `backend-test` y `frontend-build` pasan.
 
 ## Fuera de alcance
 

@@ -12,9 +12,10 @@
 - `backend npm test`: 19/19; `frontend npm run build`: correcto.
 - `git diff --check`: correcto; tests validan tipos, títulos únicos, respuestas, explicaciones y formato de Part 4.
 - Sin cambios de UI, esquema ni seeder.
+- CI de la PR #141: `backend-test` y `frontend-build` verdes.
 
 ### Estado
-- Implementación local lista en `agent/feat-uoe-catalog-144`; issue #138 abierto, PR/CI pendientes.
+- Issue #138 enlazado por la PR #141, abierta en `agent/feat-uoe-catalog-144` con checks verdes.
 
 ## [Ciclo 16] - Alinear retornos de Stripe con rutas React (#117)
 
