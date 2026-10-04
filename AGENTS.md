@@ -85,3 +85,7 @@ Prelación: contenido <100 ejercicios → E2E → IA → gamificación → tests
 ## Arranque
 
 `gh issue list`, `gh pr list`, `AGENT_CHANGELOG.md`. Si no hay issue abierto de la siguiente prioridad, créalo. Luego rama + TDD + commits + PR + self-review.
+
+## Gotchas del repo
+
+- `Header` vive en `AppLayout` y permanece montado entre rutas; los intentos y compras deben emitir una actualización de stats para refrescar sus contadores sin recarga.

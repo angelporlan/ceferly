@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { Flame, Coins, Heart, Sparkles, LogIn } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import {
+  getStreakBadge,
+  mergeUserStats,
+  subscribeToUserStats,
+  type UserStatsUpdate,
+} from '../../services/userStats.mjs'
 
 interface UserStats {
   streak: number
@@ -19,12 +25,14 @@ export const Header: React.FC = () => {
     level: 'Cambridge',
     name: 'Estudiante',
   })
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const isAuthenticated = Boolean(localStorage.getItem('token'))
 
   useEffect(() => {
+    const unsubscribe = subscribeToUserStats((update: UserStatsUpdate) => {
+      setStats((current) => mergeUserStats(current, update))
+    })
     const token = localStorage.getItem('token')
     if (token) {
-      setIsAuthenticated(true)
       const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000/api'
       fetch(`${API_BASE}/users/me`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -32,8 +40,7 @@ export const Header: React.FC = () => {
         .then(res => res.ok ? res.json() : null)
         .then(data => {
           if (data) {
-            setStats(prev => ({
-              ...prev,
+            setStats(prev => mergeUserStats(prev, {
               streak: data.streak ?? 0,
               coins: data.coins ?? 0,
               hearts: data.hearts ?? 0,
@@ -45,7 +52,11 @@ export const Header: React.FC = () => {
         })
         .catch(() => {})
     }
+
+    return unsubscribe
   }, [])
+
+  const streakBadge = getStreakBadge(stats.streak)
 
   return (
     <header className="h-16 border-b-2 border-ceferlyBorder bg-white flex items-center justify-between px-4 md:px-8 sticky top-0 z-20">
@@ -68,9 +79,19 @@ export const Header: React.FC = () => {
       {/* Gamification Counters (Streaks, Coins, Hearts) */}
       <div className="flex items-center gap-2 sm:gap-4">
         {/* Streak */}
-        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border-2 border-amber/30 bg-amber-50 shadow-sm cursor-pointer hover:scale-105 transition-transform" title="Racha de días de estudio">
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border-2 border-amber/30 bg-amber-50 shadow-sm cursor-pointer hover:scale-105 transition-transform" title={`Racha de ${stats.streak} ${stats.streak === 1 ? 'día' : 'días'}`}>
           <Flame className="w-5 h-5 text-amber fill-amber animate-pulse" />
           <span className="font-black text-amber-dark text-sm">{stats.streak}</span>
+          {streakBadge && (
+            <span
+              className="rounded-md bg-amber/20 px-1 py-0.5 text-[9px] font-black leading-none text-amber-dark"
+              role="img"
+              aria-label={streakBadge.accessibleLabel}
+              title={streakBadge.accessibleLabel}
+            >
+              {streakBadge.label}
+            </span>
+          )}
         </div>
 
         {/* Coins / Gems */}

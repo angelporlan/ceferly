@@ -5,6 +5,7 @@ import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { Badge } from '../components/ui/Badge'
 import { X, Heart, CheckCircle2, AlertCircle, ArrowRight, ShoppingBag } from 'lucide-react'
+import { publishUserStats } from '../services/userStats.mjs'
 
 interface ExerciseData {
   id: number
@@ -47,6 +48,8 @@ export const ExercisePlayer: React.FC = () => {
   const [coins, setCoins] = useState(0)
   const [streak, setStreak] = useState(0)
   const [attemptId, setAttemptId] = useState<number | undefined>()
+  const [coinsEarned, setCoinsEarned] = useState(0)
+  const [attemptSaved, setAttemptSaved] = useState(false)
   const [blocked, setBlocked] = useState(false)
   const [submitting, setSubmitting] = useState(false)
 
@@ -127,15 +130,25 @@ export const ExercisePlayer: React.FC = () => {
         if (res.status === 403) {
           setBlocked(true)
           setHearts(payload.hearts ?? 0)
+          publishUserStats({ hearts: payload.hearts ?? 0 })
           return
         }
         if (res.ok) {
-          if (payload.attempt?.id) setAttemptId(payload.attempt.id)
+          if (payload.attempt?.id) {
+            setAttemptId(payload.attempt.id)
+            setAttemptSaved(true)
+          }
           if (payload.rewards) {
             setHearts(payload.rewards.hearts)
             setCoins(payload.rewards.coins)
             setStreak(payload.rewards.streak)
+            setCoinsEarned(payload.rewards.coinsDelta ?? 0)
             setBlocked(!!payload.rewards.playBlocked)
+            publishUserStats({
+              coins: payload.rewards.coins,
+              hearts: payload.rewards.hearts,
+              streak: payload.rewards.streak,
+            })
           }
           if (payload.scored) {
             serverCorrect = !!payload.scored.isFullyCorrect
@@ -182,6 +195,10 @@ export const ExercisePlayer: React.FC = () => {
       },
     })
   }
+
+  const rewardMessage = attemptSaved
+    ? `+${coinsEarned} monedas · saldo ${coins} · racha ${streak}`
+    : 'Intento sin guardar · sin recompensa de monedas'
 
   if (loading) {
     return (
@@ -329,7 +346,7 @@ export const ExercisePlayer: React.FC = () => {
               </div>
               <div>
                 <h3 className="font-black text-lg text-mint-dark">¡Excelente trabajo!</h3>
-                <p className="text-xs font-bold text-mint-hover">+ monedas · racha {streak} · {coins} 💎</p>
+                <p className="text-xs font-bold text-mint-hover">{rewardMessage}</p>
               </div>
             </div>
           ) : (
@@ -342,6 +359,7 @@ export const ExercisePlayer: React.FC = () => {
                 <p className="text-xs font-bold text-coral-hover">
                   Solución esperada: <strong className="underline">{String(exercise.correctAnswer)}</strong>
                 </p>
+                <p className="text-xs font-bold text-coral-hover">{rewardMessage}</p>
               </div>
             </div>
           )}
