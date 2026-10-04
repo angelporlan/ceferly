@@ -1,5 +1,22 @@
 # AGENT CHANGELOG
 
+## [Ciclo 14] - E2E HTTP de explicación IA persistida (#114)
+
+### Resumen
+- Se añadió un E2E que monta los routers reales, crea un intento por HTTP y pide la explicación persistida con el fallback determinista de `explanation_rule`.
+- Comprueba persistencia, caché sin cuota ni filas duplicadas, rechazo de acceso por otro usuario y ausencia de llamadas a proveedores externos.
+- Se documentó el alcance y los invariantes en `docs/specs/ciclo14-ai-explanation-e2e.md`.
+
+### Verificación
+- Backend: 17/17 tests con una base MySQL temporal aislada; incluye la nueva ruta E2E.
+- Frontend: `npm run build` OK.
+- `git diff --check` OK.
+- `npm run lint` sigue fallando en el baseline con 16 errores y 1 warning preexistentes; cubiertos por el issue #98 / PR #102, sin cambios frontend en este ciclo.
+- El primer intento de suite backend fue bloqueado por `EPERM` al conectar con MySQL desde el sandbox; al repetirlo contra MySQL temporal, la suite pasó.
+
+### Estado
+- Issue #114 abierto; PR pendiente de creación en `agent/test-ai-explanation-e2e`.
+
 ## [Ciclo 4] - Documentación alineada con React y Vite (#95)
 
 ### Resumen
