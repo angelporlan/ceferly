@@ -1,5 +1,17 @@
 # AGENT CHANGELOG
 
+## [Ciclo 27] - Soluciones compuestas legibles en el reproductor (#139)
+
+### Resumen
+- Sustituir la conversión directa de objetos a texto por soluciones legibles: los huecos compuestos aparecen numerados y ordenados, y conservan las alternativas aceptadas.
+- El feedback de solución solo se expone después de una respuesta incorrecta; los valores vacíos, inválidos o serializados sin formato se omiten.
+- El panel de respuesta incorrecta usa `role="alert"` para anunciar el resultado a lectores de pantalla.
+- Contrato y plan: `docs/specs/ciclo27-composite-answer-display.md`.
+
+### Estado
+- Implementación y QA completados en `agent/fix-composite-answer-display-139`; pendiente publicar la PR vinculada al issue #139.
+- Verificación: `npm test` (15/15), `npm run build`, ESLint dirigido, `git diff --check` y QA visual del feedback incorrecto con tres huecos.
+
 ## [Ciclo 10] - Aplicar racha al cumplir la meta diaria (#106)
 
 ### Resumen

@@ -5,6 +5,7 @@ import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { Badge } from '../components/ui/Badge'
 import { X, Heart, CheckCircle2, AlertCircle, ArrowRight, ShoppingBag } from 'lucide-react'
+import { formatExpectedAnswers, getExpectedAnswerFeedback } from '../lib/expectedAnswers.mjs'
 
 interface ExerciseData {
   id: number
@@ -172,7 +173,7 @@ export const ExercisePlayer: React.FC = () => {
         attemptId,
         exerciseTitle: exercise.title,
         isCorrect,
-        correctAnswer: typeof exercise.correctAnswer === 'object' ? JSON.stringify(exercise.correctAnswer) : exercise.correctAnswer,
+        correctAnswer: formatExpectedAnswers(exercise.correctAnswer),
         userAnswer,
         questionText: exercise.questionText,
         explanationRule: exercise.explanation_rule,
@@ -202,6 +203,8 @@ export const ExercisePlayer: React.FC = () => {
       </div>
     )
   }
+
+  const expectedAnswerFeedback = getExpectedAnswerFeedback(status, exercise.correctAnswer)
 
   return (
     <div className="min-h-screen bg-canvas flex flex-col justify-between">
@@ -333,15 +336,17 @@ export const ExercisePlayer: React.FC = () => {
               </div>
             </div>
           ) : (
-            <div className="flex items-center gap-3">
+            <div role="alert" className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-full bg-coral text-white flex items-center justify-center shadow-md">
                 <AlertCircle className="w-7 h-7 stroke-[2.5]" />
               </div>
               <div>
                 <h3 className="font-black text-lg text-coral-dark">Respuesta incorrecta</h3>
-                <p className="text-xs font-bold text-coral-hover">
-                  Solución esperada: <strong className="underline">{String(exercise.correctAnswer)}</strong>
-                </p>
+                {expectedAnswerFeedback && (
+                  <p className="text-xs font-bold text-coral-hover whitespace-pre-line">
+                    Solución esperada: <strong className="underline">{expectedAnswerFeedback}</strong>
+                  </p>
+                )}
               </div>
             </div>
           )}
