@@ -1,5 +1,10 @@
 # AGENT CHANGELOG
 
+## [Ciclo 13] - Desglose correcto de respuestas en el historial (#111)
+
+### Estado
+- En planificación desde `agent/fix-scalar-attempt-feedback`; issue #111 abierto.
+
 ## [Ciclo 4] - Documentación alineada con React y Vite (#95)
 
 ### Resumen
