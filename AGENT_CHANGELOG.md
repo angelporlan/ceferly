@@ -1,5 +1,17 @@
 # AGENT CHANGELOG
 
+## [Ciclo 32] - Validar enteros en `daily_goal` (#152)
+
+### Resumen
+- Rechazar en el endpoint valores no enteros o fuera de rango antes de guardar la preferencia diaria del usuario.
+- Mantener la ruta y autenticación, y verificar la no mutación ante peticiones inválidas.
+- Contrato y plan: `docs/specs/ciclo32-daily-goal-integer-validation.md`.
+
+### Estado
+- Fix y regresión en `agent/fix-daily-goal-integer-validation`; TDD rojo confirmó que el string `"5"` se guardaba como 5 y que un body ausente daba 500.
+- Verificación local tras sincronizar `main` hasta `abac93d`: backend 40/40 con las 4 migraciones Prisma en MySQL desechable (`127.0.0.1:3322`).
+- PR #154 abierta con `needs-human-review` y self-review; CI verde para el HEAD anterior a la sincronización actual.
+
 ## [Ciclo 31] - README con catálogo y racha actuales (#151)
 
 ### Resumen
