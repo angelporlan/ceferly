@@ -41,6 +41,7 @@ No requiere migración: los intentos existentes ya contienen la clave `(user_id,
 - `frontend npm run build`: correcto.
 - `node --check` y `git diff --check`: correctos.
 - No se modificaron rutas UI; el servicio verifica el flujo con fixtures de base de datos.
+- CI de la PR #137: `backend-test` y `frontend-build` pasan.
 
 ## Riesgos
 

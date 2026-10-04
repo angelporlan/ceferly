@@ -12,9 +12,10 @@
 - `backend npm test`: 17/17; `frontend npm run build`: correcto.
 - `node --check` para los archivos backend modificados y `git diff --check`: correctos.
 - Sin cambios de UI; la prueba de servicio cubre reenvíos simultáneos, aislamiento por usuario y el umbral diario mixto.
+- CI de la PR #137: `backend-test` y `frontend-build` verdes.
 
 ### Estado
-- Implementación local lista en `agent/fix-writing-reward-dedupe`; issue #134 abierto, PR/CI pendientes.
+- Issue #134 enlazado por la PR #137, abierta en `agent/fix-writing-reward-dedupe` con checks verdes.
 
 ## [Ciclo 21] - Resultado vacío sin contexto (#128)
 
