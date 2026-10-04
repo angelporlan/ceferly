@@ -5,7 +5,8 @@ import { AttemptExplanation } from "../models/AttemptExplanation.js";
 import { checkAndConsumeAiUsage } from "../services/aiUsage.service.js";
 import { User } from "../models/User.js";
 import { createOpenRouterChatCompletion, createGeminiCompletion } from "../services/ai.service.js";
-import { explainAndPersistAttempt, persistAttemptExplanation, buildExplanationPrompt } from "../services/explanation.service.js";
+import { explainAndPersistAttempt, persistAttemptExplanation, buildExplanationPrompt, markWritingFeedbackAvailable } from "../services/explanation.service.js";
+import { isWritingExerciseType } from "../services/scoring.js";
 
 const aiServer = process.env.AI_SERVER || 'OpenRouter';
 
@@ -83,6 +84,7 @@ export const explainAttempt = async (req, res) => {
         });
 
         if (cachedExplanation) {
+            await markWritingFeedbackAvailable(attempt);
             return res.json({
                 explanation: cachedExplanation.explanation,
                 cached: true
@@ -99,8 +101,10 @@ export const explainAttempt = async (req, res) => {
             });
         }
 
-        const fallback = attempt.exercise?.explanation_rule
-            || "Compara tu respuesta con la clave Cambridge y revisa la estructura gramatical o la colocación.";
+        const fallback = isWritingExerciseType(attempt.exercise?.type)
+            ? "Tu texto está guardado, pero el tutor no pudo generar feedback. Comprueba que responde a todos los puntos del encargo y revisa claridad, organización, gramática y vocabulario; puedes volver a intentarlo más tarde."
+            : attempt.exercise?.explanation_rule
+                || "Compara tu respuesta con la clave Cambridge y revisa la estructura gramatical o la colocación.";
 
         const result = await explainAndPersistAttempt({
             userId,
@@ -176,4 +180,3 @@ export const explainDirect = async (req, res) => {
         return res.status(500).json({ message: "Error generating explanation" });
     }
 };
-

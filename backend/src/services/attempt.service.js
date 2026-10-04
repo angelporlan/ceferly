@@ -1,7 +1,7 @@
 import { UserExerciseAttempt } from "../models/UserExerciseAttempt.js";
 import { Exercise } from "../models/Exercise.js";
 import { applyAttemptRewards, canPlay, MAX_HEARTS } from "./gamification.js";
-import { scoreAttempt } from "./scoring.js";
+import { isWritingExerciseType, scoreAttempt, scoreWritingSubmission } from "./scoring.js";
 
 export const NO_HEARTS_CODE = "NO_HEARTS";
 export const EXERCISE_NOT_FOUND_CODE = "EXERCISE_NOT_FOUND";
@@ -13,12 +13,6 @@ export async function recordExerciseAttempt({
     totalGaps,
     now = new Date()
 }) {
-    if (!canPlay(user.hearts ?? MAX_HEARTS)) {
-        const error = new Error("No hearts remaining");
-        error.code = NO_HEARTS_CODE;
-        throw error;
-    }
-
     const exercise = await Exercise.findByPk(exerciseId);
     if (!exercise) {
         const error = new Error("Exercise not found");
@@ -26,11 +20,20 @@ export async function recordExerciseAttempt({
         throw error;
     }
 
-    const scored = scoreAttempt({
-        userAnswer,
-        correctAnswer: exercise.correct_answer,
-        totalGaps
-    });
+    const isWriting = isWritingExerciseType(exercise.type);
+    if (!isWriting && !canPlay(user.hearts ?? MAX_HEARTS)) {
+        const error = new Error("No hearts remaining");
+        error.code = NO_HEARTS_CODE;
+        throw error;
+    }
+
+    const scored = isWriting
+        ? scoreWritingSubmission(userAnswer)
+        : scoreAttempt({
+            userAnswer,
+            correctAnswer: exercise.correct_answer,
+            totalGaps
+        });
 
     const attempt = await UserExerciseAttempt.create({
         user_id: user.id,
@@ -39,7 +42,8 @@ export async function recordExerciseAttempt({
         total_gaps: scored.totalGaps,
         correct_gaps: scored.correctGaps,
         is_fully_correct: scored.isFullyCorrect,
-        score: scored.score
+        score: scored.score,
+        grading_status: scored.gradingStatus || "graded"
     });
 
     const role = typeof user.getActiveRole === "function" ? user.getActiveRole() : (user.subscription_role || "free");
@@ -50,6 +54,7 @@ export async function recordExerciseAttempt({
         lastCompletedDate: user.last_completed_date,
         role,
         isFullyCorrect: scored.isFullyCorrect,
+        isCompletionOnly: isWriting,
         now
     });
 

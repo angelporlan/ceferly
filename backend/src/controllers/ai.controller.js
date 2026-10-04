@@ -3,6 +3,8 @@ import { UserExerciseAttempt } from "../models/UserExerciseAttempt.js";
 import { User } from "../models/User.js";
 import { checkAndConsumeAiUsage } from "../services/aiUsage.service.js";
 import { explainAttempt } from "./explanation.controller.js";
+import { Exercise } from "../models/Exercise.js";
+import { markWritingFeedbackAvailable } from "../services/explanation.service.js";
 
 export const generateAiExplanation = async (req, res) => {
     try {
@@ -14,7 +16,8 @@ export const generateAiExplanation = async (req, res) => {
                 id: attemptId,
                 user_id: userId
             },
-            attributes: ["id"]
+            attributes: ["id", "grading_status"],
+            include: [{ model: Exercise, as: "exercise", attributes: ["type"] }]
         });
 
         if (!attempt) {
@@ -26,6 +29,7 @@ export const generateAiExplanation = async (req, res) => {
         });
 
         if (cachedExplanation) {
+            await markWritingFeedbackAvailable(attempt);
             return res.json({
                 explanation: cachedExplanation.explanation,
                 cached: true

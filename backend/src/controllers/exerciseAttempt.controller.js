@@ -4,6 +4,10 @@ import { Subcategory } from "../models/Subcategory.js";
 import { AttemptExplanation } from "../models/AttemptExplanation.js";
 import { Category } from "../models/Category.js";
 import { recordExerciseAttempt, NO_HEARTS_CODE, EXERCISE_NOT_FOUND_CODE } from "../services/attempt.service.js";
+import { isWritingExerciseType } from "../services/scoring.js";
+
+const EMPTY_WRITING_ANSWER_CODE = "EMPTY_WRITING_ANSWER";
+const WRITING_ANSWER_TOO_LONG_CODE = "WRITING_ANSWER_TOO_LONG";
 
 const normalizeAnswer = (value) => {
     if (value === null || value === undefined) {
@@ -88,8 +92,9 @@ const serializeAttemptSummary = (attempt) => {
         created_at: attemptJson.created_at,
         total_gaps: attemptJson.total_gaps,
         correct_gaps: attemptJson.correct_gaps,
-        score: attemptJson.score,
+        score: attemptJson.grading_status === "graded" ? attemptJson.score : null,
         is_fully_correct: attemptJson.is_fully_correct,
+        grading_status: attemptJson.grading_status,
         exercise: exercise ? {
             id: exercise.id,
             title: exercise.title,
@@ -143,6 +148,9 @@ export const createExerciseAttempt = async (req, res) => {
                 playBlocked: true
             });
         }
+        if (error.code === EMPTY_WRITING_ANSWER_CODE || error.code === WRITING_ANSWER_TOO_LONG_CODE) {
+            return res.status(400).json({ message: error.message, code: error.code });
+        }
         console.error(error);
         res.status(500).json({ message: "Error saving attempt" });
     }
@@ -177,19 +185,21 @@ export const getExerciseAttemptById = async (req, res) => {
         }
 
         const attemptJson = attempt.toJSON();
-        const markedAnswers = buildMarkedAnswers(
-            attemptJson.user_answer,
-            attemptJson.exercise?.correct_answer
-        );
+        const isWriting = isWritingExerciseType(attemptJson.exercise?.type);
+        const markedAnswers = isWriting
+            ? []
+            : buildMarkedAnswers(attemptJson.user_answer, attemptJson.exercise?.correct_answer);
 
         res.json({
             ...attemptJson,
             marked_answers: markedAnswers,
-            feedback_summary: {
-                total: markedAnswers.length,
-                correct: markedAnswers.filter((answer) => answer.is_correct).length,
-                incorrect: markedAnswers.filter((answer) => !answer.is_correct).length
-            }
+            feedback_summary: isWriting
+                ? { status: attemptJson.grading_status, total: 0, correct: 0, incorrect: 0 }
+                : {
+                    total: markedAnswers.length,
+                    correct: markedAnswers.filter((answer) => answer.is_correct).length,
+                    incorrect: markedAnswers.filter((answer) => !answer.is_correct).length
+                }
         });
 
     } catch (error) {
@@ -256,7 +266,7 @@ export const getUserAttempts = async (req, res) => {
 
         const attempts = await UserExerciseAttempt.findAll({
             where: whereClause,
-            attributes: ['id', 'correct_gaps', 'total_gaps', 'created_at', 'score', 'is_fully_correct'],
+            attributes: ['id', 'correct_gaps', 'total_gaps', 'created_at', 'score', 'is_fully_correct', 'grading_status'],
             include: includeClause,
             order: [['created_at', 'DESC']],
             limit: parseInt(limit),
@@ -268,9 +278,9 @@ export const getUserAttempts = async (req, res) => {
         res.json({
             attempts: attempts.map((attempt) => ({
                 ...serializeAttemptSummary(attempt),
-                accuracy: attempt.total_gaps > 0
+                accuracy: attempt.grading_status === "graded" && attempt.total_gaps > 0
                     ? Math.round((attempt.correct_gaps / attempt.total_gaps) * 100)
-                    : 0
+                    : null
             })),
             pagination: {
                 total,
@@ -290,8 +300,9 @@ export const getUserStats = async (req, res) => {
         const userId = req.user.id;
         const { sequelize } = await import('../config/db.js');
 
+        const total = await UserExerciseAttempt.count({ where: { user_id: userId } });
         const stats = await UserExerciseAttempt.findOne({
-            where: { user_id: userId },
+            where: { user_id: userId, grading_status: "graded" },
             attributes: [
                 [sequelize.fn('COUNT', sequelize.col('id')), 'total'],
                 [
@@ -303,7 +314,7 @@ export const getUserStats = async (req, res) => {
         });
 
         res.json({
-            total: stats ? parseInt(stats.total) : 0,
+            total,
             average: stats ? parseFloat(stats.average || 0) : 0
         });
 

@@ -26,6 +26,20 @@ test("buildExplanationPrompt includes the official rule", () => {
     assert.match(prompt, /Cambridge/);
 });
 
+test("buildExplanationPrompt gives qualitative Writing feedback without matching the model answer", () => {
+    const prompt = buildExplanationPrompt({
+        questionText: "Write an article about a useful change in your town.",
+        userAnswer: "Our town needs better buses because many people drive.",
+        correctAnswer: { model_answer: "A possible article describing several improvements." },
+        exerciseType: "essay"
+    });
+
+    assert.match(prompt, /Writing feedback/i);
+    assert.match(prompt, /organization/i);
+    assert.match(prompt, /do not require identical wording/i);
+    assert.doesNotMatch(prompt, /Correct answer:/);
+});
+
 test("explainAndPersistAttempt stores AttemptExplanation using a stubbed model client", async (t) => {
     try {
         await sequelize.authenticate();
@@ -100,4 +114,80 @@ test("explainAndPersistAttempt stores AttemptExplanation using a stubbed model c
         }
     });
     assert.equal(cached.cached, true);
+});
+
+test("writing feedback is persisted, cached, and advances the review status", async (t) => {
+    try {
+        await sequelize.authenticate();
+    } catch (error) {
+        t.diagnostic(`DB unavailable: ${error.message}`);
+        throw error;
+    }
+
+    const [level] = await Level.findOrCreate({ where: { name: "B2" } });
+    const [category] = await Category.findOrCreate({ where: { name: "Writing" } });
+    const [subcategory] = await Subcategory.findOrCreate({
+        where: { name: "Essay", category_id: category.id },
+        defaults: { description: "Original writing practice" }
+    });
+    const exercise = await Exercise.create({
+        type: "essay",
+        title: unique("B2 Writing test item"),
+        question_text: "Write an article about a useful change in your town.",
+        options: {},
+        correct_answer: { model_answer: "A sample article for reference." },
+        level_id: level.id,
+        subcategory_id: subcategory.id
+    });
+    const user = await User.create({
+        name: "Writing Learner",
+        username: unique("writer"),
+        email: `${unique("writer")}@ceferly.test`,
+        password_hash: "not-used",
+        coins: 0,
+        hearts: 5
+    });
+    const answer = "Our town should have more buses. This would help people travel to work.";
+    const { attempt } = await recordExerciseAttempt({
+        user,
+        exerciseId: exercise.id,
+        userAnswer: answer,
+        now: new Date("2026-10-04T12:00:00.000Z")
+    });
+
+    let generateCalls = 0;
+    const generateText = async (prompt) => {
+        generateCalls += 1;
+        assert.match(prompt, /Our town should have more buses/);
+        assert.match(prompt, /Writing feedback/i);
+        return JSON.stringify({
+            general_feedback: "The main idea is clear.",
+            explanation: "Strength: the proposal is clear. Improve: explain how the change helps residents."
+        });
+    };
+
+    const result = await explainAndPersistAttempt({
+        userId: user.id,
+        attemptId: attempt.id,
+        model: "stub-writing-teacher",
+        generateText
+    });
+    assert.equal(result.cached, false);
+    assert.match(result.explanation, /proposal is clear/);
+
+    const storedExplanation = await AttemptExplanation.findOne({ where: { attempt_id: attempt.id } });
+    assert.ok(storedExplanation);
+    await attempt.reload();
+    assert.equal(attempt.grading_status, "feedback_available");
+
+    const cached = await explainAndPersistAttempt({
+        userId: user.id,
+        attemptId: attempt.id,
+        model: "stub-writing-teacher",
+        generateText: async () => {
+            throw new Error("cached writing feedback must not call the model");
+        }
+    });
+    assert.equal(cached.cached, true);
+    assert.equal(generateCalls, 1);
 });

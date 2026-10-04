@@ -118,3 +118,46 @@ test("checkoutShopItem persists a coin spend", async (t) => {
     assert.equal(user.coins, 80 - SHOP_PRICES["heart-refill"]);
     assert.equal(user.hearts, MAX_HEARTS);
 });
+
+test("recordExerciseAttempt stores Writing text as pending feedback without grading it", async (t) => {
+    let user;
+    let exercise;
+    try {
+        ({ user, exercise } = await createFixtures());
+        exercise.type = "essay";
+        exercise.title = unique("B2 Writing response test");
+        exercise.question_text = "Write an article about a useful change in your town.";
+        exercise.correct_answer = { model_answer: "A sample response that is not an answer key." };
+        await exercise.save();
+        user.subscription_role = "pro";
+        user.coins = 4;
+        user.hearts = 0;
+        user.streak = 2;
+        user.last_completed_date = new Date("2026-09-07T00:00:00.000Z");
+        await user.save();
+    } catch (error) {
+        t.diagnostic(`DB unavailable: ${error.message}`);
+        throw error;
+    }
+
+    const answer = "Our town should improve its bus service.\n\nThis would make travel easier.";
+    const result = await recordExerciseAttempt({
+        user,
+        exerciseId: exercise.id,
+        userAnswer: answer,
+        now: new Date("2026-09-08T12:00:00.000Z")
+    });
+
+    const stored = await UserExerciseAttempt.findByPk(result.attempt.id);
+    await user.reload();
+    assert.equal(stored.user_answer, answer);
+    assert.equal(stored.grading_status, "pending_feedback");
+    assert.equal(stored.total_gaps, 0);
+    assert.equal(stored.score, 0);
+    assert.equal(stored.is_fully_correct, false);
+    assert.equal(result.scored.gradingStatus, "pending_feedback");
+    assert.equal(user.hearts, 0);
+    assert.equal(user.coins, 19);
+    assert.equal(user.streak, 3);
+    assert.equal(result.rewards.coinsDelta, 15);
+});
