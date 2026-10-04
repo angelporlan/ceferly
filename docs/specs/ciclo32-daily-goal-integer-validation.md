@@ -22,12 +22,12 @@ El ciclo restringe el endpoint a valores JSON de tipo number que sean enteros en
 
 ## Criterios de aceptación
 
-- [ ] Los valores 1 y 100 se guardan y se devuelven correctamente; un entero interior también se acepta.
-- [ ] Cada tipo/valor inválido responde 400.
-- [ ] Tras cada rechazo, la base conserva el `daily_goal` anterior.
-- [ ] Una petición sin token sigue respondiendo 401 y no modifica al usuario.
-- [ ] Los tests de endpoint pasan con migraciones en MySQL desechable; la suite backend completa pasa.
-- [ ] El diff no contiene cambios de UI, esquema ni rutas/autorización.
+- [x] Los valores 1 y 100 se guardan y se devuelven correctamente; un entero interior también se acepta.
+- [x] Cada tipo/valor inválido responde 400.
+- [x] Tras cada rechazo, la base conserva el `daily_goal` anterior.
+- [x] Una petición sin token sigue respondiendo 401 y no modifica al usuario.
+- [x] Los tests de endpoint pasan con migraciones en MySQL desechable; la suite backend completa pasa 39/39.
+- [x] El diff no contiene cambios de UI, esquema ni rutas/autorización.
 - [ ] La PR lleva la etiqueta `needs-human-review` porque cambia datos persistidos de usuario.
 
 ## Plan
@@ -35,7 +35,7 @@ El ciclo restringe el endpoint a valores JSON de tipo number que sean enteros en
 1. [x] Confirmar contrato, controlador, ruta autenticada y harness HTTP/MySQL existente.
 2. [x] Añadir regresiones de endpoint para límites, tipos, persistencia y autenticación; comprobar que fallan antes del fix (un string numérico se guardó como 5; body ausente respondió 500).
 3. [x] Añadir validación estricta sin coerción y conservar la respuesta exitosa.
-4. [ ] Ejecutar tests focalizados y suite backend con MySQL aislado; revisar el diff y el flujo HTTP.
+4. [x] Ejecutar test focalizado y suite backend (39/39) con migraciones en MySQL aislado; revisar el flujo HTTP.
 5. [ ] Crear PR vinculada a #152, etiquetar `needs-human-review`, hacer self-review y dejarla abierta con CI verde.
 
 ## Riesgos

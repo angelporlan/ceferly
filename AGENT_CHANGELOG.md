@@ -8,7 +8,8 @@
 - Contrato y plan: `docs/specs/ciclo32-daily-goal-integer-validation.md`.
 
 ### Estado
-- Spec y regresiones test-first listas en `agent/fix-daily-goal-integer-validation`; el caso rojo demostró que el string `"5"` se guardaba como 5. Fix implementado; verificación completa pendiente.
+- Fix y regresión en `agent/fix-daily-goal-integer-validation`; TDD rojo confirmó que el string `"5"` se guardaba como 5 y que un body ausente daba 500.
+- Verificación local: test HTTP focalizado y backend 39/39 con las 3 migraciones Prisma en MySQL desechable (`127.0.0.1:3322`); PR pendiente.
 
 ## [Ciclo 29] - Aplicar el límite de palabras a B1 Part 4 (#143)
 
