@@ -1,5 +1,19 @@
 # AGENT CHANGELOG
 
+## [Ciclo 18] - Clasificación global coherente con el API (#122)
+
+### Resumen
+- La vista de ranking ahora refleja la clasificación global por monedas y la racha como desempate; elimina la liga, los ascensos, la cuenta atrás y la etiqueta XP que no respaldaba el backend.
+- Normaliza la respuesta paginada `{ data, meta }`, muestra monedas y distingue carga, vacío, error y reintento.
+- Añade `node:test` frontend sin dependencias nuevas y un gotcha accionable en `AGENTS.md`.
+
+### Verificación
+- Frontend: 3/3 tests y build OK; smoke visual local con ranking poblado, vacío y error visible.
+- `git diff --check` OK. `npm run lint` sigue con 15 errores en otras pantallas/componentes, registrados en #98/PR #102; esta pantalla ya no aporta el `any` que causaba uno de los errores.
+- Primer test rojo esperado antes de crear el normalizador: módulo aún inexistente.
+
+### Estado
+- Issue #122 enlazado desde la PR #123 (`agent/feat-accurate-global-ranking`); PR abierta y checks `backend-test` + `frontend-build` verdes.
 ## [Ciclo 10] - Aplicar racha al cumplir la meta diaria (#106)
 
 ### Resumen
