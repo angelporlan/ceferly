@@ -6,6 +6,7 @@ import { Card } from '../components/ui/Card'
 import { Badge } from '../components/ui/Badge'
 import { formatCorrectAnswer } from '../lib/answerDisplay.mjs'
 import { X, Heart, CheckCircle2, AlertCircle, ArrowRight, ShoppingBag } from 'lucide-react'
+import { getAttemptRewardMessage, publishUserStats } from '../services/userStats.mjs'
 import {
   areNumberedGapAnswersComplete,
   buildNumberedGapAnswers,
@@ -55,6 +56,8 @@ export const ExercisePlayer: React.FC = () => {
   const [coins, setCoins] = useState(0)
   const [streak, setStreak] = useState(0)
   const [attemptId, setAttemptId] = useState<number | undefined>()
+  const [coinsEarned, setCoinsEarned] = useState(0)
+  const [attemptSaved, setAttemptSaved] = useState(false)
   const [blocked, setBlocked] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [submissionError, setSubmissionError] = useState('')
@@ -143,6 +146,7 @@ export const ExercisePlayer: React.FC = () => {
       if (res.status === 403) {
         setBlocked(true)
         setHearts(payload.hearts ?? 0)
+        publishUserStats({ hearts: payload.hearts ?? 0 })
         return
       }
       if (!res.ok) {
@@ -151,13 +155,21 @@ export const ExercisePlayer: React.FC = () => {
       if (typeof payload.scored?.isFullyCorrect !== 'boolean') {
         throw new Error('El servidor no devolvió el resultado del intento.')
       }
-
-      if (payload.attempt?.id) setAttemptId(payload.attempt.id)
+      if (payload.attempt?.id) {
+        setAttemptId(payload.attempt.id)
+        setAttemptSaved(true)
+      }
       if (payload.rewards) {
         setHearts(payload.rewards.hearts)
         setCoins(payload.rewards.coins)
         setStreak(payload.rewards.streak)
+        setCoinsEarned(payload.rewards.coinsDelta ?? 0)
         setBlocked(!!payload.rewards.playBlocked)
+        publishUserStats({
+          coins: payload.rewards.coins,
+          hearts: payload.rewards.hearts,
+          streak: payload.rewards.streak,
+        })
       }
       setExercise((current) => current ? { ...current, correctAnswer: payload.correctAnswer } : current)
       setStatus(payload.scored.isFullyCorrect ? 'correct' : 'incorrect')
@@ -191,6 +203,12 @@ export const ExercisePlayer: React.FC = () => {
     })
   }
 
+  const rewardMessage = getAttemptRewardMessage({
+    isSaved: attemptSaved,
+    coinsEarned,
+    coins,
+    streak,
+  })
   const formattedCorrectAnswer = exercise ? formatCorrectAnswer(exercise.correctAnswer) : ''
 
   if (loading) {
@@ -370,7 +388,7 @@ export const ExercisePlayer: React.FC = () => {
               </div>
               <div>
                 <h3 className="font-black text-lg text-mint-dark">¡Excelente trabajo!</h3>
-                <p className="text-xs font-bold text-mint-hover">+ monedas · racha {streak} · {coins} 💎</p>
+                <p className="text-xs font-bold text-mint-hover">{rewardMessage}</p>
               </div>
             </div>
           ) : (
@@ -385,6 +403,7 @@ export const ExercisePlayer: React.FC = () => {
                     Solución esperada: <strong className="underline">{formattedCorrectAnswer}</strong>
                   </p>
                 )}
+                <p className="text-xs font-bold text-coral-hover">{rewardMessage}</p>
               </div>
             </div>
           )}

@@ -92,6 +92,7 @@ Prelación: contenido <100 ejercicios → E2E → IA → gamificación → tests
 
 ## Gotchas del repo
 
+- `Header` vive en `AppLayout` y permanece montado entre rutas; los intentos y compras deben emitir una actualización de stats para refrescar sus contadores sin recarga.
 - `backend/src/server.js` aplica migraciones y seeds de desarrollo al arrancar fuera de producción. Los tests HTTP deben importar `backend/src/app.js`, que monta las rutas sin iniciar el servidor ni ejecutar seeds.
 - `PUT /users/me/daily-goal` requiere autenticación y acepta únicamente enteros JSON de 1 a 100; Dashboard conserva el último valor confirmado por el servidor ante errores.
 - La racha diaria debe avanzar al alcanzar `User.daily_goal`; el endpoint de progreso cuenta intentos guardados en el día UTC.
