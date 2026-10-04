@@ -1,5 +1,21 @@
 # AGENT CHANGELOG
 
+## [Ciclo 7] - Deuda de ESLint (#98)
+
+### Resumen
+Se resolvieron los 16 errores y el warning de `npm run lint` con tipos explícitos, manejo seguro de errores y dependencias de hooks; el job frontend de CI ahora ejecuta ESLint antes del build.
+
+### Verificación
+- `frontend npm run lint`: correcto, cero errores y cero warnings.
+- `frontend npm run build`: correcto.
+- `backend npm test`: 16/16.
+- QA local: login, registro, recuperación de contraseña, dashboard, clasificación y perfil cargan; el error de red de recuperación muestra un mensaje reintentable. Consola del navegador sin errores.
+- Al alternar login/registro el SDK de Google emite un warning de inicialización repetida; seguimiento abierto en #101.
+
+### Estado
+- Issue #98 reutilizado; PR pendiente de crear desde `agent/fix-eslint-debt`.
+- La baseline del lint se reprodujo antes de implementar: 16 errores y 1 warning.
+
 ## [Ciclo 4] - Documentación alineada con React y Vite (#95)
 
 ### Resumen

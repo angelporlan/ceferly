@@ -1,6 +1,40 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { authService } from '../../services/auth.service'
+import { getErrorMessage } from '../../utils/errors'
+
+interface GoogleCredentialResponse {
+  credential: string
+}
+
+interface GoogleButtonOptions {
+  theme: 'outline'
+  size: 'large'
+  width: number
+  shape: 'pill'
+  text: 'continue_with'
+}
+
+interface GoogleIdentityApi {
+  initialize: (configuration: {
+    client_id: string
+    callback: (response: GoogleCredentialResponse) => void
+  }) => void
+  renderButton: (container: HTMLElement, options: GoogleButtonOptions) => void
+}
+
+interface GoogleWindow extends Window {
+  google?: {
+    accounts?: {
+      id?: GoogleIdentityApi
+    }
+  }
+}
+
+const getGoogleIdentityApi = (): GoogleIdentityApi | undefined => {
+  if (typeof window === 'undefined') return undefined
+  return (window as GoogleWindow).google?.accounts?.id
+}
 
 interface GoogleLoginButtonProps {
   onSuccess?: () => void
@@ -20,7 +54,7 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
     import.meta.env.VITE_GOOGLE_CLIENT_ID ||
     '585513092100-7q8qab80q9q1pjpe1vnq6f4uu49snmlk.apps.googleusercontent.com'
 
-  const handleCredentialResponse = async (response: any) => {
+  const handleCredentialResponse = useCallback(async (response: GoogleCredentialResponse) => {
     setLoading(true)
     try {
       await authService.googleLogin(response.credential)
@@ -29,26 +63,27 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
       } else {
         navigate('/learn')
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (onError) {
-        onError(err.message || 'Error al autenticar con Google')
+        onError(getErrorMessage(err, 'Error al autenticar con Google'))
       }
     } finally {
       setLoading(false)
     }
-  }
+  }, [navigate, onError, onSuccess])
 
   useEffect(() => {
     const initGsi = () => {
-      if (typeof window !== 'undefined' && (window as any).google?.accounts?.id && googleBtnRef.current) {
+      const googleIdentity = getGoogleIdentityApi()
+      if (googleIdentity && googleBtnRef.current) {
         try {
-          ;(window as any).google.accounts.id.initialize({
+          googleIdentity.initialize({
             client_id: clientId,
             callback: handleCredentialResponse,
           })
 
           googleBtnRef.current.innerHTML = ''
-          ;(window as any).google.accounts.id.renderButton(googleBtnRef.current, {
+          googleIdentity.renderButton(googleBtnRef.current, {
             theme: 'outline',
             size: 'large',
             width: 360,
@@ -56,20 +91,20 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
             text: 'continue_with',
           })
           setGsiActive(true)
-        } catch (err) {
+        } catch (err: unknown) {
           console.warn('Google GSI initialization error:', err)
           setGsiActive(false)
         }
       }
     }
 
-    if ((window as any).google?.accounts?.id) {
+    if (getGoogleIdentityApi()) {
       initGsi()
     } else {
       const timer = setTimeout(initGsi, 400)
       return () => clearTimeout(timer)
     }
-  }, [clientId])
+  }, [clientId, handleCredentialResponse])
 
   const handleCustomGoogleClick = async () => {
     setLoading(true)
@@ -81,9 +116,9 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
       } else {
         navigate('/learn')
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (onError) {
-        onError(err.message || 'Error en autenticación Google')
+        onError(getErrorMessage(err, 'Error en autenticación Google'))
       }
     } finally {
       setLoading(false)

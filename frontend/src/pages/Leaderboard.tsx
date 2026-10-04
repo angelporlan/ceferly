@@ -13,6 +13,20 @@ interface RankingUser {
   isCurrentUser?: boolean
 }
 
+interface RankingItemResponse {
+  id?: number
+  name?: string
+  username?: string
+  streak?: number
+  score?: number
+  coins?: number
+  value?: number
+}
+
+interface RankingResponse {
+  data?: RankingItemResponse[]
+}
+
 export const Leaderboard: React.FC = () => {
   const [rankings, setRankings] = useState<RankingUser[]>([])
   const [empty, setEmpty] = useState(false)
@@ -25,15 +39,15 @@ export const Leaderboard: React.FC = () => {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     })
       .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
+      .then((data: RankingItemResponse[] | RankingResponse | null) => {
         const list = Array.isArray(data) ? data : (data?.data || [])
         if (Array.isArray(list) && list.length > 0) {
           setRankings(
-            list.map((item: any, idx: number) => ({
+            list.map((item, idx) => ({
               id: item.id ?? idx + 1,
               rank: idx + 1,
-              name: item.name || item.username,
-              username: item.username,
+              name: item.name || item.username || `Estudiante ${idx + 1}`,
+              username: item.username || `student-${idx + 1}`,
               streak: item.streak ?? 0,
               score: item.score ?? item.coins ?? item.value ?? 0,
             }))

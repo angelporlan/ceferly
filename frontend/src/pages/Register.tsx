@@ -6,6 +6,7 @@ import { Input } from '../components/ui/Input'
 import { GoogleLoginButton } from '../components/auth/GoogleLoginButton'
 import { authService } from '../services/auth.service'
 import { User, Lock, Mail } from 'lucide-react'
+import { getErrorMessage } from '../utils/errors'
 
 export const Register: React.FC = () => {
   const navigate = useNavigate()
@@ -24,8 +25,8 @@ export const Register: React.FC = () => {
     try {
       await authService.register({ name, username, email, password })
       navigate('/learn')
-    } catch (err: any) {
-      setError(err.message || 'Error al registrar la cuenta')
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Error al registrar la cuenta'))
     } finally {
       setLoading(false)
     }

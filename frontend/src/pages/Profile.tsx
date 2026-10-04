@@ -5,6 +5,7 @@ import { Input } from '../components/ui/Input'
 import { Badge } from '../components/ui/Badge'
 import { authService, type UserProfile } from '../services/auth.service'
 import { Flame, Coins, LogOut, Key } from 'lucide-react'
+import { getErrorMessage } from '../utils/errors'
 
 export const Profile: React.FC = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null)
@@ -41,8 +42,8 @@ export const Profile: React.FC = () => {
       setMsg({ text: 'Contraseña actualizada correctamente', type: 'success' })
       setOldPassword('')
       setNewPassword('')
-    } catch (err: any) {
-      setMsg({ text: err.message || 'Error al cambiar contraseña', type: 'error' })
+    } catch (err: unknown) {
+      setMsg({ text: getErrorMessage(err, 'Error al cambiar contraseña'), type: 'error' })
     }
   }
 

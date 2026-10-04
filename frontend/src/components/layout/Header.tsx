@@ -19,12 +19,11 @@ export const Header: React.FC = () => {
     level: 'Cambridge',
     name: 'Estudiante',
   })
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const isAuthenticated = Boolean(localStorage.getItem('token'))
 
   useEffect(() => {
     const token = localStorage.getItem('token')
     if (token) {
-      setIsAuthenticated(true)
       const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000/api'
       fetch(`${API_BASE}/users/me`, {
         headers: { Authorization: `Bearer ${token}` }

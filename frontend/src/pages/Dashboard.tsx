@@ -15,6 +15,34 @@ interface SkillNode {
   totalStars: number
 }
 
+interface SubcategoryResponse {
+  id: number | string
+  name: string
+  totalItems?: number
+}
+
+interface CategoryResponse {
+  name: string
+  subcategories?: SubcategoryResponse[]
+  Subcategories?: SubcategoryResponse[]
+}
+
+interface LevelResponse {
+  name: string
+  exam?: string
+  totalExercises?: number
+}
+
+interface UserSummaryResponse {
+  streak?: number
+  daily_goal?: number
+}
+
+interface AttemptsTodayResponse {
+  attemptsToday?: number
+  numberOfAttempts?: number
+}
+
 const DEMO_SKILL_NODES: SkillNode[] = [
   { id: '1', title: 'Conditionals (Zero, 1st, 2nd, 3rd)', category: 'Grammar', status: 'active', stars: 2, totalStars: 3 },
   { id: '2', title: 'Past & Present Perfect', category: 'Grammar', status: 'active', stars: 1, totalStars: 3 },
@@ -45,14 +73,14 @@ export const Dashboard: React.FC = () => {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     })
       .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
+      .then((data: CategoryResponse[] | null) => {
         if (data && Array.isArray(data) && data.length > 0) {
           const allSubs: SkillNode[] = []
-          data.forEach((cat: any) => {
+          data.forEach((cat) => {
             const subs = (cat.subcategories || cat.Subcategories || []).filter(
-              (sub: { totalItems?: number }) => (sub.totalItems ?? 1) > 0
+              (sub) => (sub.totalItems ?? 1) > 0
             )
-            subs.forEach((sub: any, idx: number) => {
+            subs.forEach((sub, idx) => {
               allSubs.push({
                 id: String(sub.id),
                 title: sub.name,
@@ -74,9 +102,9 @@ export const Dashboard: React.FC = () => {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     })
       .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
+      .then((data: LevelResponse[] | null) => {
         if (Array.isArray(data) && data.length > 0) {
-          setLevels(data.filter((level: { name: string }) => ['B1', 'B2', 'C1'].includes(level.name)))
+          setLevels(data.filter((level) => ['B1', 'B2', 'C1'].includes(level.name)))
         }
       })
       .catch(() => {})
@@ -87,7 +115,7 @@ export const Dashboard: React.FC = () => {
         headers: { Authorization: `Bearer ${token}` },
       })
         .then((res) => (res.ok ? res.json() : null))
-        .then((userData) => {
+        .then((userData: UserSummaryResponse | null) => {
           if (userData) {
             setStreak(userData.streak ?? 0)
             setDailyGoal(userData.daily_goal ?? 5)
@@ -99,7 +127,8 @@ export const Dashboard: React.FC = () => {
         headers: { Authorization: `Bearer ${token}` },
       })
         .then((res) => (res.ok ? res.json() : null))
-        .then((attemptData) => {
+        .then((attemptData: AttemptsTodayResponse | null) => {
+          if (!attemptData) return
           const todayCount = attemptData.attemptsToday ?? attemptData.numberOfAttempts
           if (todayCount !== undefined) {
             setAttemptsToday(todayCount)
