@@ -1,5 +1,30 @@
 # AGENT CHANGELOG
 
+## [Ciclo 31] - README con catálogo y racha actuales (#151)
+
+### Resumen
+- Corregir en README la cantidad y distribución actual de ejercicios y la regla de racha ligada a `daily_goal`.
+- Añadir instrucciones breves para diagnosticar el lint global desde archivos enfocados y sincronizar PRs con `main` conservando el changelog; no cambiar el comportamiento del producto.
+- Corregir en AGENTS la descripción de validación de `daily_goal`; abrir #152 para el guard de enteros pendiente en backend.
+- Spec: `docs/specs/ciclo31-readme-current-catalog-and-streak.md`.
+
+### Verificación
+- Backend: 28/28 tests en MySQL temporal desechable con migraciones aplicadas.
+- Frontend: 19/19 tests y build correctos.
+- Lint global: sigue con 12 errores y 1 aviso preexistentes, cubiertos por #98/PR #102; los cambios del ciclo son Markdown.
+- `git diff --check` y búsqueda de referencias antiguas al conteo/regla y a Angular: OK.
+- La auditoría detectó y separó en #152 la falta de validación de enteros del endpoint; no se modificó código en este ciclo documental.
+- QA UI/API: no aplica; no hay cambios ejecutables.
+
+### Estado
+- En curso en `agent/docs-current-catalog-streak`; issue #151 reutilizado.
+
+## Retrospectiva — ciclos 26–30
+
+- Las correcciones de contenido deben verificarse en catálogo y en filas ya sembradas; el seeder `findOrCreate` no reconcilia registros existentes, así que usar migraciones condicionales y probar intentos asociados (#147).
+- Los tests backend necesitan MySQL aislado con Prisma Migrate aplicado; si la conexión falta, el fallo no demuestra una regresión. Registrar ese entorno antes de interpretar el resultado.
+- Las ramas paralelas vuelven a solaparse en la cabecera del changelog. Actualizar `origin/main` y conservar ambas entradas evita PRs en conflicto; esta regla queda en `AGENTS.md`.
+
 ## [Ciclo 24] - Contadores de Header con datos autenticados (#135)
 
 ### Resumen

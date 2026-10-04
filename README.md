@@ -1,6 +1,6 @@
 # Ceferly 🇬🇧🚀
 
-**Ceferly** (nombre anterior: **QuickGram**) es una plataforma web para preparar titulaciones Cambridge B1 Preliminary, B2 First y C1 Advanced. El catálogo actual incluye 108 ejercicios originales de Use of English inspirados en el formato de Cambridge: 36 por nivel y 27 en cada una de las partes 1–4. No son ejercicios ni papers oficiales de Cambridge.
+**Ceferly** (nombre anterior: **QuickGram**) es una plataforma web para preparar titulaciones Cambridge B1 Preliminary, B2 First y C1 Advanced. El catálogo actual incluye 144 ejercicios originales de Use of English inspirados en el formato de Cambridge: 48 por nivel, 36 por parte y 12 por combinación de nivel y parte. No son ejercicios ni papers oficiales de Cambridge.
 
 La aplicación combina práctica de inglés, seguimiento del progreso y explicaciones de respuestas mediante **Inteligencia Artificial (IA)**. Las explicaciones de intentos se guardan para poder consultarlas desde la caché.
 
@@ -64,7 +64,7 @@ Cuando un usuario revisa un intento, puede solicitar una **explicación por IA**
 *   **Caché**: Si el intento ya tiene una explicación en `attempt_explanations`, se sirve al instante desde la base de datos sin consumir tokens de IA.
 
 ### 2. Gamificación
-*   **Meta Diaria e Hilo de Racha (Streak)**: La meta configurable cuenta intentos diarios y su valor inicial es 5. La racha avanza al registrar un intento en días consecutivos; si se omite un día, el siguiente intento inicia una racha de 1. La racha no depende actualmente de completar la meta diaria.
+*   **Meta Diaria e Hilo de Racha (Streak)**: La meta diaria se puede editar en Dashboard (5 por defecto; el control acepta enteros de 1 a 100). La racha avanza una sola vez al alcanzar la meta con intentos guardados durante el día UTC; continúa si la meta anterior se alcanzó ayer y, en otro caso, vuelve a 1. Un intento aislado por debajo de la meta no actualiza la racha.
 *   **Monedas (`coins`)**: Un intento totalmente correcto concede `free`: 10, `pro`: 15 o `premium`: 20 monedas. Los intentos incorrectos o parcialmente correctos conceden 2 monedas.
 *   **Tienda**: `heart-refill` restaura vidas por 30 monedas. Los paquetes de avatar cuestan 30, 50, 75 o 100 monedas y asignan una semilla de paquete (`seed-pack-*`); la compra y el saldo se procesan en el backend.
 

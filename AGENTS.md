@@ -92,5 +92,7 @@ Prelación: contenido <100 ejercicios → E2E → IA → gamificación → tests
 
 ## Gotchas del repo
 
-- `PUT /users/me/daily-goal` requiere autenticación y acepta enteros de 1 a 100; Dashboard debe conservar el último valor confirmado por el servidor ante errores.
+- `PUT /users/me/daily-goal` requiere autenticación y hoy comprueba presencia y límites 1–100, pero no valida que sea entero; el frontend sí lo hace y #152 sigue el hardening del endpoint. Dashboard conserva el último valor confirmado por el servidor ante errores.
 - La racha diaria debe avanzar al alcanzar `User.daily_goal`; el endpoint de progreso cuenta intentos guardados en el día UTC.
+- Para diagnosticar lint, ejecuta el lint global y además `npx eslint src/ruta-tocada` desde `frontend/`; el chequeo enfocado no sustituye al global.
+- Antes de actualizar una PR, ejecuta `git fetch origin main` y fusiona `origin/main` en la rama del ciclo; si hay conflicto en `AGENT_CHANGELOG.md`, conserva entradas de ambos lados.
