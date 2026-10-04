@@ -43,31 +43,6 @@ export const resetStreakIfNeeded = async (user, referenceDate = new Date()) => {
     return user;
 };
 
-export const updateStreakWhenDailyGoalReached = async (
-    user,
-    attemptsToday,
-    referenceDate = new Date()
-) => {
-    const dailyGoal = user.daily_goal || 5;
-    if (attemptsToday < dailyGoal) {
-        return user;
-    }
-
-    const todayKey = formatDateKey(referenceDate);
-    const lastCompletedKey = user.last_completed_date;
-
-    if (lastCompletedKey === todayKey) {
-        return user;
-    }
-
-    const yesterdayKey = getYesterdayKey(referenceDate);
-    user.streak = lastCompletedKey === yesterdayKey ? (user.streak || 0) + 1 : 1;
-    user.last_completed_date = todayKey;
-    await user.save();
-
-    return user;
-};
-
 export const getUserProgress = async (req, res) => {
     try {
         const userId = req.user.id;

@@ -17,6 +17,72 @@
 ### Estado
 - Issue #138 enlazado por la PR #141, abierta en `agent/feat-uoe-catalog-144` con checks verdes.
 
+## [Ciclo 18] - Clasificación global coherente con el API (#122)
+
+### Resumen
+- La vista de ranking ahora refleja la clasificación global por monedas y la racha como desempate; elimina la liga, los ascensos, la cuenta atrás y la etiqueta XP que no respaldaba el backend.
+- Normaliza la respuesta paginada `{ data, meta }`, muestra monedas y distingue carga, vacío, error y reintento.
+- Añade `node:test` frontend sin dependencias nuevas y un gotcha accionable en `AGENTS.md`.
+
+### Verificación
+- Frontend: 3/3 tests y build OK; smoke visual local con ranking poblado, vacío y error visible.
+- `git diff --check` OK. `npm run lint` sigue con 15 errores en otras pantallas/componentes, registrados en #98/PR #102; esta pantalla ya no aporta el `any` que causaba uno de los errores.
+- Primer test rojo esperado antes de crear el normalizador: módulo aún inexistente.
+
+### Estado
+- Issue #122 enlazado desde la PR #123 (`agent/feat-accurate-global-ranking`); PR abierta y checks `backend-test` + `frontend-build` verdes.
+## [Ciclo 10] - Aplicar racha al cumplir la meta diaria (#106)
+
+### Resumen
+La racha solo avanza cuando el número de intentos persistidos del día UTC alcanza `daily_goal`. Los intentos por debajo de la meta conservan la racha y fecha anterior; los intentos siguientes no vuelven a incrementarla. Se eliminó el helper de controlador que no tenía callers.
+
+### Verificación
+- TDD: el test de umbral falló antes del cambio (`3 !== 2`) y pasó después.
+- `backend npm test`: 18/18 con MySQL temporal en `127.0.0.1:3313`, migraciones aplicadas.
+- `frontend npm run build`: correcto.
+- Tests cubren intentos bajo la meta, alcanzar meta, intentos extra, continuidad al día siguiente y reinicio tras un día omitido.
+
+### Estado
+- Issue #106 enlazado desde la PR #107, abierta y marcada `needs-human-review`; `backend-test` y `frontend-build` pasaron para el commit `e2c3800`.
+- Spec: `docs/specs/ciclo10-streak-daily-goal.md`.
+
+## Retrospectiva — ciclos 6–10
+
+- Las recompensas y el scoring deben conservar al servidor como fuente de verdad; el Header solo proyecta la respuesta persistida.
+- Auth y datos persistidos llevan revisión humana; las PR quedan abiertas mientras el trabajo independiente continúa desde `main`.
+- El lint global se debe medir al inicio del ciclo y mantenerse separado de cambios de producto; el issue #98 sigue ese backlog.
+- Las reglas visibles en Dashboard (como completar `daily_goal`) deben corresponder a la regla de negocio persistida y tener tests de umbral.
+## [Ciclo 14] - E2E HTTP de explicación IA persistida (#114)
+
+### Resumen
+- Se añadió un E2E que monta los routers reales, crea un intento por HTTP y pide la explicación persistida con el fallback determinista de `explanation_rule`.
+- Comprueba persistencia, caché sin cuota ni filas duplicadas, rechazo de acceso por otro usuario y ausencia de llamadas a proveedores externos.
+- Se documentó el alcance y los invariantes en `docs/specs/ciclo14-ai-explanation-e2e.md`.
+
+### Verificación
+- Backend: 17/17 tests con una base MySQL temporal aislada; incluye la nueva ruta E2E.
+- Frontend: `npm run build` OK.
+- `git diff --check` OK.
+- `npm run lint` sigue fallando en el baseline con 16 errores y 1 warning preexistentes; cubiertos por el issue #98 / PR #102, sin cambios frontend en este ciclo.
+- El primer intento de suite backend fue bloqueado por `EPERM` al conectar con MySQL desde el sandbox; al repetirlo contra MySQL temporal, la suite pasó.
+
+### Estado
+- Issue #114 enlazado desde la PR #115 en `agent/test-ai-explanation-e2e`; `backend-test` y `frontend-build` pasaron en GitHub.
+## [Ciclo 15] - README y GOAL_PROMPT alineados con el código (#116)
+
+### Resumen
+- README describe el catálogo real como 108 ejercicios originales estilo Cambridge: 36 por nivel B1/B2/C1 y 27 por cada parte 1–4.
+- Alinea Stripe, política de autenticación por ruta, migraciones/seeds de desarrollo y las reglas reales de IA, racha, recompensas, tienda y rankings.
+- `GOAL_PROMPT.md` establece que código, manifests y configuración son la fuente de verdad; los README deben actualizarse si divergen.
+- `frontend/README.md` ya coincidía con el manifest React 19/Vite/Tailwind y no necesitó cambios.
+
+### Verificación
+- Contraste manual con `frontend/package.json`, `vite.config.ts`, `tailwind.config.js`, routers/controllers, `server.js`, configuración Sequelize y `contentCatalog.js` (conteo: 108/36/27).
+- `git diff --check` OK; búsqueda de `Angular` en ambos README y `GOAL_PROMPT.md` sin coincidencias.
+- No se ejecutaron tests ni build: ciclo solo documental, sin cambios de código ejecutable.
+
+### Estado
+- Issue #116 enlazado desde la PR #118 en `agent/docs-align-readme`; PR abierta para revisión.
 ## [Ciclo 16] - Alinear retornos de Stripe con rutas React (#117)
 
 ### Resumen
