@@ -23,6 +23,22 @@
 - Issue #142 enlazado desde la PR #146 en `agent/fix-cambridge-uoe-editorial`; CI `backend-test` y `frontend-build` verdes.
 - Follow-up #143: respuestas de una palabra en B1 Part 4 #3 y #5.
 
+## [Ciclo 26] - Catálogo equilibrado de 144 ejercicios Use of English (#138)
+
+### Resumen
+- Se añadieron 36 ejercicios originales a B1 Preliminary, B2 First y C1 Advanced.
+- El catálogo suma 144 preguntas: 48 por nivel, 36 por parte y 12 en cada combinación nivel/parte.
+- Contrato y plan en `docs/specs/ciclo26-uoe-catalog-144.md`.
+
+### Verificación local
+- TDD: las pruebas nuevas fallaron con el catálogo inicial (`108 !== 144`, 36 en vez de 48 por nivel).
+- `backend npm test`: 19/19; `frontend npm run build`: correcto.
+- `git diff --check`: correcto; tests validan tipos, títulos únicos, respuestas, explicaciones y formato de Part 4.
+- Sin cambios de UI, esquema ni seeder.
+- CI de la PR #141: `backend-test` y `frontend-build` verdes.
+
+### Estado
+- Issue #138 enlazado por la PR #141, abierta en `agent/feat-uoe-catalog-144` con checks verdes.
 
 ## [Ciclo 13] - Desglose correcto de respuestas en el historial (#111)
 
