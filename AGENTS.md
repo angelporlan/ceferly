@@ -70,7 +70,7 @@ Stack real:
 3. PLAN — checklist; 1 issue / 1 PR.
 4. TDD — tests que fallan primero.
 5. IMPLEMENT — commits frecuentes en `agent/*`.
-6. TESTS — build + tests verdes.
+6. TESTS — build + tests verdes. Los tests de persistencia requieren MySQL temporal en `127.0.0.1:3313`, migraciones Prisma aplicadas y acceso local al puerto.
 7. QA UI — rutas tocadas.
 8. REVIEW — self-review en la PR.
 9. PR/CI — push + `gh pr create` + checks.
