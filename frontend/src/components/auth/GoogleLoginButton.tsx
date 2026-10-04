@@ -1,6 +1,19 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { authService } from '../../services/auth.service'
+
+interface GoogleCredentialResponse {
+  credential: string
+}
+
+type GoogleCredentialHandler = (response: GoogleCredentialResponse) => void | Promise<void>
+
+let activeGoogleCredentialHandler: GoogleCredentialHandler | null = null
+let initializedGoogleClientId: string | null = null
+
+const dispatchGoogleCredential = (response: GoogleCredentialResponse): void => {
+  void activeGoogleCredentialHandler?.(response)
+}
 
 interface GoogleLoginButtonProps {
   onSuccess?: () => void
@@ -20,7 +33,7 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
     import.meta.env.VITE_GOOGLE_CLIENT_ID ||
     '585513092100-7q8qab80q9q1pjpe1vnq6f4uu49snmlk.apps.googleusercontent.com'
 
-  const handleCredentialResponse = async (response: any) => {
+  const handleCredentialResponse = useCallback(async (response: GoogleCredentialResponse) => {
     setLoading(true)
     try {
       await authService.googleLogin(response.credential)
@@ -36,19 +49,25 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
     } finally {
       setLoading(false)
     }
-  }
+  }, [navigate, onError, onSuccess])
 
   useEffect(() => {
+    activeGoogleCredentialHandler = handleCredentialResponse
+
     const initGsi = () => {
       if (typeof window !== 'undefined' && (window as any).google?.accounts?.id && googleBtnRef.current) {
         try {
-          ;(window as any).google.accounts.id.initialize({
-            client_id: clientId,
-            callback: handleCredentialResponse,
-          })
+          const googleIdentity = (window as any).google.accounts.id
+          if (initializedGoogleClientId !== clientId) {
+            googleIdentity.initialize({
+              client_id: clientId,
+              callback: dispatchGoogleCredential,
+            })
+            initializedGoogleClientId = clientId
+          }
 
           googleBtnRef.current.innerHTML = ''
-          ;(window as any).google.accounts.id.renderButton(googleBtnRef.current, {
+          googleIdentity.renderButton(googleBtnRef.current, {
             theme: 'outline',
             size: 'large',
             width: 360,
@@ -67,9 +86,19 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
       initGsi()
     } else {
       const timer = setTimeout(initGsi, 400)
-      return () => clearTimeout(timer)
+      return () => {
+        clearTimeout(timer)
+        if (activeGoogleCredentialHandler === handleCredentialResponse) {
+          activeGoogleCredentialHandler = null
+        }
+      }
     }
-  }, [clientId])
+    return () => {
+      if (activeGoogleCredentialHandler === handleCredentialResponse) {
+        activeGoogleCredentialHandler = null
+      }
+    }
+  }, [clientId, handleCredentialResponse])
 
   const handleCustomGoogleClick = async () => {
     setLoading(true)

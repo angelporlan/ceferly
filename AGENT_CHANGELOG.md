@@ -1,5 +1,19 @@
 # AGENT CHANGELOG
 
+## [Ciclo 8] - Inicialización única de Google Identity Services (#101)
+
+### Resumen
+GSI se inicializa una sola vez por client ID y usa un dispatcher hacia el handler de la pantalla montada. Login y registro siguen renderizando el botón y conservan el fallback.
+
+### Verificación
+- `frontend npm run build`: correcto.
+- `backend npm test`: 16/16.
+- QA: se alternó cuatro veces entre login y registro; no reapareció el warning de inicialización múltiple y la consola del navegador no registró warnings ni errores.
+- `frontend npm run lint`: 14 errores preexistentes de tipos en el estado de `main`, sin warnings; el issue #98 los corrige en la PR #102.
+
+### Estado
+- Issue #101 reutilizado; warning reproducido antes del cambio en QA del ciclo anterior.
+- Issue #101 enlazado desde PR #103, abierta con `needs-human-review` por afectar el flujo de login.
 ## [Ciclo 12] - E2E HTTP del intento de práctica (#110)
 
 ### Resumen
