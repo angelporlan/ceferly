@@ -13,7 +13,7 @@ interface ExerciseData {
   questionText: string
   readingText?: string
   options?: string[]
-  correctAnswer: unknown
+  correctAnswer?: unknown
   explanation_rule?: string
   content?: {
     exam?: string
@@ -49,6 +49,7 @@ export const ExercisePlayer: React.FC = () => {
   const [attemptId, setAttemptId] = useState<number | undefined>()
   const [blocked, setBlocked] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [submissionError, setSubmissionError] = useState('')
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -75,7 +76,6 @@ export const ExercisePlayer: React.FC = () => {
       })
       .then((data) => {
         const resolvedQuestionText = data.questionText || data.question_text || ''
-        const resolvedCorrectAnswer = data.correctAnswer !== undefined ? data.correctAnswer : data.correct_answer
         const resolvedReadingText = data.readingText || data.reading_text || data.content?.original || ''
         const resolvedOptions = Array.isArray(data.options)
           ? data.options
@@ -90,7 +90,6 @@ export const ExercisePlayer: React.FC = () => {
           title: data.title,
           type: data.type,
           questionText: resolvedQuestionText,
-          correctAnswer: resolvedCorrectAnswer,
           readingText: resolvedReadingText,
           options: resolvedOptions as string[],
           explanation_rule: data.explanation_rule,
@@ -108,55 +107,49 @@ export const ExercisePlayer: React.FC = () => {
   const handleCheckAnswer = async () => {
     if (!exercise || blocked || submitting) return
     const userAnswer = isChoiceExercise(exercise) ? selectedOption : gapInput.trim()
+    const token = localStorage.getItem('token')
+    if (!token) {
+      setSubmissionError('Inicia sesión para comprobar tu respuesta y guardar tu progreso.')
+      return
+    }
+
+    setSubmissionError('')
     setSubmitting(true)
 
     try {
-      const token = localStorage.getItem('token')
-      let serverCorrect: boolean | undefined
-
-      if (token) {
-        const res = await fetch(`${API_BASE}/exercises/${id}/attempt`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ userAnswer, totalGaps: 1 }),
-        })
-        const payload = await res.json().catch(() => ({}))
-        if (res.status === 403) {
-          setBlocked(true)
-          setHearts(payload.hearts ?? 0)
-          return
-        }
-        if (res.ok) {
-          if (payload.attempt?.id) setAttemptId(payload.attempt.id)
-          if (payload.rewards) {
-            setHearts(payload.rewards.hearts)
-            setCoins(payload.rewards.coins)
-            setStreak(payload.rewards.streak)
-            setBlocked(!!payload.rewards.playBlocked)
-          }
-          if (payload.scored) {
-            serverCorrect = !!payload.scored.isFullyCorrect
-          }
-        }
+      const res = await fetch(`${API_BASE}/exercises/${id}/attempt`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ userAnswer, totalGaps: 1 }),
+      })
+      const payload = await res.json().catch(() => ({}))
+      if (res.status === 403) {
+        setBlocked(true)
+        setHearts(payload.hearts ?? 0)
+        return
+      }
+      if (!res.ok) {
+        throw new Error(payload.message || 'No se pudo comprobar la respuesta. Inténtalo de nuevo.')
       }
 
-      const expected = exercise.correctAnswer
-      let isCorrect = serverCorrect
-      if (isCorrect === undefined) {
-        if (typeof expected === 'string') {
-          const slashParts = expected.split('/').map((s) => s.trim().toLowerCase())
-          isCorrect = slashParts.includes(String(userAnswer).toLowerCase())
-        } else if (typeof expected === 'object' && expected !== null) {
-          const values = Object.values(expected as Record<string, unknown>).map((v) => String(v).toLowerCase())
-          isCorrect = values.includes(String(userAnswer).toLowerCase())
-        } else {
-          isCorrect = String(userAnswer).toLowerCase() === String(expected).toLowerCase()
-        }
+      if (typeof payload.scored?.isFullyCorrect !== 'boolean') {
+        throw new Error('El servidor no devolvió el resultado del intento.')
       }
-      setStatus(isCorrect ? 'correct' : 'incorrect')
+
+      if (payload.attempt?.id) setAttemptId(payload.attempt.id)
+      if (payload.rewards) {
+        setHearts(payload.rewards.hearts)
+        setCoins(payload.rewards.coins)
+        setStreak(payload.rewards.streak)
+        setBlocked(!!payload.rewards.playBlocked)
+      }
+      setExercise((current) => current ? { ...current, correctAnswer: payload.correctAnswer } : current)
+      setStatus(payload.scored.isFullyCorrect ? 'correct' : 'incorrect')
+    } catch (error) {
+      setSubmissionError(error instanceof Error ? error.message : 'No se pudo comprobar la respuesta.')
     } finally {
       setSubmitting(false)
     }
@@ -172,7 +165,9 @@ export const ExercisePlayer: React.FC = () => {
         attemptId,
         exerciseTitle: exercise.title,
         isCorrect,
-        correctAnswer: typeof exercise.correctAnswer === 'object' ? JSON.stringify(exercise.correctAnswer) : exercise.correctAnswer,
+        correctAnswer: typeof exercise.correctAnswer === 'object' && exercise.correctAnswer !== null
+          ? JSON.stringify(exercise.correctAnswer)
+          : exercise.correctAnswer,
         userAnswer,
         questionText: exercise.questionText,
         explanationRule: exercise.explanation_rule,
@@ -319,8 +314,12 @@ export const ExercisePlayer: React.FC = () => {
       >
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           {status === 'idle' ? (
-            <div className="hidden sm:block text-xs font-bold text-slateText-muted">
-              {blocked ? 'Necesitas vidas para comprobar' : 'Selecciona o escribe una respuesta para verificar'}
+            <div className={`${submissionError ? 'block' : 'hidden sm:block'} text-xs font-bold text-slateText-muted`}>
+              {submissionError ? (
+                <span role="alert" className="text-coral-dark">
+                  {submissionError}{!localStorage.getItem('token') ? <> <Link to="/login" className="underline">Iniciar sesión</Link></> : null}
+                </span>
+              ) : blocked ? 'Necesitas vidas para comprobar' : 'Selecciona o escribe una respuesta para verificar'}
             </div>
           ) : status === 'correct' ? (
             <div className="flex items-center gap-3">
