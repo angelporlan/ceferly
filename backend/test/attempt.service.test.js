@@ -160,4 +160,35 @@ test("recordExerciseAttempt stores Writing text as pending feedback without grad
     assert.equal(user.coins, 19);
     assert.equal(user.streak, 3);
     assert.equal(result.rewards.coinsDelta, 15);
+
+    const retry = await recordExerciseAttempt({
+        user,
+        exerciseId: exercise.id,
+        userAnswer: answer,
+        now: new Date("2026-09-08T12:30:00.000Z")
+    });
+    await user.reload();
+    assert.equal(retry.rewards.coinsDelta, 0);
+    assert.equal(user.coins, 19);
+    assert.equal(user.hearts, 0);
+
+    const otherUser = await User.create({
+        name: "Another Test Learner",
+        username: unique("learner"),
+        email: `${unique("learner")}@ceferly.test`,
+        password_hash: "not-used-in-this-test",
+        subscription_role: "pro",
+        coins: 0,
+        hearts: 0,
+        streak: 0
+    });
+    const otherUserAttempt = await recordExerciseAttempt({
+        user: otherUser,
+        exerciseId: exercise.id,
+        userAnswer: answer,
+        now: new Date("2026-09-08T12:45:00.000Z")
+    });
+    await otherUser.reload();
+    assert.equal(otherUserAttempt.rewards.coinsDelta, 15);
+    assert.equal(otherUser.coins, 15);
 });

@@ -61,12 +61,13 @@ export const applyAttemptRewards = ({
     role = "free",
     isFullyCorrect = false,
     isCompletionOnly = false,
+    awardCoins = true,
     now = new Date()
 } = {}) => {
     const today = formatDateKey(now);
     const earnsCompletionReward = isFullyCorrect || isCompletionOnly;
     const nextHearts = earnsCompletionReward ? Number(hearts) : decrementHearts(hearts);
-    const coinsDelta = coinRewardForAttempt(role, earnsCompletionReward);
+    const coinsDelta = awardCoins ? coinRewardForAttempt(role, earnsCompletionReward) : 0;
     const streakState = applyDailyPracticeStreak({
         streak,
         lastCompletedDate,

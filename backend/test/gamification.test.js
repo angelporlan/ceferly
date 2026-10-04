@@ -62,6 +62,25 @@ test("writing completion earns role coins and streak without spending a heart", 
     assert.equal(after.streak, 3);
 });
 
+test("writing retries keep completion behavior without granting coins again", () => {
+    const after = applyAttemptRewards({
+        coins: 19,
+        hearts: 0,
+        streak: 3,
+        lastCompletedDate: "2026-09-08",
+        role: "pro",
+        isFullyCorrect: false,
+        isCompletionOnly: true,
+        awardCoins: false,
+        now: new Date("2026-09-08T12:30:00.000Z")
+    });
+
+    assert.equal(after.hearts, 0);
+    assert.equal(after.coins, 19);
+    assert.equal(after.coinsDelta, 0);
+    assert.equal(after.streak, 3);
+});
+
 test("play is blocked when no hearts remain", () => {
     assert.equal(canPlay(0), false);
     assert.equal(canPlay(1), true);
