@@ -13,7 +13,7 @@ El Header escucha actualizaciones de stats que publican los intentos y las compr
 - QA navegador: `/learn` y `/shop` renderizan y muestran Header/tienda en estado invitado. No había API en `:4000`, así que el intento persistido y la compra autenticada se cubren con lógica unitaria y CI, no con una sesión real local.
 
 ### Estado
-- Issue #104 enlazado desde la PR #105, abierta para revisión; CI en curso.
+- Issue #104 enlazado desde la PR #105, abierta para revisión; `backend-test` y `frontend-build` pasaron para el commit `34f3e7a`.
 - Spec: `docs/specs/ciclo9-live-gamification-header.md`.
 
 ## [Ciclo 4] - Documentación alineada con React y Vite (#95)
