@@ -16,6 +16,24 @@
 ### Estado
 - Issue #147 enlazado desde la PR #150 en `agent/fix-seeded-uoe-content`; relacionado con #143.
 
+## [Ciclo 24] - Contadores de Header con datos autenticados (#135)
+
+### Resumen
+- El Header muestra racha, monedas y vidas solo después de validar la respuesta de `/users/me`; ceros explícitos siguen visibles y valores por defecto dejan de presentarse como perfil confirmado.
+- Invitados conservan el acceso de login; carga, fallo o payload incompleto ocultan los chips sin tocar el flujo de recompensas de #104.
+- Contrato y plan: `docs/specs/ciclo24-header-stats-truth.md`.
+
+### Verificación local
+- TDD: el test del parser falló antes de implementarlo; `npm test` pasa 3/3 y `npm run build` pasa.
+- Lint dirigido pasa. El lint global conserva 15 errores y 1 aviso; este cambio elimina el error previo de Header y el resto sigue cubierto por #98/PR #102.
+- Smoke UI local: invitado, carga lenta, perfil válido, error HTTP, payload incompleto y ceros API confirmados.
+- CI de la PR #136: `backend-test` y `frontend-build` verdes.
+
+### Estado
+- Issue #135 enlazado por la PR #136, abierta con checks verdes en `agent/fix-header-stats-truth`.
+
+## [Ciclo 4] - Documentación alineada con React y Vite (#95)
+
 ## [Ciclo 27] - Correcciones editoriales de Use of English (#142)
 
 
