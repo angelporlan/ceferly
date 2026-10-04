@@ -10,6 +10,7 @@ import { Category } from "../src/models/Category.js";
 import { Subcategory } from "../src/models/Subcategory.js";
 import { UserExerciseAttempt } from "../src/models/UserExerciseAttempt.js";
 import { recordExerciseAttempt } from "../src/services/attempt.service.js";
+import { createExerciseAttempt } from "../src/controllers/exerciseAttempt.controller.js";
 import { checkoutShopItem } from "../src/services/shop.service.js";
 import { SHOP_PRICES, MAX_HEARTS } from "../src/services/gamification.js";
 
@@ -96,8 +97,70 @@ test("recordExerciseAttempt persists an attempt and updates coins/streak/hearts"
         now: new Date("2026-09-08T11:00:00.000Z")
     });
     assert.equal(right.scored.isFullyCorrect, true);
+    assert.equal(right.exercise.correct_answer, "catch");
+
+    exercise.correct_answer = { 1: "catch" };
+    await exercise.save();
+
+    const response = {
+        statusCode: 200,
+        status(code) {
+            this.statusCode = code;
+            return this;
+        },
+        json(body) {
+            this.body = body;
+            return this;
+        }
+    };
+    await createExerciseAttempt({
+        params: { id: exercise.id },
+        body: { userAnswer: "catch", totalGaps: 1 },
+        user
+    }, response);
+    assert.equal(response.statusCode, 201);
+    assert.equal(response.body.scored.isFullyCorrect, true);
+    assert.equal(response.body.correctAnswer, "catch");
     await user.reload();
     assert.equal(user.hearts, beforeHearts - 1);
+});
+
+test("recordExerciseAttempt persists numbered answers and partial gap counts", async (t) => {
+    let user;
+    let exercise;
+    try {
+        ({ user, exercise } = await createFixtures());
+    } catch (error) {
+        t.diagnostic(`DB unavailable: ${error.message}`);
+        throw error;
+    }
+
+    t.after(async () => {
+        if (user) {
+            await UserExerciseAttempt.destroy({ where: { user_id: user.id } });
+            await user.destroy();
+        }
+        if (exercise) await exercise.destroy();
+    });
+
+    exercise.question_text = "She (1)…………… the task, (2)…………… the report, and then (3)…………… away.";
+    exercise.correct_answer = { 1: "finished", 2: "walked", 3: "home" };
+    await exercise.save();
+
+    const result = await recordExerciseAttempt({
+        user,
+        exerciseId: exercise.id,
+        userAnswer: { 1: "finished", 2: "wrong", 3: "home" },
+        totalGaps: 1,
+        now: new Date("2026-09-08T10:00:00.000Z")
+    });
+    const stored = await UserExerciseAttempt.findByPk(result.attempt.id);
+
+    assert.deepEqual(stored.user_answer, { 1: "finished", 2: "wrong", 3: "home" });
+    assert.equal(stored.total_gaps, 3);
+    assert.equal(stored.correct_gaps, 2);
+    assert.equal(stored.score, 67);
+    assert.equal(stored.is_fully_correct, false);
 });
 
 test("recordExerciseAttempt persists streak only after the daily goal", async (t) => {
