@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import { User } from "../models/User.js";
+import { getStripeCheckoutReturnUrls } from "../services/paymentReturnUrls.js";
 import "dotenv/config";
 
 const stripe = new Stripe(process.env.ENV === "PROD" ? process.env.STRIPE_SECRET_KEY_PROD : process.env.STRIPE_SECRET_KEY_TEST);
@@ -39,8 +40,7 @@ export const createSessionPremium = async (req, res) => {
             },
         ],
         mode: "payment",
-        success_url: `${FRONT_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${FRONT_URL}/cancel`,
+        ...getStripeCheckoutReturnUrls(FRONT_URL),
         metadata: {
             userId: req.user.id,
             role: "premium",
@@ -67,8 +67,7 @@ export const createSessionPro = async (req, res) => {
             },
         ],
         mode: "payment",
-        success_url: `${FRONT_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${FRONT_URL}/cancel`,
+        ...getStripeCheckoutReturnUrls(FRONT_URL),
         metadata: {
             userId: req.user.id,
             role: "pro",
