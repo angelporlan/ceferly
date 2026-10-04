@@ -1,5 +1,21 @@
 # AGENT CHANGELOG
 
+## [Ciclo 20] - Estados de error para la lista de ejercicios (#126)
+
+### Resumen
+- La lista usa el contrato `{ exercises, ... }`, conserva el vacío válido y distingue errores HTTP/red con reintento.
+- Ignora resultados obsoletos al cambiar nivel/subcategoría y limita cada fila a los campos que la vista necesita.
+- Añade tests `node:test` frontend sin dependencias y la ejecución en CI.
+
+### Verificación
+- Frontend: 3/3 tests y build OK; lint dirigido a los archivos cambiados OK.
+- Smoke local con datos ficticios efímeros: lista poblada, vacío válido y error de API con reintento visible.
+- El lint completo sigue fallando con 16 errores y 1 warning en otras rutas, cubiertos por #98/PR #102.
+- El primer test rojo falló porque `exercisesData.mjs` aún no existía, como esperaba TDD.
+
+### Estado
+- Issue #126 enlazado desde la rama `agent/fix-exercises-list-api-state`; PR pendiente.
+
 ## [Ciclo 4] - Documentación alineada con React y Vite (#95)
 
 ### Resumen
