@@ -21,23 +21,25 @@ Este ciclo reconcilia esos documentos con el estado verificado de `main`. No mod
 
 ## Criterios de aceptación
 
-- [ ] No queda en la guía actual la afirmación de que el backend permite decimales/strings o que #152 sigue pendiente.
-- [ ] El changelog indica los merges `3061eff` (#153) y `ad0cfb1` (#154) y que #151/#152 están cerrados.
-- [ ] La spec del ciclo 32 indica como estado final PR #154 integrada y registra las comprobaciones actuales de `main` (`24ceedd`).
-- [ ] La spec del ciclo 31 conserva el contexto histórico sin presentarlo como estado actual.
-- [ ] `git diff --check` y búsquedas de contradicciones pasan; no hay cambios de código.
+- [x] No queda en la guía actual la afirmación de que el backend permite decimales/strings o que #152 sigue pendiente.
+- [x] El changelog indica los merges `3061eff` (#153) y `ad0cfb1` (#154) y que #151/#152 están cerrados.
+- [x] La spec del ciclo 32 indica como estado final PR #154 integrada y registra las comprobaciones actuales de `main` (`24ceedd`).
+- [x] La spec del ciclo 31 conserva el contexto histórico sin presentarlo como estado actual.
+- [x] `git diff --check` y búsquedas de contradicciones pasan; no hay cambios de código.
 
 ## Plan
 
 1. [x] Confirmar el estado del árbol, rama base, y evidencia de merge disponible para #153/#154.
 2. [x] Corregir `AGENTS.md`, `AGENT_CHANGELOG.md` y las specs de los ciclos 31 y 32.
-3. [ ] Buscar afirmaciones desactualizadas y revisar el diff documental.
-4. [ ] Commit, push y PR enlazada a #155; revisar diff, checks y publicar self-review.
+3. [x] Buscar afirmaciones desactualizadas y revisar el diff documental.
+4. [x] Hacer commit y push, crear PR #156 con `Closes #155`, revisar el diff y publicar self-review.
+5. [x] Confirmar `backend-test` y `frontend-build` verdes en GitHub Actions.
 
 ## Verificación
 
 - Línea base de `main` (`24ceedd`): backend 41/41 con MySQL aislado y las cuatro migraciones Prisma; frontend 28/28 y `npm run build` correctos.
 - `npm run lint` continúa con 12 errores y 1 aviso preexistentes, seguidos en #98/PR #102.
+- PR #156: `backend-test` y `frontend-build` verdes; diff revisado y self-review publicado.
 - Sin QA de interfaz ni TDD: este ciclo solo corrige documentación.
 
 ## Riesgos

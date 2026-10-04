@@ -13,7 +13,8 @@
 - Revisión documental y `git diff --check`; sin cambios ejecutables.
 
 ### Estado
-- Issue #155 en `agent/docs-daily-goal-merge-record`; PR pendiente.
+- PR #156 abierta desde `agent/docs-daily-goal-merge-record` con `Closes #155`; diff revisado y self-review publicado.
+- `backend-test` y `frontend-build` pasaron en GitHub Actions; el lint global conserva el baseline documentado en #98/PR #102.
 
 ## [Ciclo 17] - E2E integrado desde registro hasta explicación (#120)
 
