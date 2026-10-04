@@ -44,9 +44,15 @@ El cambio actualiza esas dos descripciones y añade notas de trabajo para el lin
 
 ## Línea base
 
-- Backend: 28/28 tests con migraciones Prisma aplicadas a MySQL desechable.
-- Frontend: 19/19 tests y build correctos.
+- Al iniciar sobre `31ca4b1`: backend 28/28 tests, frontend 19/19 tests y build correctos.
 - Lint global: falla con 12 errores y 1 aviso preexistentes en `GoogleLoginButton`, `ForgotPassword`, `Login`, `Profile`, `Register` y `auth.service.ts`; ya está cubierto por #98/PR #102.
+
+## Verificación final
+
+- Tras sincronizar `main` hasta `5f705a8`: backend 31/31 tests con migraciones aplicadas a MySQL desechable; frontend 22/22 tests y `npm run build` correctos.
+- `npm run lint` conserva los mismos 12 errores y 1 aviso de la línea base; los cambios de este ciclo son Markdown.
+- Búsquedas de afirmaciones antiguas del catálogo/racha y `Angular`: sin resultados. `git diff origin/main...HEAD --check`: correcto.
+- QA UI/API no aplica y TDD no aplica: no se cambió código ejecutable.
 
 ## Riesgos y verificación manual
 

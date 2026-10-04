@@ -9,11 +9,12 @@
 - Spec: `docs/specs/ciclo31-readme-current-catalog-and-streak.md`.
 
 ### Verificación
-- Backend: 28/28 tests en MySQL temporal desechable con migraciones aplicadas.
-- Frontend: 19/19 tests y build correctos.
-- Lint global: sigue con 12 errores y 1 aviso preexistentes, cubiertos por #98/PR #102; los cambios del ciclo son Markdown.
-- `git diff --check` y búsqueda de referencias antiguas al conteo/regla y a Angular: OK.
+- Línea base inicial (`31ca4b1`): backend 28/28, frontend 19/19 y build correctos.
+- Tras sincronizar `main` (`5f705a8`): backend 31/31 en MySQL temporal, frontend 22/22 y build correctos.
+- Lint global: continúa con 12 errores y 1 aviso preexistentes en auth/profile/ForgotPassword, cubiertos por #98/PR #102; no cambió el baseline.
+- `git diff origin/main...HEAD --check` y búsqueda de afirmaciones antiguas del conteo/racha y de Angular: OK.
 - La auditoría detectó y separó en #152 la falta de validación de enteros del endpoint; no se modificó código en este ciclo documental.
+- TDD no aplica a este ciclo solo documental.
 - QA UI/API: no aplica; no hay cambios ejecutables.
 
 ### Estado
