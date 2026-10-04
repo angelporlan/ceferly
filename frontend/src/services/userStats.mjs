@@ -24,3 +24,8 @@ export function getStreakBadge(streak) {
     accessibleLabel: `Hito alcanzado: racha de ${milestone} días o más`,
   }
 }
+
+export function getAttemptRewardMessage({ isSaved, coinsEarned, coins, streak }) {
+  if (!isSaved) return 'Intento sin guardar · sin recompensa de monedas'
+  return `+${coinsEarned} monedas · saldo ${coins} · racha ${streak}`
+}

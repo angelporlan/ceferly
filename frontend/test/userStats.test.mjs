@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { afterEach, test } from 'node:test'
 import {
   getStreakBadge,
+  getAttemptRewardMessage,
   mergeUserStats,
   publishUserStats,
   subscribeToUserStats,
@@ -55,4 +56,15 @@ test('returns the highest earned streak badge at 3, 7, and 30 day milestones', (
   assert.equal(getStreakBadge(7).label, '7d')
   assert.equal(getStreakBadge(29).label, '7d')
   assert.equal(getStreakBadge(30).label, '30d')
+})
+
+test('shows the actual server reward only for a saved attempt', () => {
+  assert.equal(
+    getAttemptRewardMessage({ isSaved: true, coinsEarned: 10, coins: 25, streak: 4 }),
+    '+10 monedas · saldo 25 · racha 4',
+  )
+  assert.equal(
+    getAttemptRewardMessage({ isSaved: false, coinsEarned: 10, coins: 25, streak: 4 }),
+    'Intento sin guardar · sin recompensa de monedas',
+  )
 })

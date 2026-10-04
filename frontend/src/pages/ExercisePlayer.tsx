@@ -5,7 +5,7 @@ import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { Badge } from '../components/ui/Badge'
 import { X, Heart, CheckCircle2, AlertCircle, ArrowRight, ShoppingBag } from 'lucide-react'
-import { publishUserStats } from '../services/userStats.mjs'
+import { getAttemptRewardMessage, publishUserStats } from '../services/userStats.mjs'
 
 interface ExerciseData {
   id: number
@@ -196,9 +196,12 @@ export const ExercisePlayer: React.FC = () => {
     })
   }
 
-  const rewardMessage = attemptSaved
-    ? `+${coinsEarned} monedas · saldo ${coins} · racha ${streak}`
-    : 'Intento sin guardar · sin recompensa de monedas'
+  const rewardMessage = getAttemptRewardMessage({
+    isSaved: attemptSaved,
+    coinsEarned,
+    coins,
+    streak,
+  })
 
   if (loading) {
     return (
