@@ -4,27 +4,38 @@ import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { Badge } from '../components/ui/Badge'
 import { Trophy, Sparkles, RefreshCw, Flame, ArrowRight, Bot } from 'lucide-react'
+import { hasValidResultContext } from '../lib/resultContext.mjs'
 
 export const ResultsPage: React.FC = () => {
   const location = useLocation()
   const navigate = useNavigate()
-  const state = location.state as {
-    exerciseId?: number
-    attemptId?: number
-    exerciseTitle?: string
-    isCorrect?: boolean
-    correctAnswer?: string
-    userAnswer?: string
-    questionText?: string
-    explanationRule?: string
-    hearts?: number
-    coins?: number
-    streak?: number
-  } | null
-
-  const isCorrect = state?.isCorrect ?? true
   const [aiExplanation, setAiExplanation] = useState<string | null>(null)
   const [loadingAi, setLoadingAi] = useState(false)
+  const routeState: unknown = location.state
+  const state = hasValidResultContext(routeState) ? routeState : null
+
+  if (!state) {
+    return (
+      <div className="max-w-xl mx-auto flex flex-col items-center justify-center py-8 gap-6 text-center">
+        <Card role="status" className="w-full p-6">
+          <h1 className="text-2xl font-black text-slateText-main">No hay un resultado disponible</h1>
+          <p className="text-sm font-bold text-slateText-muted mt-2">
+            Completa un ejercicio para ver tu resultado, las monedas y la explicación.
+          </p>
+        </Card>
+        <div className="flex flex-col sm:flex-row gap-3 w-full">
+          <Button variant="mint" size="lg" fullWidth onClick={() => navigate('/learn')}>
+            Ir a aprender
+          </Button>
+          <Button variant="secondary" size="lg" fullWidth onClick={() => navigate('/categories')}>
+            Ver categorías
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  const isCorrect = state.isCorrect
 
   const handleGetAiExplanation = async () => {
     setLoadingAi(true)
@@ -34,7 +45,7 @@ export const ResultsPage: React.FC = () => {
     try {
       let res: Response | null = null
 
-      if (state?.attemptId && token) {
+      if (state.attemptId && token) {
         try {
           res = await fetch(`${API_BASE}/attempts/${state.attemptId}/explain`, {
             method: 'POST',
@@ -56,12 +67,12 @@ export const ResultsPage: React.FC = () => {
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
           body: JSON.stringify({
-            questionText: state?.questionText ?? 'Exercise question',
-            userAnswer: state?.userAnswer ?? '',
-            correctAnswer: state?.correctAnswer ?? '',
-            exerciseType: state?.exerciseTitle ?? 'Cambridge Grammar',
-            explanationRule: state?.explanationRule,
-            attemptId: state?.attemptId,
+            questionText: state.questionText ?? 'Exercise question',
+            userAnswer: state.userAnswer ?? '',
+            correctAnswer: state.correctAnswer ?? '',
+            exerciseType: state.exerciseTitle ?? 'Cambridge Grammar',
+            explanationRule: state.explanationRule,
+            attemptId: state.attemptId,
           }),
         })
       }
@@ -71,12 +82,12 @@ export const ResultsPage: React.FC = () => {
         setAiExplanation(data.explanation || data.message || 'Explicación generada con éxito.')
       } else {
         setAiExplanation(
-          `En el examen de Cambridge B2/C1, esta estructura requiere "${state?.correctAnswer}". Recuerda que en este contexto el tiempo verbal o la colocación sigue las reglas oficiales de concordancia.`
+          `En el examen de Cambridge B2/C1, esta estructura requiere "${state.correctAnswer}". Recuerda que en este contexto el tiempo verbal o la colocación sigue las reglas oficiales de concordancia.`
         )
       }
     } catch {
       setAiExplanation(
-        `En el examen de Cambridge B2/C1, esta estructura requiere "${state?.correctAnswer}". Recuerda que en este contexto el tiempo verbal o la colocación sigue las reglas oficiales de concordancia.`
+        `En el examen de Cambridge B2/C1, esta estructura requiere "${state.correctAnswer}". Recuerda que en este contexto el tiempo verbal o la colocación sigue las reglas oficiales de concordancia.`
       )
     } finally {
       setLoadingAi(false)
@@ -123,7 +134,7 @@ export const ResultsPage: React.FC = () => {
         </Card>
 
         <Card className="p-4 flex flex-col items-center gap-1 border-amber/40 bg-amber-50/50">
-          <span className="text-[10px] font-black uppercase text-amber-dark">Puntos XP</span>
+          <span className="text-[10px] font-black uppercase text-amber-dark">Monedas</span>
           <span className="text-2xl font-black text-amber">{state?.coins ?? 0}</span>
         </Card>
 
