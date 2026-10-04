@@ -85,3 +85,7 @@ Prelación: contenido <100 ejercicios → E2E → IA → gamificación → tests
 ## Arranque
 
 `gh issue list`, `gh pr list`, `AGENT_CHANGELOG.md`. Si no hay issue abierto de la siguiente prioridad, créalo. Luego rama + TDD + commits + PR + self-review.
+
+## Gotchas del repo
+
+- `PUT /users/me/daily-goal` requiere autenticación y acepta enteros de 1 a 100; Dashboard debe conservar el último valor confirmado por el servidor ante errores.

@@ -1,5 +1,22 @@
 # AGENT CHANGELOG
 
+## [Ciclo 11] - Editar meta diaria desde Dashboard (#108)
+
+### Resumen
+- La tarjeta de meta diaria permite ajustar de 1 a 100 ejercicios y actualiza el progreso tras confirmar el servidor.
+- Los errores de validación, red o servidor conservan la última meta confirmada y anuncian el estado con feedback accesible.
+- Las personas visitantes ven el acceso al inicio de sesión en vez de un control que no podrían guardar.
+
+### Verificación
+- `frontend npm test`: 2/2.
+- `frontend npm run build`: OK; `npx eslint src/pages/Dashboard.tsx`: OK; `git diff --check`: OK.
+- QA UI: `/learn` cargó como visitante y mostró la meta, el progreso y el enlace de inicio de sesión.
+- El guardado autenticado requiere backend y sesión; no se verificó en navegador en esta sesión.
+
+### Estado
+- Issue #108; PR pendiente de publicar desde `agent/feat-daily-goal-settings`.
+- Spec: `docs/specs/ciclo11-daily-goal-settings.md`.
+
 ## [Ciclo 4] - Documentación alineada con React y Vite (#95)
 
 ### Resumen
