@@ -1,5 +1,21 @@
 # AGENT CHANGELOG
 
+## [Ciclo 17] - E2E integrado desde registro hasta explicación (#120)
+
+### Resumen
+- Se añadió un E2E que registra al alumno por HTTP y conserva su JWT para recorrer niveles, categorías, lista/detalle de ejercicio, intento, resultado y explicación.
+- Monta routers reales en Express temporal, persiste la explicación con `explanation_rule` y bloquea llamadas de red a proveedores.
+- La spec de `docs/specs/ciclo17-full-learning-explanation-e2e.md` fija el flujo y su limpieza.
+
+### Verificación
+- E2E integrado: 1/1; suite backend: 17/17 con MySQL temporal y migraciones.
+- Frontend: `npm run build` OK; `git diff --check` OK.
+- En la primera ejecución del test, la forma escalar del fixture no coincidió con el resultado compuesto esperado; el fixture ahora usa respuestas por hueco y el flujo pasa. El manejo general de respuestas escalares sigue en #111/PR #113.
+- Sin cambios de interfaz ni llamadas reales a IA/Stripe.
+
+### Estado
+- Issue #120 abierto; E2E verificado en `agent/test-full-learning-explanation-e2e`, PR pendiente de creación.
+
 ## [Ciclo 4] - Documentación alineada con React y Vite (#95)
 
 ### Resumen
