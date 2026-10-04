@@ -86,36 +86,6 @@ export const Header: React.FC = () => {
       unsubscribe()
     }
   }, [])
-        })
-        if (!response.ok) throw new Error('User profile request failed')
-
-        const data: unknown = await response.json()
-        const counters = parseHeaderCounters(data)
-        if (!counters || !isRecord(data)) throw new Error('User profile response is incomplete')
-        if (!isCurrentRequest) return
-
-        const level = isRecord(data.level) ? data.level.name : undefined
-        setStats((previous) => ({
-          ...previous,
-          ...counters,
-          level: typeof level === 'string' ? level : previous.level,
-          name: typeof data.name === 'string' ? data.name : previous.name,
-          avatarSeed: typeof data.avatar_seed === 'string' ? data.avatar_seed : previous.avatarSeed,
-        }))
-        setStatsStatus('ready')
-      } catch {
-        if (isCurrentRequest) setStatsStatus('unavailable')
-      }
-    }
-
-    void loadProfile()
-
-    return () => {
-      isCurrentRequest = false
-    }
-
-    return unsubscribe
-  }, [])
 
   const streakBadge = getStreakBadge(stats.streak)
 
