@@ -16,6 +16,24 @@
 - PR #156 abierta desde `agent/docs-daily-goal-merge-record` con `Closes #155`; diff revisado y self-review publicado.
 - `backend-test` y `frontend-build` pasaron en GitHub Actions; el lint global conserva el baseline documentado en #98/PR #102.
 
+## [Ciclo 25] - Recompensa única y meta diaria para Writing (#134)
+
+### Resumen
+- Writing concede monedas una sola vez por usuario y ejercicio; los reenvíos siguen guardándose y suman a la meta diaria.
+- El historial persistido de intentos sirve de deduplicación y una transacción serializa los envíos del mismo usuario.
+- Contrato y plan: `docs/specs/ciclo25-writing-rewards.md`.
+
+### Verificación local
+- TDD: la prueba nueva falló antes del cambio al observar dos recompensas para dos reenvíos concurrentes.
+- `backend npm test`: 17/17; `frontend npm run build`: correcto.
+- `node --check` para los archivos backend modificados y `git diff --check`: correctos.
+- Sin cambios de UI; la prueba de servicio cubre reenvíos simultáneos, aislamiento por usuario y el umbral diario mixto.
+- CI de la PR #137: `backend-test` y `frontend-build` verdes.
+
+### Estado
+- Issue #134 enlazado por la PR #137, abierta en `agent/fix-writing-reward-dedupe` con checks verdes.
+
+## [Ciclo 21] - Resultado vacío sin contexto (#128)
 ## [Ciclo 9] - Recompensas sincronizadas en Header (#104)
 
 ### Resumen
