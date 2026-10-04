@@ -58,6 +58,7 @@ Stack real:
 - Backend: Express ESM + Sequelize/MySQL (`backend/`, :4000)
 - Docker Compose. MySQL suele estar en 3313.
 - UI Duolingo: verde `#58CC02`. No romper el look.
+- El catálogo solo se renderiza desde `/api/categories`; no uses nodos demo ante errores o respuestas vacías.
 
 ## Pipeline por ciclo
 

@@ -1,5 +1,21 @@
 # AGENT CHANGELOG
 
+## [Ciclo 19] - Estados reales para la pantalla de categorías (#124)
+
+### Resumen
+- Se eliminó `FALLBACK_CATEGORIES`; `/categories` ahora renderiza únicamente el catálogo real recibido del API.
+- Se filtran subcategorías y categorías sin ejercicios y se distinguen carga, vacío válido, error HTTP/red y reintento.
+- Se añadieron pruebas `node:test` frontend sin dependencias nuevas y una regla breve para no reintroducir nodos demo.
+
+### Verificación
+- Frontend: 3/3 tests y build OK; lint dirigido a los archivos cambiados OK.
+- Smoke local con datos ficticios efímeros: catálogo poblado, respuesta vacía y API no disponible; ningún estado vacío/error mostró enlaces demo.
+- El lint completo sigue fallando con 16 errores y 1 warning en otros archivos, ya cubiertos por #98/PR #102.
+- El primer test rojo falló porque `categoriesData.mjs` aún no existía, como esperaba TDD.
+
+### Estado
+- Issue #124 enlazado desde la rama `agent/fix-categories-api-states`; PR pendiente.
+
 ## [Ciclo 4] - Documentación alineada con React y Vite (#95)
 
 ### Resumen
