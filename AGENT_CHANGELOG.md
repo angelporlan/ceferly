@@ -14,7 +14,7 @@
 - El guardado autenticado requiere backend y sesión; no se verificó en navegador en esta sesión.
 
 ### Estado
-- Issue #108; PR pendiente de publicar desde `agent/feat-daily-goal-settings`.
+- Issue #108 enlazado a la PR #109, abierta con la etiqueta `needs-human-review`.
 - Spec: `docs/specs/ciclo11-daily-goal-settings.md`.
 
 ## [Ciclo 4] - Documentación alineada con React y Vite (#95)
