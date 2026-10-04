@@ -18,7 +18,7 @@
 - QA UI/API: no aplica; no hay cambios ejecutables.
 
 ### Estado
-- PR #153 abierta en `agent/docs-current-catalog-streak`, con self-review publicado; CI pendiente.
+- PR #153 abierta en `agent/docs-current-catalog-streak`, con self-review publicado; CI verde (2 backend-test y 2 frontend-build).
 
 ## Retrospectiva — ciclos 26–30
 

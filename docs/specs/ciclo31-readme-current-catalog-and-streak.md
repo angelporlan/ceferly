@@ -41,7 +41,7 @@ El cambio actualiza esas dos descripciones y añade notas de trabajo para el lin
 2. [x] Editar README, AGENTS, spec y changelog con las afirmaciones verificadas.
 3. [x] Repetir tests/build y lint global; hacer búsquedas de consistencia y `git diff --check`.
 4. [x] Abrir PR `Closes #151` y publicar self-review.
-5. [ ] Esperar CI verde.
+5. [x] Esperar CI verde: 2 ejecuciones de backend-test y 2 de frontend-build.
 
 ## Línea base
 
@@ -52,6 +52,7 @@ El cambio actualiza esas dos descripciones y añade notas de trabajo para el lin
 
 - Tras sincronizar `main` hasta `2277923`: backend 33/33 tests con migraciones aplicadas a MySQL desechable; frontend 22/22 tests y `npm run build` correctos.
 - `npm run lint` conserva los mismos 12 errores y 1 aviso de la línea base; los cambios de este ciclo son Markdown.
+- CI de PR #153: 2 ejecuciones de backend-test y 2 de frontend-build, todas verdes.
 - Búsquedas de afirmaciones antiguas del catálogo/racha y `Angular`: sin resultados. `git diff origin/main...HEAD --check`: correcto.
 - QA UI/API no aplica y TDD no aplica: no se cambió código ejecutable.
 
